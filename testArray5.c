@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void LLloadFile(const char *filename, int *numRows, int *numColumns);
-void loadFile(const char *filename, int *numRows, int *numColumns, char ***table);
+// void loadFile(const char *filename, int *numRows, int *numColumns, char ***table);
 
 int main()
 {
@@ -98,38 +97,4 @@ void loadFile(const char *filename, int *numRows, int *numColumns, char ***table
     wprintf(L"Header : %ls\n", header);
 
     fclose(file);
-}
-
-void LLloadFile(const char *filename, int *numRows, int *numColumns)
-{
-    // Chargement du fichier
-    setlocale(LC_ALL, "");
-    FILE *file;
-    file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
-        return; // Pas besoin de retourner NULL ici
-    }
-
-    // Recherche du nombre de lignes
-    wchar_t header[256];
-    fgetws(header, sizeof(header) / sizeof(header[0]), file);
-    if (swscanf(header, L"Rows: %d", numRows) != 1)
-    {
-        fprintf(stderr, "Erreur lors de la lecture du nombre de lignes\n");
-        fclose(file);
-        return; // Pas besoin de retourner NULL ici
-    }
-
-    // Recherche du nombre de colonnes
-    fgetws(header, sizeof(header) / sizeof(header[0]), file);
-    if (swscanf(header, L"Cols: %d", numColumns) != 1)
-    {
-        fprintf(stderr, "Erreur lors de la lecture du nombre de colonnes\n");
-        fclose(file);
-        return; // Pas besoin de retourner NULL ici
-    }
-
-    printf("lignes : %d et colonnes : %d\n", *numRows, *numColumns);
 }
