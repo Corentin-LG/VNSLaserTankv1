@@ -5,14 +5,14 @@
 #include <stdbool.h>
 
 void LLloadFile(const char *filename, int *numRows, int *numColumns);
-void loadFile(const char *filename, int *numRows, int *numColumns, char ***table);
+void loadFile(const char *filename, int *numRows, int *numColumns, char ****table);
 
 int main()
 {
     // Inputs obligatoires
     const char *filename = "Beginner-I.lt4";
     int numRows, numColumns;
-    char **table;
+    char ***table;
     loadFile(filename, &numRows, &numColumns, &table);
 
     // Vous pouvez maintenant utiliser le tableau 'table' qui contient les données.
@@ -35,7 +35,7 @@ int main()
     return 0;
 }
 
-void loadFile(const char *filename, int *numRows, int *numColumns, char ***table)
+void loadFile(const char *filename, int *numRows, int *numColumns, char ****table)
 {
     // Chargement du fichier
     setlocale(LC_ALL, "");
@@ -68,12 +68,13 @@ void loadFile(const char *filename, int *numRows, int *numColumns, char ***table
 
     printf("lignes : %d et colonnes : %d\n", *numRows, *numColumns);
 
-    *table = (char **)malloc(*numRows * sizeof(char *));
+    *table = (char ***)malloc(*numRows * sizeof(char **));
     for (int i = 0; i < *numRows; i++)
     {
-        (*table)[i] = (char *)malloc(*numColumns * sizeof(char));
+        (*table)[i] = (char **)malloc(*numColumns * sizeof(char*));
     }
-
+    
+    // Déplace le curseur 7 fois
     for (int i = 0; i < 7; i++) {
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
     }
