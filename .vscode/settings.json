@@ -2,6 +2,8 @@
     "files.associations": {
         "locale.h": "c",
         "stdio.h": "c",
-        "testarray5": "c"
-    }
+        "testarray5": "c",
+        "stdbool.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

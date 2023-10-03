@@ -3,26 +3,29 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void afficherTableau(int **tableau, int numRows, int numColumns);
-void LoadFile(const char *filename, int *numRows, int *numColumns, int ***tableau);
+void printArray(int **array, int rows, int cols);
+int **LoadFile(const char *filename, int *numRows, int *numColumns);
 
 int main()
 {
     const char *filename = "Beginner-I.lt4";
     int **tableau;
-    int numRows;
-    int numColumns;
+    int *numRows;
+    int *numColumns;
+    numRows = (int *)malloc(sizeof(int));
+    numColumns = (int *)malloc(sizeof(int));
 
-    int *pNumRows = &numRows;
-    int *pNumColumns = &numColumns;
+    tableau = LoadFile(filename, numRows, numColumns);
 
-    LoadFile(filename, pNumRows, pNumColumns, &tableau);
+    printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
+
+    printArray(tableau, numRows, numColumns);
+    free(numRows);
+    free(numColumns);
     if (tableau != NULL)
     {
-        afficherTableau(tableau, numRows, numColumns);
-
         // Libérer la mémoire du tableau
-        for (int i = 0; i < numRows; i++)
+        for (int i = 0; i < *numRows; i++)
         {
             free(tableau[i]);
         }
@@ -47,19 +50,16 @@ struct ConversionTable table[] = {
     {L"Tu", 1}, {L"Tr", 2}, {L"Td", 3}, {L"Tl", 4},{L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}};
 
 
-void afficherTableau(int **tableau, int numRows, int numColumns)
-{
-    for (int i = 0; i < numRows; i++)
-    {
-        for (int j = 0; j < numColumns; j++)
-        {
-            printf("%d ", tableau[i][j]);
+void printArray(int **array, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%3d ", array[i][j]);
         }
-        printf("\n"); // Nouvelle ligne pour chaque ligne du tableau
+        printf("\n");
     }
 }
 
-void LoadFile(const char *filename, int *numRows, int *numColumns, int ***tableau)
+int **LoadFile(const char *filename, int *numRows, int *numColumns)
 {
     // Chargement du fichier
     setlocale(LC_ALL, "");
@@ -74,7 +74,7 @@ void LoadFile(const char *filename, int *numRows, int *numColumns, int ***tablea
     // Recherche du nombre de lignes
     wchar_t header[256];
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
-    if (swscanf(header, L"Rows: %d", numRows) != 1)
+    if (swscanf(header, L"Rows: %d", *numRows) != 1)
     {
         fprintf(stderr, "Erreur lors de la lecture du nombre de lignes\n");
         fclose(file);
@@ -83,7 +83,7 @@ void LoadFile(const char *filename, int *numRows, int *numColumns, int ***tablea
 
     // Recherche du nombre de colonnes
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
-    if (swscanf(header, L"Cols: %d", numColumns) != 1)
+    if (swscanf(header, L"Cols: %d", *numColumns) != 1)
     {
         fprintf(stderr, "Erreur lors de la lecture du nombre de colonnes\n");
         fclose(file);
@@ -93,58 +93,60 @@ void LoadFile(const char *filename, int *numRows, int *numColumns, int ***tablea
     printf("lignes : %d et colonnes : %d\n", *numRows, *numColumns);
 
     // Créez un tableau 2D pour stocker les valeurs converties
-    *tableau = (int **)malloc((*numRows) * sizeof(int *));
+    int **LoadFile = (int **)malloc((*numRows) * sizeof(int *));
     for (int i = 0; i < (*numRows); i++)
     {
-        (*tableau)[i] = (int *)malloc((*numColumns) * sizeof(int));
+        LoadFile[i] = (int *)malloc((*numColumns) * sizeof(int));
     }
 
-    // // reset head reader
-    // fseek(file, 0, SEEK_SET);
+    // reset head reader
+    fseek(file, 0, SEEK_SET);
 
-    // wchar_t header2[250];
+    wchar_t header2[250];
 
-    // for (int i = 0; i < 7; i++)
-    // {
-    //     fgetws(header2, sizeof(header2) / sizeof(header2[0]), file);
-    // }
+    for (int i = 0; i < 7; i++)
+    {
+        fgetws(header2, sizeof(header2) / sizeof(header2[0]), file);
+    }
 
-    // header2[0] = L'\0'; // Vide la chaîne header
+    header2[0] = L'\0'; // Vide la chaîne header
 
-    // int outputIndexRows = 0;
-    // int outputIndexColumns = 0;
+    int outputIndexRows = 0;
+    int outputIndexColumns = 0;
 
-    // // Découper la chaîne en mots
-    // wchar_t *token;
+    // Découper la chaîne en mots
+    wchar_t *token;
 
-    // // Lire les lignes 8 à 23 et les concaténer dans header
-    // for (int i = 7; i < *numRows; i++)
-    // {
-    //     fgetws(header2, sizeof(header2) / sizeof(header2[0]), file);
+    // Lire les lignes 8 à 23 et les concaténer dans header
+    for (int i = 7; i < *numRows; i++)
+    {
+        fgetws(header2, sizeof(header2) / sizeof(header2[0]), file);
 
-    //     // Découper la chaîne en mots
-    //     token = wcstok(header2, L" ");
+        // Découper la chaîne en mots
+        token = wcstok(header2, L" ");
 
-    //     while (token != NULL)
-    //     {
-    //         // Parcourir la table de conversion pour trouver la correspondance
-    //         for (int j = 0; j < sizeof(table) / sizeof(table[0]); j++)
-    //         {
-    //             if (wcscmp(token, table[j].lettre) == 0)
-    //             {
-    //                 (*tableau)[outputIndexRows][outputIndexColumns++] = table[j].valeur;
-    //                 break;
-    //             }
-    //         }
+        while (token != NULL)
+        {
+            // Parcourir la table de conversion pour trouver la correspondance
+            for (int j = 0; j < sizeof(table) / sizeof(table[0]); j++)
+            {
+                if (wcscmp(token, table[j].lettre) == 0)
+                {
+                    LoadFile[outputIndexRows][outputIndexColumns++] = table[j].valeur;
+                    break;
+                }
+            }
 
-    //         // Obtenir le mot suivant
-    //         token = wcstok(NULL, L" ");
+            // Obtenir le mot suivant
+            token = wcstok(NULL, L" ");
 
-    //         // Zero Column
-    //         outputIndexColumns = 0;
+            // Zero Column
+            outputIndexColumns = 0;
 
-    //         // Next Line
-    //         outputIndexRows++;
-    //     }
-    // }
+            // Next Line
+            outputIndexRows++;
+        }
+    }
+
+    return LoadFile;
 }
