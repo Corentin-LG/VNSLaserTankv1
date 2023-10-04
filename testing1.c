@@ -42,10 +42,8 @@ struct ConversionTable
     int valeur;
 };
 
-
 struct ConversionTable table[] = {
-    {L"Tu", 1}, {L"Tr", 2}, {L"Td", 3}, {L"Tl", 4},{L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Mdr", 8}, {L"Wu", 9}, {L"Wr", 10}};
-
+    {L"Tu", 1}, {L"Tr", 2}, {L"Td", 3}, {L"Tl", 4}, {L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}, {L"Au", 11}, {L"Ar", 12}, {L"Ad", 13}, {L"Al", 14}, {L"Mur", 15}, {L"Mrd", 16}, {L"Mdl", 17}, {L"Mlu", 18}, {L"Wu", 19}, {L"Wr", 20}, {L"Wd", 21}, {L"Wl", 22}, {L"C", 23}, {L"Rur", 24}, {L"Rrd", 25}, {L"Rdl", 26}, {L"Rlu", 27}, {L"I", 28}, {L"i", 29}, {L"Tr", 30}, {L"Tg", 31}, {L"Tb", 32}, {L"Tc", 33}, {L"Ty", 34}, {L"Tp", 35}, {L"Tw", 36}, {L"Td", 37}};
 
 void printArray(int **array, int rows, int cols)
 {
@@ -97,13 +95,44 @@ int **LoadFile(const char *filename, int *numRows, int *numColumns)
         loadedFile[i] = (int *)malloc((*numColumns) * sizeof(int));
     }
 
+    for (int i = 0; i < 5; i++)
+    {
+        fgetws(header, sizeof(header) / sizeof(header[0]), file);
+    }
+
+    //wchar_t token[256];
+    wchar_t *token;
+    //header[0] = L'\0'; // Vide la chaîne header
+
+    // Lire les données du fichier et les stocker dans le tableau
     for (int i = 0; i < *numRows; i++)
     {
         for (int j = 0; j < *numColumns; j++)
         {
-            loadedFile[i][j] = rand() % 100; // Remplit avec des nombres aléatoires de 0 à 99
+
+            fgetws(header, sizeof(header) / sizeof(header[0]), file);
+            token = wcstok(header, L" ");
+            printf("gros token = %ls\n", token);
+            printf("gros header = %ls\n", header);
+
+            // Recherche de la correspondance dans la table de conversion
+            for (int k = 0; k < sizeof(table) / sizeof(table[0]); k++)
+            {
+                printf("tok = %ls\n", token);
+                printf("letter = %ls\n", table[k].lettre);
+                
+                if (wcscmp(token, table[k].lettre) == 0)
+                {
+                    loadedFile[i][j] = table[k].valeur;
+                    printf("YESYES %d\n", loadedFile[i][j]);
+                    printf("letter = %d\n", table[k].valeur);
+                    break;
+                }
+            }
         }
     }
+
     fclose(file);
     return loadedFile;
 }
+
