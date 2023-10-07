@@ -3,7 +3,8 @@
         "locale.h": "c",
         "stdio.h": "c",
         "testarray5": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "string.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -108,6 +108,7 @@ int **LoadFile(const char *filename, int *numRows, int *numColumns)
     for (int i = 0; i < *numRows; i++)
     {
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
+        
         for (int j = 0; j < *numColumns; j++)
         {
             //fgetws(header, sizeof(header) / sizeof(header[0]), file);
