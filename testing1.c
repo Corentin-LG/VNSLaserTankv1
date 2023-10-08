@@ -12,16 +12,17 @@ int main()
 {
     srand(time(NULL));
     const char *filename = "testing.lt4";
-    int **tableau;
+    //int **tableau;
     int numRows;
     int numColumns;
 
-    tableau = LoadFile(filename, &numRows, &numColumns);
+    //tableau = LoadFile(filename, &numRows, &numColumns);
+
+    int ** tableau = LoadFile(filename, &numRows, &numColumns);
 
     if (tableau != NULL)
     {
         printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
-
         printArray(tableau, numRows, numColumns);
 
         // Libérer la mémoire du tableau

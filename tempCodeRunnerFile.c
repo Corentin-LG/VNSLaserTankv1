@@ -1,3 +1,2 @@
-
-
-    // printf("rows2 = %d et cols2 = %d\n", *rows, *cols);
+int numRows = 0;
+    int numColumns = 0;
