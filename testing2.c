@@ -1,13 +1,14 @@
 #include <stdio.h>
-#include <locale.h> // Ajoutez l'inclusion de locale.h
+#include <locale.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <wchar.h> // Ajoutez l'inclusion de wchar.h
+#include <wchar.h>
 #include <string.h>
 
 void printArray(int **array, int rows, int cols);
-// Table de conversion
+bool firstTankPosition (int id);
+
 struct ConversionTable
 {
     const wchar_t *lettre;
@@ -20,13 +21,20 @@ struct ConversionTable tableX[] = {
 struct ConversionTable tableN[] = {
     {L"Tu\n", 1}, {L"Tr\n", 2}, {L"Td\n", 3}, {L"Tl\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rrd\n", 25}, {L"Rdl\n", 26}, {L"Rlu\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}};
 
+enum gameElement { NOTHING, TANKUP, TANKRIGHT, TANKDOWN, TANKLEFT, DIRT, BASE, WATER, SOLIDBLOCK, MOVABLEBLOC, BRICKS, ANTITANKUP, ANTITANKRIGHT, ANTITANKDOWN, ANTITANKLEFT, MIRRORUPRIGHT, MIRRORRIGHTDOWN, MIRRORDOWNLEFT, MIRRORLEFTUP, WAYUP, WAYRIGHT, WAYDOWN, WAYLEFT, CRYSTALBLOCK, ROTATIVEMIRRORUPRIGHT, ROTATIVEMIRRORRIGHTDOWN, ROTATIVEMIRRORDOWNLEFT, ROTATIVEMIRRORLEFTUP, ICE, THINICE, TUNNELRED, TUNNELGREEN, TUNNELBLUE, TUNNELCYAN, TUNNELYELLOW, TUNNELPINK, TUNNELWHITE, TUNNELDARK };
+
 int main()
 {
     srand(time(NULL));
-    const char *filename = "Beginner-I.lt4";
-    // const char *filename = "testing.lt4";
+    // const char *filename = "Beginner-I.lt4";
+    const char *filename = "testing.lt4";
     int numRows = 0;
     int numColumns = 0;
+    int **tankPosition = (int **)malloc((2) * sizeof(int *));
+    for (int i = 0; i < 2; i++)
+    {
+        tankPosition[i] = (int *)malloc((2) * sizeof(int));
+    }
 
     // Chargement du fichier
     setlocale(LC_ALL, "");
@@ -35,7 +43,7 @@ int main()
     if (file == NULL)
     {
         fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
-        return 1; // Retourne 1 en cas d'erreur
+        return 1;
     }
 
     // Recherche du nombre de lignes
@@ -45,7 +53,7 @@ int main()
     {
         fprintf(stderr, "Erreur lors de la lecture du nombre de lignes\n");
         fclose(file);
-        return 1; // Retourne 1 en cas d'erreur
+        return 1;
     }
 
     // Recherche du nombre de colonnes
@@ -54,7 +62,7 @@ int main()
     {
         fprintf(stderr, "Erreur lors de la lecture du nombre de colonnes\n");
         fclose(file);
-        return 1; // Retourne 1 en cas d'erreur
+        return 1;
     }
 
     // Créez un tableau 2D pour stocker les valeurs converties
@@ -83,36 +91,36 @@ int main()
 
         token = wcstok(header, L" ");
 
-        wprintf(L"En-tête complet : %ls\n", header);
+        // wprintf(L"En-tête complet : %ls\n", header);
         for (int j = 0; j < numColumns; j++)
         {
 
-            wprintf(L"Token complet : %ls et plus si affinité\n", token);
+            // wprintf(L"Token complet : %ls et plus si affinité\n", token);
             k = 0;
 
             // Recherche de la correspondance dans la table de conversion
             while (token != NULL)
             {
-                // for (int k = 0; k < sizeof(tableX) / sizeof(tableX[0]); k++)
-                // {
-                wprintf(L"j = %d, k = %d, token = %ls, tokenLenght = %d, lettre = %ls\n", j, k, token, strlen(token), tableX[k].lettre);
+                // wprintf(L"j = %d, k = %d, token = %ls, tokenLenght = %d, lettre = %ls\n", j, k, token, strlen(token), tableX[k].lettre);
                 tokenInterm = token;
                 tabxInterm = tableX[k].lettre;
                 tabnInterm = tableN[k].lettre;
 
-                wprintf(L"tokenInterm = %ls, tabxInterm = %ls, tokenIntermLenght = %d, tabxIntermLenght = %d,\n", tokenInterm, tabxInterm, strlen(&tokenInterm), strlen(&tabxInterm));
-                // if (wcscmp(token, tableX[k].lettre) == 0)
+                // wprintf(L"tokenInterm = %ls, tabxInterm = %ls, tokenIntermLenght = %d, tabxIntermLenght = %d,\n", tokenInterm, tabxInterm, strlen(&tokenInterm), strlen(&tabxInterm));
                 if (wcscmp(tokenInterm, tabxInterm) == 0 || wcscmp(tokenInterm, tabnInterm) == 0)
                 {
-                    printf("yes\n");
+                    // printf("yes\n");
                     tableau[i][j] = tableX[k].valeur;
+                    if (firstTankPosition (tableX[k].valeur) ){
+                        tankPosition[0][0] = i;
+                        tankPosition[1][0] = i;
+                        tankPosition[0][1] = j;
+                        tankPosition[1][1] = j;
+                    }
                     break;
                 }
-
-                // }
                 k = k + 1;
                 // wprintf(L"%ls\n", token);
-                //  token = wcstok(NULL, L" ");
             }
             if (token != NULL)
             {
@@ -121,7 +129,11 @@ int main()
         }
     }
 
+    //printArray(tableau, numRows, numColumns);
+
     fclose(file);
+
+    printArray(tankPosition, 2,2);
 
     if (tableau != NULL)
     {
@@ -148,5 +160,23 @@ void printArray(int **array, int rows, int cols)
             printf("%3d ", array[i][j]);
         }
         printf("\n");
+    }
+}
+
+void firstHeuristique (int **array){
+
+}
+
+bool firstTankPosition (int id) {
+    switch (id)
+    {
+    case TANKUP:
+    case TANKRIGHT:
+    case TANKDOWN:
+    case TANKLEFT:
+        return true;
+    
+    default:
+        return false;
     }
 }
