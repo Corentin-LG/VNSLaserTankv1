@@ -62,14 +62,14 @@ enum gameElement
     TUNNELWHITE,
     TUNNELDARK
 };
-// enum gameMoving
-// {
-//     FIRE,
-//     UP,
-//     RIGHT,
-//     DOWN,
-//     LEFT
-// };
+enum gameMoving
+{
+    FIRE,
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT
+};
 
 int main()
 {
@@ -88,8 +88,9 @@ int main()
     {
         basesPosition[i] = (int *)malloc((2) * sizeof(int));
     }
-    // char deplacementsHypothese = (char *)malloc((1000) * sizeof(char));
-    // char deplacementsRetenu = (char *)malloc((1000) * sizeof(char));
+    int numBases = 0;
+    char deplacementsHypothese = (char *)malloc((1000) * sizeof(char));
+    char deplacementsRetenu = (char *)malloc((1000) * sizeof(char));
     // Chargement du fichier
     setlocale(LC_ALL, "");
     FILE *file;
@@ -134,7 +135,6 @@ int main()
     wchar_t *token;
     wchar_t *splitBuffer;
     int k = 0;
-    int l = 0;
     wchar_t *tokenInterm;
     wchar_t *tabxInterm;
     wchar_t *tabnInterm;
@@ -173,19 +173,16 @@ int main()
                         tankPosition[1][0] = i;
                         tankPosition[0][1] = j;
                         tankPosition[1][1] = j;
-                        break;
+                        // break;
                     }
-                    // if (tableX[k].valeur == BASE)
-                    // {
-                    //     l = 0;
-                    //     while (basesPosition[l][0])
-                    //     {
-                    //         l = l + 1;
-                    //     }
-                    //     basesPosition[l][0] = i;
-                    //     basesPosition[l][1] = j;
-                    //     break;
-                    // }
+                    if (tableX[k].valeur == BASE)
+                    {
+                        basesPosition[numBases][0] = i;
+                        basesPosition[numBases][1] = j;
+                        numBases = numBases + 1;
+                        // break;
+                    }
+
                     break;
                 }
                 k = k + 1;
@@ -228,7 +225,7 @@ int main()
 
     if (basesPosition != NULL)
     {
-        printArray(basesPosition, 5, 5);
+        printArray(basesPosition, numBases, 2);
 
         // Libérer la mémoire du tableau
         for (int i = 0; i < 5; i++)
