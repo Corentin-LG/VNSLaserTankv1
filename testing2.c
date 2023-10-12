@@ -7,7 +7,7 @@
 #include <string.h>
 
 void printArray(int **array, int rows, int cols);
-bool firstTankPosition (int id);
+bool firstTankPosition(int id);
 
 struct ConversionTable
 {
@@ -21,13 +21,61 @@ struct ConversionTable tableX[] = {
 struct ConversionTable tableN[] = {
     {L"Tu\n", 1}, {L"Tr\n", 2}, {L"Td\n", 3}, {L"Tl\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rrd\n", 25}, {L"Rdl\n", 26}, {L"Rlu\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}};
 
-enum gameElement { NOTHING, TANKUP, TANKRIGHT, TANKDOWN, TANKLEFT, DIRT, BASE, WATER, SOLIDBLOCK, MOVABLEBLOC, BRICKS, ANTITANKUP, ANTITANKRIGHT, ANTITANKDOWN, ANTITANKLEFT, MIRRORUPRIGHT, MIRRORRIGHTDOWN, MIRRORDOWNLEFT, MIRRORLEFTUP, WAYUP, WAYRIGHT, WAYDOWN, WAYLEFT, CRYSTALBLOCK, ROTATIVEMIRRORUPRIGHT, ROTATIVEMIRRORRIGHTDOWN, ROTATIVEMIRRORDOWNLEFT, ROTATIVEMIRRORLEFTUP, ICE, THINICE, TUNNELRED, TUNNELGREEN, TUNNELBLUE, TUNNELCYAN, TUNNELYELLOW, TUNNELPINK, TUNNELWHITE, TUNNELDARK };
+enum gameElement
+{
+    NOTHING,
+    TANKUP,
+    TANKRIGHT,
+    TANKDOWN,
+    TANKLEFT,
+    DIRT,
+    BASE,
+    WATER,
+    SOLIDBLOCK,
+    MOVABLEBLOC,
+    BRICKS,
+    ANTITANKUP,
+    ANTITANKRIGHT,
+    ANTITANKDOWN,
+    ANTITANKLEFT,
+    MIRRORUPRIGHT,
+    MIRRORRIGHTDOWN,
+    MIRRORDOWNLEFT,
+    MIRRORLEFTUP,
+    WAYUP,
+    WAYRIGHT,
+    WAYDOWN,
+    WAYLEFT,
+    CRYSTALBLOCK,
+    ROTATIVEMIRRORUPRIGHT,
+    ROTATIVEMIRRORRIGHTDOWN,
+    ROTATIVEMIRRORDOWNLEFT,
+    ROTATIVEMIRRORLEFTUP,
+    ICE,
+    THINICE,
+    TUNNELRED,
+    TUNNELGREEN,
+    TUNNELBLUE,
+    TUNNELCYAN,
+    TUNNELYELLOW,
+    TUNNELPINK,
+    TUNNELWHITE,
+    TUNNELDARK
+};
+// enum gameMoving
+// {
+//     FIRE,
+//     UP,
+//     RIGHT,
+//     DOWN,
+//     LEFT
+// };
 
 int main()
 {
     srand(time(NULL));
-    // const char *filename = "Beginner-I.lt4";
-    const char *filename = "testing.lt4";
+    const char *filename = "Beginner-I.lt4";
+    // const char *filename = "testing.lt4";
     int numRows = 0;
     int numColumns = 0;
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
@@ -35,7 +83,13 @@ int main()
     {
         tankPosition[i] = (int *)malloc((2) * sizeof(int));
     }
-
+    int **basesPosition = (int **)malloc((5) * sizeof(int *));
+    for (int i = 0; i < 5; i++)
+    {
+        basesPosition[i] = (int *)malloc((2) * sizeof(int));
+    }
+    // char deplacementsHypothese = (char *)malloc((1000) * sizeof(char));
+    // char deplacementsRetenu = (char *)malloc((1000) * sizeof(char));
     // Chargement du fichier
     setlocale(LC_ALL, "");
     FILE *file;
@@ -80,6 +134,7 @@ int main()
     wchar_t *token;
     wchar_t *splitBuffer;
     int k = 0;
+    int l = 0;
     wchar_t *tokenInterm;
     wchar_t *tabxInterm;
     wchar_t *tabnInterm;
@@ -111,12 +166,26 @@ int main()
                 {
                     // printf("yes\n");
                     tableau[i][j] = tableX[k].valeur;
-                    if (firstTankPosition (tableX[k].valeur) ){
+                    if (tableX[k].valeur == TANKUP || tableX[k].valeur == TANKRIGHT || tableX[k].valeur == TANKDOWN ||
+                        tableX[k].valeur == TANKLEFT)
+                    {
                         tankPosition[0][0] = i;
                         tankPosition[1][0] = i;
                         tankPosition[0][1] = j;
                         tankPosition[1][1] = j;
+                        break;
                     }
+                    // if (tableX[k].valeur == BASE)
+                    // {
+                    //     l = 0;
+                    //     while (basesPosition[l][0])
+                    //     {
+                    //         l = l + 1;
+                    //     }
+                    //     basesPosition[l][0] = i;
+                    //     basesPosition[l][1] = j;
+                    //     break;
+                    // }
                     break;
                 }
                 k = k + 1;
@@ -129,11 +198,9 @@ int main()
         }
     }
 
-    //printArray(tableau, numRows, numColumns);
+    // printArray(tableau, numRows, numColumns);
 
     fclose(file);
-
-    printArray(tankPosition, 2,2);
 
     if (tableau != NULL)
     {
@@ -147,6 +214,32 @@ int main()
         }
         free(tableau);
     }
+
+    if (tankPosition != NULL)
+    {
+        printArray(tankPosition, 2, 2);
+
+        for (int i = 0; i < 2; i++)
+        {
+            free(tankPosition[i]);
+        }
+        free(tankPosition);
+    }
+
+    if (basesPosition != NULL)
+    {
+        printArray(basesPosition, 5, 5);
+
+        // Libérer la mémoire du tableau
+        for (int i = 0; i < 5; i++)
+        {
+            free(basesPosition[i]);
+        }
+        free(basesPosition);
+    }
+
+    // free(deplacementsHypothese);
+    // free(deplacementsRetenu);
 
     return 0;
 }
@@ -163,11 +256,12 @@ void printArray(int **array, int rows, int cols)
     }
 }
 
-void firstHeuristique (int **array){
-
+void firstHeuristique(int **array)
+{
 }
 
-bool firstTankPosition (int id) {
+bool firstTankPosition(int id)
+{
     switch (id)
     {
     case TANKUP:
@@ -175,7 +269,7 @@ bool firstTankPosition (int id) {
     case TANKDOWN:
     case TANKLEFT:
         return true;
-    
+
     default:
         return false;
     }
