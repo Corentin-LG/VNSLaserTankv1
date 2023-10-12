@@ -73,26 +73,36 @@ enum gameMoving
 
 int main()
 {
+    //////////////////////////////////////////////////////////////////
+                            // Global Var //
     srand(time(NULL));
+    setlocale(LC_ALL, "");
     const char *filename = "Beginner-I.lt4";
     // const char *filename = "testing.lt4";
-    int numRows = 0;
-    int numColumns = 0;
+
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
     for (int i = 0; i < 2; i++)
     {
         tankPosition[i] = (int *)malloc((2) * sizeof(int));
     }
+
     int **basesPosition = (int **)malloc((5) * sizeof(int *));
     for (int i = 0; i < 5; i++)
     {
         basesPosition[i] = (int *)malloc((2) * sizeof(int));
     }
-    int numBases = 0;
+
     char deplacementsHypothese = (char *)malloc((1000) * sizeof(char));
     char deplacementsRetenu = (char *)malloc((1000) * sizeof(char));
-    // Chargement du fichier
-    setlocale(LC_ALL, "");
+
+    wchar_t header[100000];
+    //////////////////////////////////////////////////////////////////
+                            // Annexe Var //
+    int numRows = 0;
+    int numColumns = 0;
+    int numBases = 0;
+    //////////////////////////////////////////////////////////////////
+                            // Open File //
     FILE *file;
     file = fopen(filename, "r");
     if (file == NULL)
@@ -101,8 +111,7 @@ int main()
         return 1;
     }
 
-    // Recherche du nombre de lignes
-    wchar_t header[100000];
+                    // Search Lines and Columns//
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
     if (swscanf(header, L"Rows: %d", &numRows) != 1)
     {
@@ -111,7 +120,6 @@ int main()
         return 1;
     }
 
-    // Recherche du nombre de colonnes
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
     if (swscanf(header, L"Cols: %d", &numColumns) != 1)
     {
@@ -120,7 +128,7 @@ int main()
         return 1;
     }
 
-    // Créez un tableau 2D pour stocker les valeurs converties
+                        // Initiate Grid //
     int **tableau = (int **)malloc((numRows + 1) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
@@ -132,28 +140,23 @@ int main()
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
     }
 
-    wchar_t *token;
-    wchar_t *splitBuffer;
+                        // Complete Grid //
     int k = 0;
+    wchar_t *token;
     wchar_t *tokenInterm;
     wchar_t *tabxInterm;
     wchar_t *tabnInterm;
 
-    // Lire les données du fichier et les stocker dans le tableau
     for (int i = 0; i < numRows; i++)
     {
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
-
         token = wcstok(header, L" ");
 
         // wprintf(L"En-tête complet : %ls\n", header);
         for (int j = 0; j < numColumns; j++)
         {
-
             // wprintf(L"Token complet : %ls et plus si affinité\n", token);
             k = 0;
-
-            // Recherche de la correspondance dans la table de conversion
             while (token != NULL)
             {
                 // wprintf(L"j = %d, k = %d, token = %ls, tokenLenght = %d, lettre = %ls\n", j, k, token, strlen(token), tableX[k].lettre);
@@ -182,7 +185,6 @@ int main()
                         numBases = numBases + 1;
                         // break;
                     }
-
                     break;
                 }
                 k = k + 1;
@@ -194,17 +196,31 @@ int main()
             }
         }
     }
-
     // printArray(tableau, numRows, numColumns);
-
     fclose(file);
+    //////////////////////////////////////////////////////////////////
+                        // First "Solution" //
 
+
+
+
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////
+                            // Heuristic //
+
+    //////////////////////////////////////////////////////////////////
+                          // Write Output //
+
+    //////////////////////////////////////////////////////////////////
+                            // Free Memory //
     if (tableau != NULL)
     {
         printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
         printArray(tableau, numRows, numColumns);
-
-        // Libérer la mémoire du tableau
         for (int i = 0; i < numRows; i++)
         {
             free(tableau[i]);
@@ -215,7 +231,6 @@ int main()
     if (tankPosition != NULL)
     {
         printArray(tankPosition, 2, 2);
-
         for (int i = 0; i < 2; i++)
         {
             free(tankPosition[i]);
@@ -226,8 +241,6 @@ int main()
     if (basesPosition != NULL)
     {
         printArray(basesPosition, numBases, 2);
-
-        // Libérer la mémoire du tableau
         for (int i = 0; i < 5; i++)
         {
             free(basesPosition[i]);
@@ -235,8 +248,8 @@ int main()
         free(basesPosition);
     }
 
-    // free(deplacementsHypothese);
-    // free(deplacementsRetenu);
+    free(deplacementsHypothese);
+    free(deplacementsRetenu);
 
     return 0;
 }
@@ -253,8 +266,9 @@ void printArray(int **array, int rows, int cols)
     }
 }
 
-void firstHeuristique(int **array)
+void firstHeuristique(int **tank, int **bases, int baseNumber)
 {
+
 }
 
 bool firstTankPosition(int id)
