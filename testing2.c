@@ -8,6 +8,7 @@
 
 void printArray(int **array, int rows, int cols);
 bool firstTankPosition(int id);
+void displayMovingLetters(int *array, int movingNumber);
 
 struct ConversionTable
 {
@@ -74,7 +75,7 @@ enum gameMoving
 int main()
 {
     //////////////////////////////////////////////////////////////////
-                            // Global Var //
+    // Global Var //
     srand(time(NULL));
     setlocale(LC_ALL, "");
     const char *filename = "Beginner-I.lt4";
@@ -92,17 +93,17 @@ int main()
         basesPosition[i] = (int *)malloc((2) * sizeof(int));
     }
 
-    char deplacementsHypothese = (char *)malloc((1000) * sizeof(char));
-    char deplacementsRetenu = (char *)malloc((1000) * sizeof(char));
+    int *deplacementsHypothese = (int *)malloc((1000) * sizeof(int));
+    int *deplacementsRetenu = (int *)malloc((1000) * sizeof(int));
 
     wchar_t header[100000];
     //////////////////////////////////////////////////////////////////
-                            // Annexe Var //
+    // Annexe Var //
     int numRows = 0;
     int numColumns = 0;
     int numBases = 0;
     //////////////////////////////////////////////////////////////////
-                            // Open File //
+    // Open File //
     FILE *file;
     file = fopen(filename, "r");
     if (file == NULL)
@@ -111,7 +112,7 @@ int main()
         return 1;
     }
 
-                    // Search Lines and Columns//
+    // Search Lines and Columns//
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
     if (swscanf(header, L"Rows: %d", &numRows) != 1)
     {
@@ -128,7 +129,7 @@ int main()
         return 1;
     }
 
-                        // Initiate Grid //
+    // Initiate Grid //
     int **tableau = (int **)malloc((numRows + 1) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
@@ -140,7 +141,7 @@ int main()
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
     }
 
-                        // Complete Grid //
+    // Complete Grid //
     int k = 0;
     wchar_t *token;
     wchar_t *tokenInterm;
@@ -199,24 +200,62 @@ int main()
     // printArray(tableau, numRows, numColumns);
     fclose(file);
     //////////////////////////////////////////////////////////////////
-                        // First "Solution" //
+    // First "Solution" //
 
-
-
-
-
-
-
-
+    int verticalDeplacement = 0;
+    int horizontalDeplacement = 0;
+    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; //deltaColomns
+    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0]; //deltaLignes
+    printf("v = %d, h = %d \n", verticalDeplacement, horizontalDeplacement);
+    printf("b01 %d, 01 %d, b00 %d, 00 %d\n", basesPosition[0][1], tankPosition[0][1], basesPosition[0][0],tankPosition[0][0] );
+    int curseur = 0;
+    if (verticalDeplacement > 0)
+    {
+        for (int i = verticalDeplacement; i > 0; i--)
+        {
+            deplacementsHypothese[curseur] = DOWN;
+            deplacementsRetenu[curseur] = DOWN;
+            curseur++;
+        }
+    }
+    else
+    {
+        for (int i = verticalDeplacement; i < 0; i++)
+        {
+            deplacementsHypothese[curseur] = UP;
+            deplacementsRetenu[curseur] = UP;
+            curseur++;
+        }
+    }
+    if (horizontalDeplacement > 0)
+    {
+        for (int i = horizontalDeplacement; i > 0; i--)
+        {
+            deplacementsHypothese[curseur] = RIGHT;
+            deplacementsRetenu[curseur] = RIGHT;
+            curseur++;
+        }
+    }
+    else
+    {
+        for (int i = horizontalDeplacement; i < 0; i++)
+        {
+            deplacementsHypothese[curseur] = LEFT;
+            deplacementsRetenu[curseur] = LEFT;
+            curseur++;
+        }
+    }
+    displayMovingLetters(deplacementsHypothese, curseur);
+    displayMovingLetters(deplacementsRetenu, curseur);
+    //////////////////////////////////////////////////////////////////
+    // Heuristic //
+    // 2e grille
 
     //////////////////////////////////////////////////////////////////
-                            // Heuristic //
+    // Write Output //
 
     //////////////////////////////////////////////////////////////////
-                          // Write Output //
-
-    //////////////////////////////////////////////////////////////////
-                            // Free Memory //
+    // Free Memory //
     if (tableau != NULL)
     {
         printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
@@ -230,6 +269,7 @@ int main()
 
     if (tankPosition != NULL)
     {
+        printf("tankp");
         printArray(tankPosition, 2, 2);
         for (int i = 0; i < 2; i++)
         {
@@ -240,6 +280,7 @@ int main()
 
     if (basesPosition != NULL)
     {
+        printf("basesp");
         printArray(basesPosition, numBases, 2);
         for (int i = 0; i < 5; i++)
         {
@@ -268,7 +309,6 @@ void printArray(int **array, int rows, int cols)
 
 void firstHeuristique(int **tank, int **bases, int baseNumber)
 {
-
 }
 
 bool firstTankPosition(int id)
@@ -284,4 +324,30 @@ bool firstTankPosition(int id)
     default:
         return false;
     }
+}
+
+void displayMovingLetters(int *array, int movingNumber)
+{
+    for (int i = 0; i < movingNumber; i++)
+    {
+        switch (array[i])
+        {
+        case UP:
+            printf("U");
+            break;
+        case RIGHT:
+            printf("R");
+            break;
+        case DOWN:
+            printf("D");
+            break;
+        case LEFT:
+            printf("L");
+            break;
+        default:
+            printf("X");
+            break;
+        }
+    }
+    printf("\n");
 }
