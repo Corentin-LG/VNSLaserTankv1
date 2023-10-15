@@ -85,7 +85,7 @@ int main()
     // const char *filename = "Gary-II.lt4";
     // const char *filename = "Challenge-V.lt4";
     // const char *filename = "Beginner-II.lt4";
-    const char *filename = "testing.lt4";
+    const char *filename = "testing2.lt4";
 
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
     for (int i = 0; i < 2; i++)
