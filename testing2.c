@@ -130,10 +130,21 @@ int main()
     }
 
     // Initiate Grid //
-    int **tableau = (int **)malloc((numRows + 1) * sizeof(int *));
+    int **gridOrigin = (int **)malloc((numRows) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
-        tableau[i] = (int *)malloc((numColumns + 1) * sizeof(int));
+        gridOrigin[i] = (int *)malloc((numColumns) * sizeof(int));
+    }
+
+    int **gridWorked = (int **)malloc((numRows) * sizeof(int *));
+    for (int i = 0; i < numRows; i++)
+    {
+        gridWorked[i] = (int *)malloc((numColumns) * sizeof(int));
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        fgetws(header, sizeof(header) / sizeof(header[0]), file);
     }
 
     for (int i = 0; i < 5; i++)
@@ -153,23 +164,20 @@ int main()
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
         token = wcstok(header, L" ");
 
-        // wprintf(L"En-tête complet : %ls\n", header);
-        for (int j = 0; j < numColumns; j++)
+         for (int j = 0; j < numColumns; j++)
         {
-            // wprintf(L"Token complet : %ls et plus si affinité\n", token);
             k = 0;
             while (token != NULL)
             {
-                // wprintf(L"j = %d, k = %d, token = %ls, tokenLenght = %d, lettre = %ls\n", j, k, token, strlen(token), tableX[k].lettre);
                 tokenInterm = token;
                 tabxInterm = tableX[k].lettre;
                 tabnInterm = tableN[k].lettre;
 
-                // wprintf(L"tokenInterm = %ls, tabxInterm = %ls, tokenIntermLenght = %d, tabxIntermLenght = %d,\n", tokenInterm, tabxInterm, strlen(&tokenInterm), strlen(&tabxInterm));
                 if (wcscmp(tokenInterm, tabxInterm) == 0 || wcscmp(tokenInterm, tabnInterm) == 0)
                 {
-                    // printf("yes\n");
-                    tableau[i][j] = tableX[k].valeur;
+                    gridOrigin[i][j] = tableX[k].valeur;
+                    gridWorked[i][j] = tableX[k].valeur;
+
                     if (tableX[k].valeur == TANKUP || tableX[k].valeur == TANKRIGHT || tableX[k].valeur == TANKDOWN ||
                         tableX[k].valeur == TANKLEFT)
                     {
@@ -256,15 +264,26 @@ int main()
 
     //////////////////////////////////////////////////////////////////
     // Free Memory //
-    if (tableau != NULL)
+    if (gridOrigin != NULL)
     {
         printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(tableau, numRows, numColumns);
+        printArray(gridOrigin, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
-            free(tableau[i]);
+            free(gridOrigin[i]);
         }
-        free(tableau);
+        free(gridOrigin);
+    }
+
+    if (gridWorked != NULL)
+    {
+        printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printArray(gridWorked, numRows, numColumns);
+        for (int i = 0; i < numRows; i++)
+        {
+            free(gridWorked[i]);
+        }
+        free(gridWorked);
     }
 
     if (tankPosition != NULL)
