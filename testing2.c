@@ -130,10 +130,16 @@ int main()
     }
 
     // Initiate Grid //
-    int **tableau = (int **)malloc((numRows + 1) * sizeof(int *));
+    int **gridOrigin = (int **)malloc((numRows + 1) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
-        tableau[i] = (int *)malloc((numColumns + 1) * sizeof(int));
+        gridOrigin[i] = (int *)malloc((numColumns + 1) * sizeof(int));
+    }
+
+    int **gridWorked = (int **)malloc((numRows) * sizeof(int *));
+    for (int i = 0; i < numRows; i++)
+    {
+        gridWorked[i] = (int *)malloc((numColumns) * sizeof(int));
     }
 
     for (int i = 0; i < 5; i++)
@@ -169,7 +175,8 @@ int main()
                 if (wcscmp(tokenInterm, tabxInterm) == 0 || wcscmp(tokenInterm, tabnInterm) == 0)
                 {
                     // printf("yes\n");
-                    tableau[i][j] = tableX[k].valeur;
+                    gridOrigin[i][j] = tableX[k].valeur;
+                    gridWorked[i][j] = tableX[k].valeur;
                     if (tableX[k].valeur == TANKUP || tableX[k].valeur == TANKRIGHT || tableX[k].valeur == TANKDOWN ||
                         tableX[k].valeur == TANKLEFT)
                     {
@@ -256,15 +263,26 @@ int main()
 
     //////////////////////////////////////////////////////////////////
     // Free Memory //
-    if (tableau != NULL)
+    if (gridOrigin != NULL)
     {
         printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(tableau, numRows, numColumns);
+        printArray(gridOrigin, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
-            free(tableau[i]);
+            free(gridOrigin[i]);
         }
-        free(tableau);
+        free(gridOrigin);
+    }
+
+    if (gridWorked != NULL)
+    {
+        printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printArray(gridWorked, numRows, numColumns);
+        for (int i = 0; i < numRows; i++)
+        {
+            free(gridWorked[i]);
+        }
+        free(gridWorked);
     }
 
     if (tankPosition != NULL)
