@@ -8,7 +8,7 @@
 
 void printArray(int **array, int rows, int cols);
 bool firstTankPosition(int id);
-void displayMovingLetters(int *array, int movingNumber);
+void displayMovingLetters(int *array);
 
 struct ConversionTable
 {
@@ -63,8 +63,10 @@ enum gameElement
     TUNNELWHITE,
     TUNNELDARK
 };
+
 enum gameMoving
 {
+    NOMOVE,
     FIRE,
     UP,
     RIGHT,
@@ -102,6 +104,7 @@ int main()
     int *deplacementsHypothese = (int *)malloc((1000) * sizeof(int));
     int *deplacementsRetenu = (int *)malloc((1000) * sizeof(int));
 
+    size_t deplacementsSize = sizeof( int ) * 1000;
     wchar_t header[100000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
@@ -258,12 +261,14 @@ int main()
             curseur++;
         }
     }
-    displayMovingLetters(deplacementsHypothese, curseur);
-    displayMovingLetters(deplacementsRetenu, curseur);
+    displayMovingLetters(deplacementsHypothese);
+    displayMovingLetters(deplacementsRetenu);
     //////////////////////////////////////////////////////////////////
     // Heuristic //
     // 2e grille
-
+    printf("test\n");
+    memset(deplacementsHypothese, -1, deplacementsSize);
+    displayMovingLetters(deplacementsHypothese);
     //////////////////////////////////////////////////////////////////
     // Write Output //
 
@@ -350,12 +355,16 @@ bool firstTankPosition(int id)
     }
 }
 
-void displayMovingLetters(int *array, int movingNumber)
+void displayMovingLetters(int *array)
 {
-    for (int i = 0; i < movingNumber; i++)
+    int i = 0;
+    while (array[i] > 0 && array[i] <= 5)
     {
         switch (array[i])
         {
+        case FIRE:
+            printf("F");
+            break;
         case UP:
             printf("U");
             break;
@@ -369,9 +378,10 @@ void displayMovingLetters(int *array, int movingNumber)
             printf("L");
             break;
         default:
-            printf("X");
+            printf("X%d ", array[i]);
             break;
         }
+        i++;
     }
     printf("\n");
 }
