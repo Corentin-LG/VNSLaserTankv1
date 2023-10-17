@@ -7,8 +7,14 @@
 #include <string.h>
 
 void printArray(int **array, int rows, int cols);
-bool firstTankPosition(int id);
+bool firstTankPosition(int id, int *currentTankDirection);
 void displayMovingLetters(int *array);
+
+int randomMove();
+bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns);
+bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid);
+bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
+void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid);
 
 struct ConversionTable
 {
@@ -104,13 +110,14 @@ int main()
     int *deplacementsHypothese = (int *)malloc((1000) * sizeof(int));
     int *deplacementsRetenu = (int *)malloc((1000) * sizeof(int));
 
-    size_t deplacementsSize = sizeof( int ) * 1000;
+    size_t deplacementsSize = sizeof(int) * 1000;
     wchar_t header[100000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
     int numRows = 0;
     int numColumns = 0;
     int numBases = 0;
+    int *currentTankDirection = 0;
     //////////////////////////////////////////////////////////////////
     // Open File //
     FILE *file;
@@ -193,6 +200,8 @@ int main()
                         tankPosition[1][0] = i;
                         tankPosition[0][1] = j;
                         tankPosition[1][1] = j;
+                        currentTankDirection = tableX[k].valeur + 1;
+                        printf("ctp = %d\n", currentTankDirection);
                         // break;
                     }
                     if (tableX[k].valeur == BASE)
@@ -220,10 +229,10 @@ int main()
 
     int verticalDeplacement = 0;
     int horizontalDeplacement = 0;
-    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; //deltaColomns
-    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0]; //deltaLignes
+    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; // deltaColomns
+    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0];   // deltaLignes
     printf("v = %d, h = %d \n", verticalDeplacement, horizontalDeplacement);
-    printf("b01 %d, 01 %d, b00 %d, 00 %d\n", basesPosition[0][1], tankPosition[0][1], basesPosition[0][0],tankPosition[0][0] );
+    printf("b01 %d, 01 %d, b00 %d, 00 %d\n", basesPosition[0][1], tankPosition[0][1], basesPosition[0][0], tankPosition[0][0]);
     int curseur = 0;
     if (verticalDeplacement > 0)
     {
@@ -269,6 +278,33 @@ int main()
     printf("test\n");
     memset(deplacementsHypothese, -1, deplacementsSize);
     displayMovingLetters(deplacementsHypothese);
+
+    // printf("rand =%d\n", randomMove());
+    int turnNumber = 0;
+    // tant que les positions ne sont pas les mêmes
+    // while (!(tankPosition[0][0] == basesPosition[0][0] &&
+    //        tankPosition[0][1] == basesPosition[0][1]))
+    // {
+    //     // je veux faire un move
+    //     int testMove = randomMove();
+    //     // si ce move est possible
+    //     // cas pas de case/out of born // relunch
+    //     // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
+
+    //     // le faire
+    //     // sinon retester un move différent
+    //     turnNumber++;
+    // }
+
+    // test
+    //  bool tankValid = firstTankPosition(1, &currentTankDirection);
+    //  printf("cr = %d, truc =%d\n", currentTankDirection, tankValid);
+    //  tankValid = firstTankPosition(10, &currentTankDirection);
+    //  printf("cr = %d, truc =%d\n", currentTankDirection, tankValid);
+    printf("test2\n");
+    bool tankValid = legalMove(&tankPosition, 2, &gridWorked, numRows, numColumns);
+    printf("valid = %d\n", tankValid);
+
     //////////////////////////////////////////////////////////////////
     // Write Output //
 
@@ -340,16 +376,22 @@ void firstHeuristique(int **tank, int **bases, int baseNumber)
 {
 }
 
-bool firstTankPosition(int id)
+bool firstTankPosition(int id, int *currentTankDirection)
 {
     switch (id)
     {
     case TANKUP:
-    case TANKRIGHT:
-    case TANKDOWN:
-    case TANKLEFT:
+        *currentTankDirection = TANKUP;
         return true;
-
+    case TANKRIGHT:
+        *currentTankDirection = TANKRIGHT;
+        return true;
+    case TANKDOWN:
+        *currentTankDirection = TANKDOWN;
+        return true;
+    case TANKLEFT:
+        *currentTankDirection = TANKLEFT;
+        return true;
     default:
         return false;
     }
@@ -384,4 +426,89 @@ void displayMovingLetters(int *array)
         i++;
     }
     printf("\n");
+}
+
+int randomMove()
+{
+    int randomNumber = rand() % 5;
+    // enum 1 à 5 intéressant donc faire 0 à 4 +1
+    randomNumber++;
+    printf("randomNumber = %d\n", randomNumber);
+    return randomNumber;
+}
+
+bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns)
+{
+    // il faut trouver si oui ou non, le tank peut se déplacer
+    switch (moveID)
+    {
+    case FIRE:
+        printf("F");
+        return true;
+        break;
+    case UP:
+        printf("U");
+        // upMove()
+        if (arrayTankCell[0][0] = 0)
+        {
+            return false;
+            break;
+        }
+        else
+        {
+            // arrayGrid[arrayTankCell[0][0]-1][arrayTankCell[0][1]]//cible
+            // grille, coo atterrissage, -> à appliquer, avoir la grille de modifsS
+            if (legalFloor(&arrayTankCell, &arrayGrid))
+            {
+                return false;
+                break;
+            }
+            else
+            {
+                // arrayGrid[arrayTankCell[0][0]-1][arrayTankCell[0][1]]//cible
+
+                return true;
+                break;
+            }
+            return true;
+            break;
+        }
+        break;
+    case RIGHT:
+        printf("R");
+        return true;
+        break;
+    case DOWN:
+        printf("D");
+        return true;
+        break;
+    case LEFT:
+        printf("L");
+        return true;
+        break;
+    default:
+        printf("X");
+        return false;
+        break;
+    }
+}
+
+bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid)
+{
+    // il faut trouver si oui ou non, le tank peut faire son tire
+}
+
+bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid)
+{
+    // il faut trouver si oui ou non, le tank peut faire son tire
+}
+
+void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid)
+{
+    // faire le déplacement
+}
+
+void legalFloor(int **arrayTankCell, int **arrayGrid)
+{
+    // faire le déplacement
 }
