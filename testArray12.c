@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
+bool switecher (int ijvalue);
 int main() {
     int numRows = 15;
     int numCols = 26;
@@ -28,7 +30,9 @@ int main() {
     }
     free(myArray);
 
+    int ij = 5;
 
+    printf("boo = %d", switecher(ij));
 
 
 
@@ -63,4 +67,22 @@ int main() {
     // free(arrayGrid);
 
     return 0;
+}
+
+bool switecher (int ijvalue){
+    switch (ijvalue)
+    {
+    case 5:
+        printf("qqc\n");
+        break;
+        return true;
+        printf("r\n");
+        break;
+    
+    default:
+        return false;
+        break;
+    }
+    printf("r\n");
+    return false;
 }

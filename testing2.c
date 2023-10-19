@@ -246,6 +246,8 @@ int main()
                         printf("tu11 = %d\n", tankPosition[1][1]);
                         currentTankDirection = tableConversion[k].valeur + 1;
                         printf("ctp = %d\n", currentTankDirection);
+                        // assume tank spawn on dirt
+                        gridGround[i][j] = DIRT;
                     }
                     if (tableConversion[k].valeur == BASE)
                     {
@@ -354,12 +356,35 @@ int main()
     printf("t00 %d; t01 %d; t10 %d; t11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
     printf("test2\n");
 
-    // bool tankValid = legalMove(&tankPosition, 2, &gridWorked, numRows, numColumns);
+    int testMoveID = 2;
+    // wip
+    bool tankValid = legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns);
+    if (tankValid)
+    {
+        // si le move est valid, il faut le faire
+        // pour commencer le sol de dirt
+        switch (testMoveID)
+        {
+        case UP:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][0] = tankPosition[0][0] - 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = UP;
+            break;
+        case RIGHT:
+            break;
+        case DOWN:
+            break;
+        case LEFT:
+            break;
+        }
+    }
     //  si vrai ajouter le move à la liste
+    // lagalMove ; nextFloor ; isFloor
 
     // printf("valid = %d\n", tankValid);
     printf("t00 %d; t01 %d; t10 %d; t11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
 
+    printf("test3\n");
     //////////////////////////////////////////////////////////////////
     // Write Output //
 
@@ -525,63 +550,45 @@ int randomMove()
 bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns)
 {
     // il faut trouver si oui ou non, le tank peut se déplacer
+    printf("movID %d\n", moveID);
     switch (moveID)
     {
     case FIRE:
         printf("F ");
         return true;
-        break;
     case UP:
         printf("LegalM\n");
-        // upMove()
         if (arrayTankCell[0][0] == 0)
         {
             return false;
-            break;
         }
         else
         {
-            // arrayGrid[arrayTankCell[0][0]-1][arrayTankCell[0][1]]//cible
-            // grille, coo atterrissage, -> à appliquer, avoir la grille de modifsS
-            if (nextFloor(&arrayTankCell, moveID, &arrayGrid))
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
             {
-                // faut mais c'est le début
-                arrayTankCell[0][0] = arrayTankCell[0][0] - 1;
-                arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]] = 1;
-                // arrayTankCell[0][0] = arrayTankCell[0][0]
-                //  faudra comparer avec les autres grilles
                 return true;
-                break;
             }
             else
             {
-                // arrayGrid[arrayTankCell[0][0]-1][arrayTankCell[0][1]]//cible
-                printf("truc = %d", arrayTankCell[0][0]);
                 return false;
-                break;
             }
-            printf("bidule = %d", arrayTankCell[0][0]);
-            return true;
-            break;
         }
-        break;
+        return true;
+
     case RIGHT:
         printf("R");
         return true;
-        break;
     case DOWN:
         printf("D");
         return true;
-        break;
     case LEFT:
         printf("L");
         return true;
-        break;
     default:
         printf("X");
         return false;
-        break;
     }
+    return false;
 }
 
 bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid)
@@ -607,38 +614,31 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
     case FIRE:
         printf("F");
         return true;
-        break;
     case UP:
         printf("nextF\n");
         // xt+1 détecte case type
         // sub function return
         if (isFloor(arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]]))
         {
-            //
+            printf("yes Up\n");
             return true;
         }
         else
         {
             return false;
         }
-
-        break;
     case RIGHT:
         printf("R");
         return true;
-        break;
     case DOWN:
         printf("D");
         return true;
-        break;
     case LEFT:
         printf("L");
         return true;
-        break;
     default:
         printf("X%d ", moveID);
         return false;
-        break;
     }
     return false;
 }
@@ -649,52 +649,36 @@ bool isFloor(int floorID)
     {
     case DIRT:
         return true;
-        break;
     case BASE:
         return true;
-        break;
     case WAYUP:
         return true;
-        break;
     case WAYRIGHT:
         return true;
-        break;
     case WAYDOWN:
         return true;
-        break;
     case WAYLEFT:
         return true;
-        break;
     case ICE:
         return true;
-        break;
     case THINICE:
         return true;
-        break;
     case TUNNELRED:
         return true;
-        break;
     case TUNNELGREEN:
         return true;
-        break;
     case TUNNELBLUE:
         return true;
-        break;
     case TUNNELCYAN:
         return true;
-        break;
     case TUNNELYELLOW:
         return true;
-        break;
     case TUNNELPINK:
         return true;
-        break;
     case TUNNELWHITE:
         return true;
-        break;
     case TUNNELDARK:
         return true;
-        break;
     default:
         printf("other floor %d\n", floorID);
         return false;
@@ -708,19 +692,14 @@ bool isMovable(int movableID)
     {
     case MOVABLEBLOC:
         return false;
-        break;
     case ANTITANKUP:
         return false;
-        break;
     case ANTITANKRIGHT:
         return false;
-        break;
     case ANTITANKDOWN:
         return false;
-        break;
     case ANTITANKLEFT:
         return false;
-        break;
     default:
         printf("other movable %d\n", movableID);
         return false;
@@ -734,49 +713,34 @@ bool isShootable(int shootableID)
     {
     case MOVABLEBLOC:
         return true;
-        break;
     case BRICKS:
         return true;
-        break;
     case ANTITANKUP:
         return true;
-        break;
     case ANTITANKRIGHT:
         return true;
-        break;
     case ANTITANKDOWN:
         return true;
-        break;
     case ANTITANKLEFT:
         return true;
-        break;
     case MIRRORUPRIGHT:
         return true;
-        break;
     case MIRRORRIGHTDOWN:
         return true;
-        break;
     case MIRRORDOWNLEFT:
         return true;
-        break;
     case MIRRORLEFTUP:
         return true;
-        break;
     case CRYSTALBLOCK:
         return true;
-        break;
     case ROTATIVEMIRRORUPRIGHT:
         return true;
-        break;
     case ROTATIVEMIRRORRIGHTDOWN:
         return true;
-        break;
     case ROTATIVEMIRRORDOWNLEFT:
         return true;
-        break;
     case ROTATIVEMIRRORLEFTUP:
         return true;
-        break;
     default:
         printf("other shootable %d\n", shootableID);
         return false;
@@ -790,37 +754,26 @@ bool isUnMovable(int unMovableID)
     {
     case SOLIDBLOCK:
         return true;
-        break;
     case BRICKS:
         return true;
-        break;
     case MIRRORUPRIGHT:
         return true;
-        break;
     case MIRRORRIGHTDOWN:
         return true;
-        break;
     case MIRRORDOWNLEFT:
         return true;
-        break;
     case MIRRORLEFTUP:
         return true;
-        break;
     case CRYSTALBLOCK:
         return true;
-        break;
     case ROTATIVEMIRRORUPRIGHT:
         return true;
-        break;
     case ROTATIVEMIRRORRIGHTDOWN:
         return true;
-        break;
     case ROTATIVEMIRRORDOWNLEFT:
         return true;
-        break;
     case ROTATIVEMIRRORLEFTUP:
         return true;
-        break;
     default:
         printf("other movable %d\n", unMovableID);
         return false;
