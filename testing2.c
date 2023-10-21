@@ -25,6 +25,7 @@ bool isFloor(int floorID);
 bool isMovable(int movableID);
 bool isShootable(int shootableID);
 bool isUnMovable(int unMovableID);
+bool moveTank (int ** tankPosition, int testMoveID, int ** gridWorked, int ** gridGround);
 
 //////////////////////////////////////////////////////////////////
 // Reading Functions //
@@ -91,12 +92,12 @@ enum gameElement
 
 enum gameMoving
 {
-    NOMOVE,
     FIRE,
     UP,
     RIGHT,
     DOWN,
-    LEFT
+    LEFT,
+    NOMOVE = 404
 };
 
 //////////////////////////////////////////////////////////////////
@@ -169,10 +170,10 @@ int main()
     }
 
     // Initiate Grid //
-    int **gridOrigin = (int **)malloc((numRows + 1) * sizeof(int *));
+    int **gridOrigin = (int **)malloc((numRows) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
-        gridOrigin[i] = (int *)malloc((numColumns + 1) * sizeof(int));
+        gridOrigin[i] = (int *)malloc((numColumns) * sizeof(int));
     }
 
     int **gridWorked = (int **)malloc((numRows) * sizeof(int *));
@@ -244,7 +245,7 @@ int main()
                         printf("tu01 = %d; ", tankPosition[0][1]);
                         tankPosition[1][1] = j;
                         printf("tu11 = %d\n", tankPosition[1][1]);
-                        currentTankDirection = tableConversion[k].valeur + 1;
+                        currentTankDirection = tableConversion[k].valeur;
                         printf("ctp = %d\n", currentTankDirection);
                         // assume tank spawn on dirt
                         gridGround[i][j] = DIRT;
@@ -333,20 +334,28 @@ int main()
 
     // printf("rand =%d\n", randomMove());
     int turnNumber = 0;
-    // tant que les positions ne sont pas les mêmes
-    // while (!(tankPosition[0][0] == basesPosition[0][0] &&
-    //        tankPosition[0][1] == basesPosition[0][1]))
-    // {
-    //     // je veux faire un move
-    //     int testMove = randomMove();
-    //     // si ce move est possible
-    //     // cas pas de case/out of born // relunch
-    //     // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
+    //tant que les positions ne sont pas les mêmes
+    while (!(tankPosition[0][0] == basesPosition[0][0] &&
+           tankPosition[0][1] == basesPosition[0][1]))
+    {
+        // je veux faire un move
+        int testMove = randomMove();
+        // si ce move est possible
+        // cas pas de case/out of born // relunch
+        // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
+        while (!(legalMove(tankPosition, testMove, gridWorked, numRows, numColumns)))
+        {
+            testMove = randomMove();
+        }
+        if (moveTank(tankPosition, testMove, gridWorked, gridGround)){
+            printf("yeah nb %d\n",turnNumber);
+        }
 
-    //     // le faire
-    //     // sinon retester un move différent
-    //     turnNumber++;
-    // }
+
+        // le faire
+        // sinon retester un move différent
+        turnNumber++;
+    }
 
     // test
     //  bool tankValid = firstTankPosition(1, &currentTankDirection);
@@ -356,28 +365,16 @@ int main()
     printf("t00 %d; t01 %d; t10 %d; t11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
     printf("test2\n");
 
-    int testMoveID = 2;
-    // wip
-    bool tankValid = legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns);
-    if (tankValid)
-    {
-        // si le move est valid, il faut le faire
-        // pour commencer le sol de dirt
-        switch (testMoveID)
-        {
-        case UP:
-            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
-            tankPosition[0][0] = tankPosition[0][0] - 1;
-            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = UP;
-            break;
-        case RIGHT:
-            break;
-        case DOWN:
-            break;
-        case LEFT:
-            break;
-        }
-    }
+    // int testMoveID = LEFT;
+    // // wip
+    // // bool tankValid = legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns);
+    // if(legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns)){
+    //     if (moveTank(tankPosition, testMoveID, gridWorked, gridGround)){
+    //         printf("yeah\n");
+    //     }
+    // }
+
+
     //  si vrai ajouter le move à la liste
     // lagalMove ; nextFloor ; isFloor
 
@@ -557,7 +554,7 @@ bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int
         printf("F ");
         return true;
     case UP:
-        printf("LegalM\n");
+        printf("[UP]\n");
         if (arrayTankCell[0][0] == 0)
         {
             return false;
@@ -573,17 +570,57 @@ bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int
                 return false;
             }
         }
-        return true;
-
     case RIGHT:
-        printf("R");
-        return true;
+        printf("[RIGHT]\n");
+        if (arrayTankCell[0][1] == nbColumns - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     case DOWN:
-        printf("D");
-        return true;
+        printf("[DOWN]\n");
+        if (arrayTankCell[0][0] == nbRows - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     case LEFT:
-        printf("L");
-        return true;
+        printf("[LEFT]\n");
+        if (arrayTankCell[0][1] == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     default:
         printf("X");
         return false;
@@ -615,9 +652,6 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
         printf("F");
         return true;
     case UP:
-        printf("nextF\n");
-        // xt+1 détecte case type
-        // sub function return
         if (isFloor(arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]]))
         {
             printf("yes Up\n");
@@ -628,14 +662,35 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
             return false;
         }
     case RIGHT:
-        printf("R");
-        return true;
+        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] + 1]))
+        {
+            printf("yes Right\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     case DOWN:
-        printf("D");
-        return true;
+        if (isFloor(arrayGrid[arrayTankCell[0][0] + 1][arrayTankCell[0][1]]))
+        {
+            printf("yes Down\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     case LEFT:
-        printf("L");
-        return true;
+        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] - 1]))
+        {
+            printf("yes Left\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     default:
         printf("X%d ", moveID);
         return false;
@@ -778,5 +833,32 @@ bool isUnMovable(int unMovableID)
         printf("other movable %d\n", unMovableID);
         return false;
     }
+    return false;
+}
+
+bool moveTank (int ** tankPosition, int testMoveID, int ** gridWorked, int ** gridGround) {
+    switch (testMoveID)
+        {
+        case UP:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][0] = tankPosition[0][0] - 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = UP;
+            return true;
+        case RIGHT:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][1] = tankPosition[0][1] + 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = RIGHT;
+            return true;
+        case DOWN:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][0] = tankPosition[0][0] + 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = DOWN;
+            return true;
+        case LEFT:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][1] = tankPosition[0][1] - 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = LEFT;
+            return true;
+        }
     return false;
 }
