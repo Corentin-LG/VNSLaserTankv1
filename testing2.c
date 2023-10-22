@@ -45,6 +45,7 @@ bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
 // Reading Functions //
 void printArray(int **array, int rows, int cols);
 void printMovingLetters(int *array, int curseur);
+int replayDeplacements(char deplacementLetter);
 
 //////////////////////////////////////////////////////////////////
 // Structs //
@@ -111,7 +112,7 @@ enum gameMoving
     RIGHT,
     DOWN,
     LEFT,
-    NOMOVE = 404
+    NOMOVE = 66
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,7 +401,7 @@ int main()
         turnNumber = 0;
         curseur = 0;
         curseurDeplacementsMH = 0;
-        objectiveFunctionMH =0 ;
+        objectiveFunctionMH = 0;
         memset(deplacementsHypotheseMH, -1, deplacementsSize);
         tankPosition[0][0] = tankPosition[1][0];
         tankPosition[0][1] = tankPosition[1][1];
@@ -415,7 +416,7 @@ int main()
                 turnNumber--;
                 curseur++;
                 turnNumber++;
-                objectiveFunctionMH = objectiveFunctionMH-2;
+                objectiveFunctionMH = objectiveFunctionMH - 2;
                 // printArray(gridWorked, numRows, numColumns);
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
@@ -449,7 +450,9 @@ int main()
         }
         curseurDeplacementsMH = curseur;
         printf("curserMH %d ; curserH %d\n", curseurDeplacementsMH, curseurDeplacementsHypothese);
-    } while (curseurDeplacementsMH > curseurDeplacementsHypothese);
+    } while (curseurDeplacementsMH > 30);
+    // > 20 not fast at all, 30 -> 5 seconds
+    // while (curseurDeplacementsMH > curseurDeplacementsHypothese);
 
     curseurDeplacementsMH = curseur;
     printf("curserHM %d\n", curseurDeplacementsMH);
@@ -465,12 +468,77 @@ int main()
 
     // Write Output //
 
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////
+    // Replay //
+
+    // need further modif
+    tankPosition[0][0] = tankPosition[1][0];
+    tankPosition[0][1] = tankPosition[1][1];
+    resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+
+    // prendre la méta heur pour l'instant et son curseur
+    // faire la boucle de déplacement et afficher
+
+    for (int i = 0; i < curseurDeplacementsMH; i++)
+    {
+        printf("Move N° %d;\n", i);
+        if (deplacementsHypotheseMH[i] == FIRE)
+        {
+            printArray(gridWorked, numRows, numColumns);
+        }
+        else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != deplacementsHypotheseMH[i])
+        {
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = deplacementsHypotheseMH[i];
+            printArray(gridWorked, numRows, numColumns);
+        }
+        else
+        {
+            if (isLegalMove(tankPosition, deplacementsHypotheseMH[i], gridWorked, numRows, numColumns))
+            {
+                if (moveTank(tankPosition, deplacementsHypotheseMH[i], gridWorked, gridGround))
+                {
+                    printArray(gridWorked, numRows, numColumns);
+                }
+            }
+            else
+            {
+                // printf("nonlegal\n");
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // Display //
+    printf("gridOrigin = lignes : %d et colonnes : %d\n", numRows, numColumns);
+    printArray(gridOrigin, numRows, numColumns);
+    printf("gridWorked = lignes : %d et colonnes : %d\n", numRows, numColumns);
+    printArray(gridWorked, numRows, numColumns);
+    printf("gridGround = lignes : %d et colonnes : %d\n", numRows, numColumns);
+    printArray(gridGround, numRows, numColumns);
+    printf("gridMovables = lignes : %d et colonnes : %d\n", numRows, numColumns);
+    printArray(gridMovables, numRows, numColumns);
+    printf("tankp\n");
+    printArray(tankPosition, 2, 2);
+    printf("basesp\n");
+    printArray(basesPosition, numBases, 2);
+    printf("meta\n");
+    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
+    printf("hyp\n");
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    printf("retenu\n");
+    printMovingLetters(deplacementsRetenu, curseurDeplacementsRetenu);
+
+    
+
     //////////////////////////////////////////////////////////////////
     // Free Memory //
     if (gridOrigin != NULL)
     {
-        printf("gridOrigin = lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(gridOrigin, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
             free(gridOrigin[i]);
@@ -480,8 +548,6 @@ int main()
 
     if (gridWorked != NULL)
     {
-        printf("gridWorked = lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(gridWorked, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
             free(gridWorked[i]);
@@ -491,8 +557,6 @@ int main()
 
     if (gridGround != NULL)
     {
-        printf("gridGround = lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(gridGround, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
             free(gridGround[i]);
@@ -502,8 +566,6 @@ int main()
 
     if (gridMovables != NULL)
     {
-        printf("gridMovables = lignes : %d et colonnes : %d\n", numRows, numColumns);
-        printArray(gridMovables, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
             free(gridMovables[i]);
@@ -513,8 +575,6 @@ int main()
 
     if (tankPosition != NULL)
     {
-        printf("tankp\n");
-        printArray(tankPosition, 2, 2);
         for (int i = 0; i < 2; i++)
         {
             free(tankPosition[i]);
@@ -524,22 +584,15 @@ int main()
 
     if (basesPosition != NULL)
     {
-        printf("basesp\n");
-        printArray(basesPosition, numBases, 2);
         for (int i = 0; i < 5; i++)
         {
             free(basesPosition[i]);
         }
         free(basesPosition);
     }
-    printf("meta\n");
-    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
+
     free(deplacementsHypotheseMH);
-    printf("hyp\n");
-    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
     free(deplacementsHypothese);
-    printf("retenu\n");
-    printMovingLetters(deplacementsRetenu, curseurDeplacementsRetenu);
     free(deplacementsRetenu);
 
     // free(curseurDeplacementsHypothese);
@@ -1000,5 +1053,24 @@ void resetGridMovables(int **gridOrigin, int **gridMovables, int numRows, int nu
                 gridMovables[i][j] = gridOrigin[i][j];
             }
         }
+    }
+}
+
+int replayDeplacements(char deplacementLetter)
+{
+    switch (deplacementLetter)
+    {
+    case 'F':
+        return FIRE;
+    case 'U':
+        return UP;
+    case 'R':
+        return RIGHT;
+    case 'D':
+        return DOWN;
+    case 'L':
+        return LEFT;
+    default:
+        return NOMOVE;
     }
 }
