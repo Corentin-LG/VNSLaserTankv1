@@ -6,22 +6,48 @@
 #include <wchar.h>
 #include <string.h>
 
-void printArray(int **array, int rows, int cols);
-bool firstTankPosition(int id);
-void displayMovingLetters(int *array, int movingNumber);
+//////////////////////////////////////////////////////////////////
+// Global Functions //
+int randomMove();
 
+//////////////////////////////////////////////////////////////////
+// Array Functions //
+bool firstTankPosition(int id, int *currentTankDirection);
+
+//////////////////////////////////////////////////////////////////
+// Elements Functions //
+bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns);
+bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid);
+bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid);
+bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
+void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid);
+bool isFloor(int floorID);
+bool isMovable(int movableID);
+bool isShootable(int shootableID);
+bool isUnMovable(int unMovableID);
+bool moveTank (int ** tankPosition, int testMoveID, int ** gridWorked, int ** gridGround);
+
+//////////////////////////////////////////////////////////////////
+// Reading Functions //
+void printArray(int **array, int rows, int cols);
+void displayMovingLetters(int *array);
+
+//////////////////////////////////////////////////////////////////
+// Structs //
 struct ConversionTable
 {
     const wchar_t *lettre;
     int valeur;
 };
 
-struct ConversionTable tableX[] = {
-    {L"Tu", 1}, {L"Tr", 2}, {L"Td", 3}, {L"Tl", 4}, {L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}, {L"Au", 11}, {L"Ar", 12}, {L"Ad", 13}, {L"Al", 14}, {L"Mur", 15}, {L"Mdr", 16}, {L"Mdl", 17}, {L"Mul", 18}, {L"Wu", 19}, {L"Wr", 20}, {L"Wd", 21}, {L"Wl", 22}, {L"C", 23}, {L"Rur", 24}, {L"Rrd", 25}, {L"Rdl", 26}, {L"Rlu", 27}, {L"I", 28}, {L"i", 29}, {L"Tr", 30}, {L"Tg", 31}, {L"Tb", 32}, {L"Tc", 33}, {L"Ty", 34}, {L"Tp", 35}, {L"Tw", 36}, {L"Td", 37}};
+struct ConversionTable tableConversion[] = {
+    {L"Tu", 1}, {L"Tright", 2}, {L"Tdown", 3}, {L"Tleft", 4}, {L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}, {L"Au", 11}, {L"Ar", 12}, {L"Ad", 13}, {L"Al", 14}, {L"Mur", 15}, {L"Mdr", 16}, {L"Mdl", 17}, {L"Mul", 18}, {L"Wu", 19}, {L"Wr", 20}, {L"Wd", 21}, {L"Wl", 22}, {L"C", 23}, {L"Rur", 24}, {L"Rdr", 25}, {L"Rdl", 26}, {L"Rul", 27}, {L"I", 28}, {L"i", 29}, {L"Tr", 30}, {L"Tg", 31}, {L"Tb", 32}, {L"Tc", 33}, {L"Ty", 34}, {L"Tp", 35}, {L"Tw", 36}, {L"Td", 37}};
 
-struct ConversionTable tableN[] = {
-    {L"Tu\n", 1}, {L"Tr\n", 2}, {L"Td\n", 3}, {L"Tl\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rrd\n", 25}, {L"Rdl\n", 26}, {L"Rlu\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}};
+struct ConversionTable tableNConversion[] = {
+    {L"Tu\n", 1}, {L"Tright\n", 2}, {L"Tdown\n", 3}, {L"Tleft\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rdr\n", 25}, {L"Rdl\n", 26}, {L"Rul\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}};
 
+//////////////////////////////////////////////////////////////////
+// Enums //
 enum gameElement
 {
     NOTHING,
@@ -63,23 +89,35 @@ enum gameElement
     TUNNELWHITE,
     TUNNELDARK
 };
+
 enum gameMoving
 {
     FIRE,
     UP,
     RIGHT,
     DOWN,
-    LEFT
+    LEFT,
+    NOMOVE = 404
 };
 
+//////////////////////////////////////////////////////////////////
+// Main //
 int main()
 {
     //////////////////////////////////////////////////////////////////
     // Global Var //
     srand(time(NULL));
     setlocale(LC_ALL, "");
-    const char *filename = "Beginner-I.lt4";
-    // const char *filename = "testing.lt4";
+    // const char *filename = "Special-I.lt4";
+    // const char *filename = "Sokoban-II.lt4";
+    // const char *filename = "No_HS-LPB.lt4";
+    // const char *filename = "LaserTank.lt4";
+    // const char *filename = "Gary-II.lt4";
+    // const char *filename = "Challenge-IV.lt4";
+    // const char *filename = "Beginner-II.lt4";
+    const char *filename = "testing2.lt4";
+
+    printf("%s\n", filename);
 
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
     for (int i = 0; i < 2; i++)
@@ -96,12 +134,14 @@ int main()
     int *deplacementsHypothese = (int *)malloc((1000) * sizeof(int));
     int *deplacementsRetenu = (int *)malloc((1000) * sizeof(int));
 
+    size_t deplacementsSize = sizeof(int) * 1000;
     wchar_t header[100000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
     int numRows = 0;
     int numColumns = 0;
     int numBases = 0;
+    int *currentTankDirection = 0;
     //////////////////////////////////////////////////////////////////
     // Open File //
     FILE *file;
@@ -130,16 +170,36 @@ int main()
     }
 
     // Initiate Grid //
-    int **gridOrigin = (int **)malloc((numRows + 1) * sizeof(int *));
+    int **gridOrigin = (int **)malloc((numRows) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
-        gridOrigin[i] = (int *)malloc((numColumns + 1) * sizeof(int));
+        gridOrigin[i] = (int *)malloc((numColumns) * sizeof(int));
     }
 
     int **gridWorked = (int **)malloc((numRows) * sizeof(int *));
     for (int i = 0; i < numRows; i++)
     {
         gridWorked[i] = (int *)malloc((numColumns) * sizeof(int));
+    }
+
+    int **gridGround = (int **)malloc((numRows) * sizeof(int *));
+    for (int i = 0; i < numRows; i++)
+    {
+        gridGround[i] = (int *)malloc((numColumns) * sizeof(int));
+    }
+    for (int i = 0; i < numRows; i++)
+    {
+        memset(gridGround[i], NOTHING, numColumns * sizeof(int));
+    }
+
+    int **gridMovables = (int **)malloc((numRows) * sizeof(int *));
+    for (int i = 0; i < numRows; i++)
+    {
+        gridMovables[i] = (int *)malloc((numColumns) * sizeof(int));
+    }
+    for (int i = 0; i < numRows; i++)
+    {
+        memset(gridMovables[i], NOTHING, numColumns * sizeof(int));
     }
 
     for (int i = 0; i < 5; i++)
@@ -151,8 +211,8 @@ int main()
     int k = 0;
     wchar_t *token;
     wchar_t *tokenInterm;
-    wchar_t *tabxInterm;
-    wchar_t *tabnInterm;
+    wchar_t *tabConvInterm;
+    wchar_t *tabNConvInterm;
 
     for (int i = 0; i < numRows; i++)
     {
@@ -166,32 +226,43 @@ int main()
             k = 0;
             while (token != NULL)
             {
-                // wprintf(L"j = %d, k = %d, token = %ls, tokenLenght = %d, lettre = %ls\n", j, k, token, strlen(token), tableX[k].lettre);
                 tokenInterm = token;
-                tabxInterm = tableX[k].lettre;
-                tabnInterm = tableN[k].lettre;
+                tabConvInterm = tableConversion[k].lettre;
+                tabNConvInterm = tableNConversion[k].lettre;
 
-                // wprintf(L"tokenInterm = %ls, tabxInterm = %ls, tokenIntermLenght = %d, tabxIntermLenght = %d,\n", tokenInterm, tabxInterm, strlen(&tokenInterm), strlen(&tabxInterm));
-                if (wcscmp(tokenInterm, tabxInterm) == 0 || wcscmp(tokenInterm, tabnInterm) == 0)
+                if (wcscmp(tokenInterm, tabConvInterm) == 0 || wcscmp(tokenInterm, tabNConvInterm) == 0)
                 {
                     // printf("yes\n");
-                    gridOrigin[i][j] = tableX[k].valeur;
-                    gridWorked[i][j] = tableX[k].valeur;
-                    if (tableX[k].valeur == TANKUP || tableX[k].valeur == TANKRIGHT || tableX[k].valeur == TANKDOWN ||
-                        tableX[k].valeur == TANKLEFT)
+                    gridOrigin[i][j] = tableConversion[k].valeur;
+                    gridWorked[i][j] = tableConversion[k].valeur;
+                    if (tableConversion[k].valeur == TANKUP)
                     {
                         tankPosition[0][0] = i;
+                        printf("tu00 = %d; ", tankPosition[0][0]);
                         tankPosition[1][0] = i;
+                        printf("tu10 = %d; ", tankPosition[1][0]);
                         tankPosition[0][1] = j;
+                        printf("tu01 = %d; ", tankPosition[0][1]);
                         tankPosition[1][1] = j;
-                        // break;
+                        printf("tu11 = %d\n", tankPosition[1][1]);
+                        currentTankDirection = tableConversion[k].valeur;
+                        printf("ctp = %d\n", currentTankDirection);
+                        // assume tank spawn on dirt
+                        gridGround[i][j] = DIRT;
                     }
-                    if (tableX[k].valeur == BASE)
+                    if (tableConversion[k].valeur == BASE)
                     {
                         basesPosition[numBases][0] = i;
                         basesPosition[numBases][1] = j;
                         numBases = numBases + 1;
-                        // break;
+                    }
+                    if (isFloor(tableConversion[k].valeur))
+                    {
+                        gridGround[i][j] = tableConversion[k].valeur;
+                    }
+                    if (isMovable(tableConversion[k].valeur))
+                    {
+                        gridMovables[i][j] = tableConversion[k].valeur;
                     }
                     break;
                 }
@@ -211,10 +282,10 @@ int main()
 
     int verticalDeplacement = 0;
     int horizontalDeplacement = 0;
-    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; //deltaColomns
-    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0]; //deltaLignes
+    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; // deltaColomns
+    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0];   // deltaLignes
     printf("v = %d, h = %d \n", verticalDeplacement, horizontalDeplacement);
-    printf("b01 %d, 01 %d, b00 %d, 00 %d\n", basesPosition[0][1], tankPosition[0][1], basesPosition[0][0],tankPosition[0][0] );
+    printf("b00 %d; b01 %d\n", basesPosition[0][0], basesPosition[0][1]);
     int curseur = 0;
     if (verticalDeplacement > 0)
     {
@@ -252,12 +323,65 @@ int main()
             curseur++;
         }
     }
-    displayMovingLetters(deplacementsHypothese, curseur);
-    displayMovingLetters(deplacementsRetenu, curseur);
+    displayMovingLetters(deplacementsHypothese);
+    displayMovingLetters(deplacementsRetenu);
     //////////////////////////////////////////////////////////////////
     // Heuristic //
     // 2e grille
+    printf("test\n");
+    memset(deplacementsHypothese, -1, deplacementsSize);
+    displayMovingLetters(deplacementsHypothese);
 
+    // printf("rand =%d\n", randomMove());
+    int turnNumber = 0;
+    //tant que les positions ne sont pas les mêmes
+    while (!(tankPosition[0][0] == basesPosition[0][0] &&
+           tankPosition[0][1] == basesPosition[0][1]))
+    {
+        // je veux faire un move
+        int testMove = randomMove();
+        // si ce move est possible
+        // cas pas de case/out of born // relunch
+        // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
+        while (!(legalMove(tankPosition, testMove, gridWorked, numRows, numColumns)))
+        {
+            testMove = randomMove();
+        }
+        if (moveTank(tankPosition, testMove, gridWorked, gridGround)){
+            printf("yeah nb %d\n",turnNumber);
+        }
+
+
+        // le faire
+        // sinon retester un move différent
+        turnNumber++;
+    }
+
+    // test
+    //  bool tankValid = firstTankPosition(1, &currentTankDirection);
+    //  printf("cr = %d, truc =%d\n", currentTankDirection, tankValid);
+    //  tankValid = firstTankPosition(10, &currentTankDirection);
+    //  printf("cr = %d, truc =%d\n", currentTankDirection, tankValid);
+    printf("t00 %d; t01 %d; t10 %d; t11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
+    printf("test2\n");
+
+    // int testMoveID = LEFT;
+    // // wip
+    // // bool tankValid = legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns);
+    // if(legalMove(tankPosition, testMoveID, gridWorked, numRows, numColumns)){
+    //     if (moveTank(tankPosition, testMoveID, gridWorked, gridGround)){
+    //         printf("yeah\n");
+    //     }
+    // }
+
+
+    //  si vrai ajouter le move à la liste
+    // lagalMove ; nextFloor ; isFloor
+
+    // printf("valid = %d\n", tankValid);
+    printf("t00 %d; t01 %d; t10 %d; t11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
+
+    printf("test3\n");
     //////////////////////////////////////////////////////////////////
     // Write Output //
 
@@ -265,7 +389,7 @@ int main()
     // Free Memory //
     if (gridOrigin != NULL)
     {
-        printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printf("gridOrigin = lignes : %d et colonnes : %d\n", numRows, numColumns);
         printArray(gridOrigin, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
@@ -276,13 +400,35 @@ int main()
 
     if (gridWorked != NULL)
     {
-        printf("lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printf("gridWorked = lignes : %d et colonnes : %d\n", numRows, numColumns);
         printArray(gridWorked, numRows, numColumns);
         for (int i = 0; i < numRows; i++)
         {
             free(gridWorked[i]);
         }
         free(gridWorked);
+    }
+
+    if (gridGround != NULL)
+    {
+        printf("gridGround = lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printArray(gridGround, numRows, numColumns);
+        for (int i = 0; i < numRows; i++)
+        {
+            free(gridGround[i]);
+        }
+        free(gridGround);
+    }
+
+    if (gridMovables != NULL)
+    {
+        printf("gridMovables = lignes : %d et colonnes : %d\n", numRows, numColumns);
+        printArray(gridMovables, numRows, numColumns);
+        for (int i = 0; i < numRows; i++)
+        {
+            free(gridMovables[i]);
+        }
+        free(gridMovables);
     }
 
     if (tankPosition != NULL)
@@ -313,6 +459,8 @@ int main()
     return 0;
 }
 
+//////////////////////////////////////////////////////////////////
+// Reading Functions //
 void printArray(int **array, int rows, int cols)
 {
     for (int i = 0; i < rows; i++)
@@ -325,31 +473,16 @@ void printArray(int **array, int rows, int cols)
     }
 }
 
-void firstHeuristique(int **tank, int **bases, int baseNumber)
+void displayMovingLetters(int *array)
 {
-}
-
-bool firstTankPosition(int id)
-{
-    switch (id)
-    {
-    case TANKUP:
-    case TANKRIGHT:
-    case TANKDOWN:
-    case TANKLEFT:
-        return true;
-
-    default:
-        return false;
-    }
-}
-
-void displayMovingLetters(int *array, int movingNumber)
-{
-    for (int i = 0; i < movingNumber; i++)
+    int i = 0;
+    while (array[i] > 0 && array[i] <= 5)
     {
         switch (array[i])
         {
+        case FIRE:
+            printf("F");
+            break;
         case UP:
             printf("U");
             break;
@@ -363,9 +496,369 @@ void displayMovingLetters(int *array, int movingNumber)
             printf("L");
             break;
         default:
-            printf("X");
+            printf("X%d ", array[i]);
             break;
         }
+        i++;
     }
     printf("\n");
+}
+
+void firstHeuristique(int **tank, int **bases, int baseNumber)
+{
+}
+
+//////////////////////////////////////////////////////////////////
+// Array Functions //
+bool firstTankPosition(int id, int *currentTankDirection)
+{
+    switch (id)
+    {
+    case TANKUP:
+        *currentTankDirection = TANKUP;
+        return true;
+    case TANKRIGHT:
+        *currentTankDirection = TANKRIGHT;
+        return true;
+    case TANKDOWN:
+        *currentTankDirection = TANKDOWN;
+        return true;
+    case TANKLEFT:
+        *currentTankDirection = TANKLEFT;
+        return true;
+    default:
+        return false;
+    }
+}
+
+//////////////////////////////////////////////////////////////////
+// Global Functions //
+int randomMove()
+{
+    int randomNumber = rand() % 5;
+    // enum 1 à 5 intéressant donc faire 0 à 4 +1
+    randomNumber++;
+    printf("randomNumber = %d\n", randomNumber);
+    return randomNumber;
+}
+
+//////////////////////////////////////////////////////////////////
+// Elements Functions //
+bool legalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns)
+{
+    // il faut trouver si oui ou non, le tank peut se déplacer
+    printf("movID %d\n", moveID);
+    switch (moveID)
+    {
+    case FIRE:
+        printf("F ");
+        return true;
+    case UP:
+        printf("[UP]\n");
+        if (arrayTankCell[0][0] == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case RIGHT:
+        printf("[RIGHT]\n");
+        if (arrayTankCell[0][1] == nbColumns - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case DOWN:
+        printf("[DOWN]\n");
+        if (arrayTankCell[0][0] == nbRows - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case LEFT:
+        printf("[LEFT]\n");
+        if (arrayTankCell[0][1] == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    default:
+        printf("X");
+        return false;
+    }
+    return false;
+}
+
+bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid)
+{
+    // il faut trouver si oui ou non, le tank peut faire son tire
+}
+
+bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid)
+{
+    // il faut trouver si oui ou non, le tank peut faire son tire
+}
+
+void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid)
+{
+    // faire le déplacement
+}
+
+bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
+{
+    // arrayGrid[arrayTankCell[0][0]-1][arrayTankCell[0][1]]
+    switch (moveID)
+    {
+    case FIRE:
+        printf("F");
+        return true;
+    case UP:
+        if (isFloor(arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]]))
+        {
+            printf("yes Up\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case RIGHT:
+        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] + 1]))
+        {
+            printf("yes Right\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case DOWN:
+        if (isFloor(arrayGrid[arrayTankCell[0][0] + 1][arrayTankCell[0][1]]))
+        {
+            printf("yes Down\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case LEFT:
+        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] - 1]))
+        {
+            printf("yes Left\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    default:
+        printf("X%d ", moveID);
+        return false;
+    }
+    return false;
+}
+
+bool isFloor(int floorID)
+{
+    switch (floorID)
+    {
+    case DIRT:
+        return true;
+    case BASE:
+        return true;
+    case WAYUP:
+        return true;
+    case WAYRIGHT:
+        return true;
+    case WAYDOWN:
+        return true;
+    case WAYLEFT:
+        return true;
+    case ICE:
+        return true;
+    case THINICE:
+        return true;
+    case TUNNELRED:
+        return true;
+    case TUNNELGREEN:
+        return true;
+    case TUNNELBLUE:
+        return true;
+    case TUNNELCYAN:
+        return true;
+    case TUNNELYELLOW:
+        return true;
+    case TUNNELPINK:
+        return true;
+    case TUNNELWHITE:
+        return true;
+    case TUNNELDARK:
+        return true;
+    default:
+        printf("other floor %d\n", floorID);
+        return false;
+    }
+    return false;
+}
+
+bool isMovable(int movableID)
+{
+    switch (movableID)
+    {
+    case MOVABLEBLOC:
+        return false;
+    case ANTITANKUP:
+        return false;
+    case ANTITANKRIGHT:
+        return false;
+    case ANTITANKDOWN:
+        return false;
+    case ANTITANKLEFT:
+        return false;
+    default:
+        printf("other movable %d\n", movableID);
+        return false;
+    }
+    return false;
+}
+
+bool isShootable(int shootableID)
+{
+    switch (shootableID)
+    {
+    case MOVABLEBLOC:
+        return true;
+    case BRICKS:
+        return true;
+    case ANTITANKUP:
+        return true;
+    case ANTITANKRIGHT:
+        return true;
+    case ANTITANKDOWN:
+        return true;
+    case ANTITANKLEFT:
+        return true;
+    case MIRRORUPRIGHT:
+        return true;
+    case MIRRORRIGHTDOWN:
+        return true;
+    case MIRRORDOWNLEFT:
+        return true;
+    case MIRRORLEFTUP:
+        return true;
+    case CRYSTALBLOCK:
+        return true;
+    case ROTATIVEMIRRORUPRIGHT:
+        return true;
+    case ROTATIVEMIRRORRIGHTDOWN:
+        return true;
+    case ROTATIVEMIRRORDOWNLEFT:
+        return true;
+    case ROTATIVEMIRRORLEFTUP:
+        return true;
+    default:
+        printf("other shootable %d\n", shootableID);
+        return false;
+    }
+    return false;
+}
+
+bool isUnMovable(int unMovableID)
+{
+    switch (unMovableID)
+    {
+    case SOLIDBLOCK:
+        return true;
+    case BRICKS:
+        return true;
+    case MIRRORUPRIGHT:
+        return true;
+    case MIRRORRIGHTDOWN:
+        return true;
+    case MIRRORDOWNLEFT:
+        return true;
+    case MIRRORLEFTUP:
+        return true;
+    case CRYSTALBLOCK:
+        return true;
+    case ROTATIVEMIRRORUPRIGHT:
+        return true;
+    case ROTATIVEMIRRORRIGHTDOWN:
+        return true;
+    case ROTATIVEMIRRORDOWNLEFT:
+        return true;
+    case ROTATIVEMIRRORLEFTUP:
+        return true;
+    default:
+        printf("other movable %d\n", unMovableID);
+        return false;
+    }
+    return false;
+}
+
+bool moveTank (int ** tankPosition, int testMoveID, int ** gridWorked, int ** gridGround) {
+    switch (testMoveID)
+        {
+        case UP:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][0] = tankPosition[0][0] - 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = UP;
+            return true;
+        case RIGHT:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][1] = tankPosition[0][1] + 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = RIGHT;
+            return true;
+        case DOWN:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][0] = tankPosition[0][0] + 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = DOWN;
+            return true;
+        case LEFT:
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
+            tankPosition[0][1] = tankPosition[0][1] - 1;
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = LEFT;
+            return true;
+        }
+    return false;
 }
