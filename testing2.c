@@ -150,11 +150,11 @@ int main()
     int *deplacementsRetenu = (int *)malloc((10000) * sizeof(int));
 
     int *curseurDeplacementsHypothese = malloc(sizeof(int));
-    int *curseurDeplacementsHypotheseAutreMetaHeuristique = malloc(sizeof(int));
+    int *curseurDeplacementsAutreMetaHeuristique = malloc(sizeof(int));
     int *curseurDeplacementsRetenu = malloc(sizeof(int));
 
     size_t deplacementsSize = sizeof(int) * 10000;
-    wchar_t header[100000];
+    wchar_t header[10000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
     int numRows = 0;
@@ -300,55 +300,55 @@ int main()
     // First "Solution" //
     // depreciated
 
-    int verticalDeplacement = 0;
-    int horizontalDeplacement = 0;
-    horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; // deltaColomns
-    verticalDeplacement = basesPosition[0][0] - tankPosition[0][0];   // deltaLignes
-    printf("verticalDeplacement = %d, horizontalDeplacement = %d \n", verticalDeplacement, horizontalDeplacement);
-    printf("basesPosition00 %d; basesPosition01 %d\n", basesPosition[0][0], basesPosition[0][1]);
+    // int verticalDeplacement = 0;
+    // int horizontalDeplacement = 0;
+    // horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; // deltaColomns
+    // verticalDeplacement = basesPosition[0][0] - tankPosition[0][0];   // deltaLignes
+    // printf("verticalDeplacement = %d, horizontalDeplacement = %d \n", verticalDeplacement, horizontalDeplacement);
+    // printf("basesPosition00 %d; basesPosition01 %d\n", basesPosition[0][0], basesPosition[0][1]);
 
-    int curseur = 0;
-    // make rotation first
-    if (horizontalDeplacement > 0)
-    {
-        for (int i = horizontalDeplacement; i >= 0; i--)
-        {
-            deplacementsHypothese[curseur] = RIGHT;
-            deplacementsRetenu[curseur] = RIGHT;
-            curseur++;
-        }
-    }
-    else
-    {
-        for (int i = horizontalDeplacement; i <= 0; i++)
-        {
-            deplacementsHypothese[curseur] = LEFT;
-            deplacementsRetenu[curseur] = LEFT;
-            curseur++;
-        }
-    }
-    if (verticalDeplacement > 0)
-    {
-        for (int i = verticalDeplacement; i >= 0; i--)
-        {
-            deplacementsHypothese[curseur] = DOWN;
-            deplacementsRetenu[curseur] = DOWN;
-            curseur++;
-        }
-    }
-    else
-    {
-        for (int i = verticalDeplacement; i <= 0; i++)
-        {
-            deplacementsHypothese[curseur] = UP;
-            deplacementsRetenu[curseur] = UP;
-            curseur++;
-        }
-    }
-    *curseurDeplacementsHypothese = curseur;
-    *curseurDeplacementsRetenu = curseur;
-    displayMovingLetters(deplacementsHypothese);
-    displayMovingLetters(deplacementsRetenu);
+    // int curseur = 0;
+    // // make rotation first
+    // if (horizontalDeplacement > 0)
+    // {
+    //     for (int i = horizontalDeplacement; i >= 0; i--)
+    //     {
+    //         deplacementsHypothese[curseur] = RIGHT;
+    //         deplacementsRetenu[curseur] = RIGHT;
+    //         curseur++;
+    //     }
+    // }
+    // else
+    // {
+    //     for (int i = horizontalDeplacement; i <= 0; i++)
+    //     {
+    //         deplacementsHypothese[curseur] = LEFT;
+    //         deplacementsRetenu[curseur] = LEFT;
+    //         curseur++;
+    //     }
+    // }
+    // if (verticalDeplacement > 0)
+    // {
+    //     for (int i = verticalDeplacement; i >= 0; i--)
+    //     {
+    //         deplacementsHypothese[curseur] = DOWN;
+    //         deplacementsRetenu[curseur] = DOWN;
+    //         curseur++;
+    //     }
+    // }
+    // else
+    // {
+    //     for (int i = verticalDeplacement; i <= 0; i++)
+    //     {
+    //         deplacementsHypothese[curseur] = UP;
+    //         deplacementsRetenu[curseur] = UP;
+    //         curseur++;
+    //     }
+    // }
+    // *curseurDeplacementsHypothese = curseur;
+    // *curseurDeplacementsRetenu = curseur;
+    // displayMovingLetters(deplacementsHypothese);
+    // displayMovingLetters(deplacementsRetenu);
     //////////////////////////////////////////////////////////////////
     // Heuristic //
     // 2e grille
@@ -356,59 +356,114 @@ int main()
     // memset(deplacementsHypothese, -1, deplacementsSize);
     // displayMovingLetters(deplacementsHypothese);
 
-    int turnNumber;
-    curseur = 0;
+    int curseur = 0;
+    int turnNumber = 0;
+
+    // resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+    // resetGridGround(gridOrigin, gridGround, numRows, numColumns);
+    // resetGridMovables(gridOrigin, gridMovables, numRows, numColumns);
+    memset(deplacementsHypothese, -1, deplacementsSize);
+    // memset(deplacementsRetenu, -1, deplacementsSize);
+    // memset(deplacementsHypotheseAutreMetaHeuristique, -1, deplacementsSize);
+
+    while (!(tankPosition[0][0] == basesPosition[0][0] &&
+             tankPosition[0][1] == basesPosition[0][1]))
+    {
+        int testMove = getRandomMove();
+        while (!(isLegalMove(tankPosition, testMove, gridWorked, numRows, numColumns)))
+        {
+            testMove = getRandomMove();
+        }
+
+        if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
+        {
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
+            turnNumber--;
+        }
+        else
+        {
+            if (moveTank(tankPosition, testMove, gridWorked, gridGround))
+            {
+                // printf("yeah nb %d\n", turnNumber);
+            }
+        }
+
+        deplacementsHypothese[curseur] = testMove;
+        deplacementsRetenu[curseur] = testMove;
+        
+        for (int w = 0; w < curseur; w++)
+        {
+            printf("%d", *deplacementsHypothese[w]);
+        }
+        printf("\n");
+
+        curseur++;
+        turnNumber++;
+        
+    }
 
     // do
     // {
-        resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
-        resetGridGround(gridOrigin, gridGround, numRows, numColumns);
-        resetGridMovables(gridOrigin, gridMovables, numRows, numColumns);
-        turnNumber = 0;
-        curseur = 0;
-        memset(deplacementsHypotheseAutreMetaHeuristique, -1, deplacementsSize);
-        // tant que les positions ne sont pas les mêmes
-        while (!(tankPosition[0][0] == basesPosition[0][0] &&
-                 tankPosition[0][1] == basesPosition[0][1]))
-        {
-            // je veux faire un move
-            int testMove = getRandomMove();
-            // si ce move est possible
-            // cas pas de case/out of born // relunch
-            // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
-            while (!(isLegalMove(tankPosition, testMove, gridWorked, numRows, numColumns)))
-            {
-                testMove = getRandomMove();
-            }
+    // resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+    // resetGridGround(gridOrigin, gridGround, numRows, numColumns);
+    // resetGridMovables(gridOrigin, gridMovables, numRows, numColumns);
+    // printf("dsdsd\n");
+    // turnNumber = 0;
+    // curseur = 0;
+    // memset(deplacementsHypotheseAutreMetaHeuristique, -1, deplacementsSize);
+    // // tant que les positions ne sont pas les mêmes
+    // while (!(tankPosition[0][0] == basesPosition[0][0] &&
+    //          tankPosition[0][1] == basesPosition[0][1]))
+    // {
+    //     // je veux faire un move
+    //     int testMove = getRandomMove();
+    //     // si ce move est possible
+    //     // cas pas de case/out of born // relunch
+    //     // cas case // c1 c'est dirt/base pour commencer sinon ne rien faire
+    //     while (!(isLegalMove(tankPosition, testMove, gridWorked, numRows, numColumns)))
+    //     {
+    //         testMove = getRandomMove();
+    //         printf("dsdsd2\n");
+    //     }
 
-            if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
-            {
-                gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
-                turnNumber--;
-            }
-            else
-            {
-                if (moveTank(tankPosition, testMove, gridWorked, gridGround))
-                {
-                    // printf("yeah nb %d\n", turnNumber);
-                }
-            }
+    //     if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
+    //     {
+    //         gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
+    //         turnNumber--;
+    //         printf("dsdsd3\n");
+    //     }
+    //     else
+    //     {
+    //         if (moveTank(tankPosition, testMove, gridWorked, gridGround))
+    //         {
+    //             // printf("yeah nb %d\n", turnNumber);
+    //             printf("dsdsd4\n");
+    //         }
+    //     }
 
-            deplacementsHypotheseAutreMetaHeuristique[turnNumber] = testMove;
+    //     // deplacementsHypotheseAutreMetaHeuristique[turnNumber] = testMove;
+    //     printf("dsdsd5\n");
+    //     curseur++;
+    //     turnNumber++;
+    // }
+    // *curseurDeplacementsAutreMetaHeuristique = curseur;
+    // printf("turnNumber = %d; curseur = %d\n", turnNumber, curseur);
+    // if (*curseurDeplacementsAutreMetaHeuristique < *curseurDeplacementsHypothese)
+    // {
+    //     memset(deplacementsHypothese, -1, deplacementsSize);
+    //     for (int i = 0; i < sizeof(deplacementsHypothese) / sizeof(deplacementsHypothese[0]); i++)
+    //     {
+    //         deplacementsHypothese[i] = curseurDeplacementsAutreMetaHeuristique[i];
+    //         *curseurDeplacementsAutreMetaHeuristique = *curseurDeplacementsHypothese;
+    //     }
+    // }
+    // } while (!(*curseurDeplacementsAutreMetaHeuristique <= *curseurDeplacementsHypothese)); // wip
 
-            curseur++;
-            turnNumber++;
-        }
-        curseurDeplacementsHypotheseAutreMetaHeuristique = curseur;
-        printf("turnNumber = %d; curseur = %d\n", turnNumber, curseur);
-    // } while (*curseurDeplacementsHypotheseAutreMetaHeuristique > *curseurDeplacementsHypothese); // wip
-
-
-
-    printf("tankPosition00 %d; tankPosition01 %d; tankPosition10 %d; tankPosition11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
-    printf("what found\n");
+    // printf("curseurDeplacementsAutreMetaHeuristique = %d ; curseurDeplacementsHypothese = %d\n", *curseurDeplacementsAutreMetaHeuristique, *curseurDeplacementsHypothese);
+    // printf("tankPosition00 %d; tankPosition01 %d; tankPosition10 %d; tankPosition11 %d\n", tankPosition[0][0], tankPosition[0][1], tankPosition[1][0], tankPosition[1][1]);
+    // printf("what found\n");
     // displayMovingLetters(deplacementsHypotheseAutreMetaHeuristique);
-    printf("what found\n");
+    // printf("what found\n");
     //////////////////////////////////////////////////////////////////
     // Write Output //
 
@@ -460,7 +515,7 @@ int main()
 
     if (tankPosition != NULL)
     {
-        printf("tankp");
+        printf("tankp\n");
         printArray(tankPosition, 2, 2);
         for (int i = 0; i < 2; i++)
         {
@@ -471,7 +526,7 @@ int main()
 
     if (basesPosition != NULL)
     {
-        printf("basesp");
+        printf("basesp\n");
         printArray(basesPosition, numBases, 2);
         for (int i = 0; i < 5; i++)
         {
@@ -479,15 +534,18 @@ int main()
         }
         free(basesPosition);
     }
+    printf("meta\n");
     displayMovingLetters(deplacementsHypotheseAutreMetaHeuristique);
-    free(deplacementsRetenu);
+    free(deplacementsHypotheseAutreMetaHeuristique);
+    printf("hyp\n");
     displayMovingLetters(deplacementsHypothese);
     free(deplacementsHypothese);
+    printf("retenu\n");
     displayMovingLetters(deplacementsRetenu);
     free(deplacementsRetenu);
 
     free(curseurDeplacementsHypothese);
-    free(curseurDeplacementsHypotheseAutreMetaHeuristique);
+    free(curseurDeplacementsAutreMetaHeuristique);
     free(curseurDeplacementsRetenu);
     return 0;
 }
@@ -576,6 +634,7 @@ int getRandomMove()
     // // printf("randomNumber = %d\n", randomNumber);
 
     int randomNumber = rand() % 5;
+    printf("randomNumber = %d\n", randomNumber);
     return randomNumber;
 }
 
@@ -588,7 +647,7 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, i
     switch (moveID)
     {
     case FIRE:
-        //printf("F");
+        // printf("F");
         return true;
     case UP:
         // printf("[UP]\n");
