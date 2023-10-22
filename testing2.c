@@ -114,7 +114,9 @@ enum gameMoving
     NOMOVE = 404
 };
 
-//////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Main //
 int main()
 {
@@ -130,6 +132,7 @@ int main()
     // const char *filename = "Challenge-IV.lt4";
     // const char *filename = "Beginner-II.lt4";
     const char *filename = "testing2.lt4";
+    const int *CYCLES = 5;
 
     printf("%s\n", filename);
 
@@ -156,6 +159,13 @@ int main()
     int curseurDeplacementsHypothese = 0;
     int curseurDeplacementsMH = 0;
     int curseurDeplacementsRetenu = 0;
+
+    int objectiveFunctionHypothese = 0;
+    int objectiveFunctionMH = 0;
+    int objectiveFunctionRetenu = 0;
+    // base = 10000
+    // move = -1
+    // shoot = -2
 
     size_t deplacementsSize = sizeof(int) * 1000000;
     wchar_t header[1000];
@@ -300,62 +310,11 @@ int main()
     }
     // printArray(tableau, numRows, numColumns);
     fclose(file);
-    //////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // First "Solution" //
-    // depreciated
-
-    // int verticalDeplacement = 0;
-    // int horizontalDeplacement = 0;
-    // horizontalDeplacement = basesPosition[0][1] - tankPosition[0][1]; // deltaColomns
-    // verticalDeplacement = basesPosition[0][0] - tankPosition[0][0];   // deltaLignes
-    // printf("verticalDeplacement = %d, horizontalDeplacement = %d \n", verticalDeplacement, horizontalDeplacement);
-    // printf("basesPosition00 %d; basesPosition01 %d\n", basesPosition[0][0], basesPosition[0][1]);
-
-    // int curseur = 0;
-    // // make rotation first
-    // if (horizontalDeplacement > 0)
-    // {
-    //     for (int i = horizontalDeplacement; i >= 0; i--)
-    //     {
-    //         deplacementsHypothese[curseur] = RIGHT;
-    //         deplacementsRetenu[curseur] = RIGHT;
-    //         curseur++;
-    //     }
-    // }
-    // else
-    // {
-    //     for (int i = horizontalDeplacement; i <= 0; i++)
-    //     {
-    //         deplacementsHypothese[curseur] = LEFT;
-    //         deplacementsRetenu[curseur] = LEFT;
-    //         curseur++;
-    //     }
-    // }
-    // if (verticalDeplacement > 0)
-    // {
-    //     for (int i = verticalDeplacement; i >= 0; i--)
-    //     {
-    //         deplacementsHypothese[curseur] = DOWN;
-    //         deplacementsRetenu[curseur] = DOWN;
-    //         curseur++;
-    //     }
-    // }
-    // else
-    // {
-    //     for (int i = verticalDeplacement; i <= 0; i++)
-    //     {
-    //         deplacementsHypothese[curseur] = UP;
-    //         deplacementsRetenu[curseur] = UP;
-    //         curseur++;
-    //     }
-    // }
-    // *curseurDeplacementsHypothese = curseur;
-    // *curseurDeplacementsRetenu = curseur;
-    // displayMovingLetters(deplacementsHypothese);
-    // displayMovingLetters(deplacementsRetenu);
-    //////////////////////////////////////////////////////////////////
-    // Heuristic //
-    // 2e grille
     printf("test\n");
     // memset(deplacementsHypothese, -1, deplacementsSize);
     // displayMovingLetters(deplacementsHypothese);
@@ -392,6 +351,8 @@ int main()
             turnNumber--;
             curseur++;
             turnNumber++;
+            objectiveFunctionHypothese = objectiveFunctionHypothese - 2;
+            objectiveFunctionRetenu = objectiveFunctionRetenu - 2;
             // printArray(gridWorked, numRows, numColumns);
         }
         else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
@@ -415,6 +376,8 @@ int main()
                     deplacementsRetenu[curseur] = testMove;
                     curseur++;
                     turnNumber++;
+                    objectiveFunctionHypothese--;
+                    objectiveFunctionRetenu--;
                     // printArray(gridWorked, numRows, numColumns);
                 }
             }
@@ -437,6 +400,7 @@ int main()
         turnNumber = 0;
         curseur = 0;
         curseurDeplacementsMH = 0;
+        objectiveFunctionMH =0 ;
         memset(deplacementsHypotheseMH, -1, deplacementsSize);
         tankPosition[0][0] = tankPosition[1][0];
         tankPosition[0][1] = tankPosition[1][1];
@@ -451,6 +415,7 @@ int main()
                 turnNumber--;
                 curseur++;
                 turnNumber++;
+                objectiveFunctionMH = objectiveFunctionMH-2;
                 // printArray(gridWorked, numRows, numColumns);
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
@@ -472,6 +437,7 @@ int main()
                         deplacementsHypotheseMH[curseur] = testMove;
                         curseur++;
                         turnNumber++;
+                        objectiveFunctionMH--;
                         // printArray(gridWorked, numRows, numColumns);
                     }
                 }
@@ -493,7 +459,10 @@ int main()
     // printf("what found\n");
     // displayMovingLetters(deplacementsHypotheseMH);
     // printf("what found\n");
-    //////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Write Output //
 
     //////////////////////////////////////////////////////////////////
