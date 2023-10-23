@@ -39,7 +39,7 @@ void resetGridMovables(int **gridOrigin, int **gridMovables, int numRows, int nu
 
 // depreci
 void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid);
-bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid);
+bool legalFire(int **arrayTankCell, int positionID, int **arrayGrid);
 bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
 //////////////////////////////////////////////////////////////////
 // Reading Functions //
@@ -56,10 +56,10 @@ struct ConversionTable
 };
 
 struct ConversionTable tableConversionSimple[] = {
-    {L"Tu", 1}, {L"Tright", 2}, {L"Tdown", 3}, {L"Tleft", 4}, {L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}, {L"Au", 11}, {L"Ar", 12}, {L"Ad", 13}, {L"Al", 14}, {L"Mur", 15}, {L"Mdr", 16}, {L"Mdl", 17}, {L"Mul", 18}, {L"Wu", 19}, {L"Wr", 20}, {L"Wd", 21}, {L"Wl", 22}, {L"C", 23}, {L"Rur", 24}, {L"Rdr", 25}, {L"Rdl", 26}, {L"Rul", 27}, {L"I", 28}, {L"i", 29}, {L"Tr", 30}, {L"Tg", 31}, {L"Tb", 32}, {L"Tc", 33}, {L"Ty", 34}, {L"Tp", 35}, {L"Tw", 36}, {L"Td", 37}};
+    {L"Tu", 1}, {L"Tright", 2}, {L"Tdown", 3}, {L"Tleft", 4}, {L"D", 5}, {L"b", 6}, {L"w", 7}, {L"Bs", 8}, {L"Bm", 9}, {L"B", 10}, {L"Au", 11}, {L"Ar", 12}, {L"Ad", 13}, {L"Al", 14}, {L"Mur", 15}, {L"Mdr", 16}, {L"Mdl", 17}, {L"Mul", 18}, {L"Wu", 19}, {L"Wr", 20}, {L"Wd", 21}, {L"Wl", 22}, {L"C", 23}, {L"Rur", 24}, {L"Rdr", 25}, {L"Rdl", 26}, {L"Rul", 27}, {L"I", 28}, {L"i", 29}, {L"Tr", 30}, {L"Tg", 31}, {L"Tb", 32}, {L"Tc", 33}, {L"Ty", 34}, {L"Tp", 35}, {L"Tw", 36}, {L"Td", 37}, {L"Aud", 38}, {L"Ard", 39}, {L"Add", 40}, {L"Ald", 41}};
 
 struct ConversionTable tableConversionBis[] = {
-    {L"Tu\n", 1}, {L"Tright\n", 2}, {L"Tdown\n", 3}, {L"Tleft\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rdr\n", 25}, {L"Rdl\n", 26}, {L"Rul\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}};
+    {L"Tu\n", 1}, {L"Tright\n", 2}, {L"Tdown\n", 3}, {L"Tleft\n", 4}, {L"D\n", 5}, {L"b\n", 6}, {L"w\n", 7}, {L"Bs\n", 8}, {L"Bm\n", 9}, {L"B\n", 10}, {L"Au\n", 11}, {L"Ar\n", 12}, {L"Ad\n", 13}, {L"Al\n", 14}, {L"Mur\n", 15}, {L"Mdr\n", 16}, {L"Mdl\n", 17}, {L"Mul\n", 18}, {L"Wu\n", 19}, {L"Wr\n", 20}, {L"Wd\n", 21}, {L"Wl\n", 22}, {L"C\n", 23}, {L"Rur\n", 24}, {L"Rdr\n", 25}, {L"Rdl\n", 26}, {L"Rul\n", 27}, {L"I\n", 28}, {L"i\n", 29}, {L"Tr\n", 30}, {L"Tg\n", 31}, {L"Tb\n", 32}, {L"Tc\n", 33}, {L"Ty\n", 34}, {L"Tp\n", 35}, {L"Tw\n", 36}, {L"Td\n", 37}, {L"Aud\n", 38}, {L"Ard\n", 39}, {L"Add\n", 40}, {L"Ald\n", 41}};
 
 //////////////////////////////////////////////////////////////////
 // Enums //
@@ -102,7 +102,11 @@ enum gameElement
     TUNNELYELLOW,
     TUNNELPINK,
     TUNNELWHITE,
-    TUNNELDARK
+    TUNNELDARK,
+    ANTITANKUPDEAD,
+    ANTITANKRIGHTDEAD,
+    ANTITANKDOWNDEAD,
+    ANTITANKLEFTDEAD
 };
 
 enum gameMoving
@@ -468,11 +472,6 @@ int main()
 
     // Write Output //
 
-
-
-
-
-
     //////////////////////////////////////////////////////////////////
     // Replay //
 
@@ -532,8 +531,6 @@ int main()
     printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
     printf("retenu\n");
     printMovingLetters(deplacementsRetenu, curseurDeplacementsRetenu);
-
-    
 
     //////////////////////////////////////////////////////////////////
     // Free Memory //
@@ -773,7 +770,7 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, i
     return false;
 }
 
-bool legalFire(int **arrayTankCell, int moveID, int **arrayGrid)
+bool legalFire(int **arrayTankCell, int positionID, int **arrayGrid)
 {
     // il faut trouver si oui ou non, le tank peut faire son tire
 }
@@ -909,6 +906,7 @@ bool isMovable(int movableID)
 
 bool isShootable(int shootableID)
 {
+    // case mirror and ennemy so add param position id
     switch (shootableID)
     {
     case MOVABLEBLOC:
@@ -948,6 +946,7 @@ bool isShootable(int shootableID)
     return false;
 }
 
+// dep
 bool isUnMovable(int unMovableID)
 {
     switch (unMovableID)
@@ -974,8 +973,90 @@ bool isUnMovable(int unMovableID)
         return true;
     case ROTATIVEMIRRORLEFTUP:
         return true;
+    case ANTITANKUPDEAD:
+        return true;
+    case ANTITANKRIGHTDEAD:
+        return true;
+    case ANTITANKDOWNDEAD:
+        return true;
+    case ANTITANKLEFTDEAD:
+        return true;
     default:
         // printf("other movable %d\n", unMovableID);
+        return false;
+    }
+    return false;
+}
+
+bool isFireTrought(int elementID, int positionID)
+{
+    switch (elementID)
+    {
+    case DIRT:
+        return true;
+    case BASE:
+        return true;
+    case WATER:
+        return true;
+    case WAYUP:
+        return true;
+    case WAYRIGHT:
+        return true;
+    case WAYDOWN:
+        return true;
+    case WAYLEFT:
+        return true;
+    case CRYSTALBLOCK:
+        return true;
+    case ICE:
+        return true;
+    case THINICE:
+        return true;
+    case TUNNELRED:
+        return true;
+    case TUNNELGREEN:
+        return true;
+    case TUNNELBLUE:
+        return true;
+    case TUNNELCYAN:
+        return true;
+    case TUNNELYELLOW:
+        return true;
+    case TUNNELPINK:
+        return true;
+    case TUNNELWHITE:
+        return true;
+    case TUNNELDARK:
+        return true;
+    default:
+        // printf("other shootable %d\n", shootableID);
+        return false;
+    }
+    return false;
+}
+
+bool isFireDeflect(int elementID, int positionID)
+{
+    switch (elementID)
+    {
+    case MIRRORUPRIGHT:
+        return true;
+    case MIRRORRIGHTDOWN:
+        return true;
+    case MIRRORDOWNLEFT:
+        return true;
+    case MIRRORLEFTUP:
+        return true;
+    case ROTATIVEMIRRORUPRIGHT:
+        return true;
+    case ROTATIVEMIRRORRIGHTDOWN:
+        return true;
+    case ROTATIVEMIRRORDOWNLEFT:
+        return true;
+    case ROTATIVEMIRRORLEFTUP:
+        return true;
+    default:
+        // printf("other shootable %d\n", shootableID);
         return false;
     }
     return false;
