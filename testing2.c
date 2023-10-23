@@ -19,13 +19,20 @@ bool firstTankPosition(int id, int *currentTankDirection);
 // Elements Functions //
 
 // isSomething
-bool isFloor(int floorID);
-bool isMovable(int movableID);
-bool isShootable(int shootableID);
-bool isUnMovable(int unMovableID);
+// grid
+bool isFloor(int elementID);
+bool isOutOfBorder(int **objectPosition, int numRows, int numColumns);
+// tank
 bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns);
+// elements
+bool isMovable(int elementID);
+bool isShootable(int elementID);
+bool isTurnable(int elementID, int positionID);
+bool isUnMovable(int elementID); // dep
+                                 // fire
 bool isFireTrought(int elementID);
 bool isFireDeflect(int elementID, int positionID);
+bool isFireStop(int elementID);
 
 // Ground
 bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid);
@@ -187,7 +194,7 @@ int main()
     int numRows = 0;
     int numColumns = 0;
     int numBases = 0;
-    int *currentTankDirection = 0;
+    int currentTankDirection = 0;
     //////////////////////////////////////////////////////////////////
     // Open File //
     FILE *file;
@@ -291,8 +298,6 @@ int main()
                         // printf("tu01 = %d; ", tankPosition[0][1]);
                         tankPosition[1][1] = j;
                         // printf("tu11 = %d\n", tankPosition[1][1]);
-                        currentTankDirection = tableConversionSimple[k].valeur;
-                        // printf("ctp = %d\n", currentTankDirection);
                         // assume tank spawn on dirt
                         gridGround[i][j] = DIRT;
                     }
@@ -424,24 +429,100 @@ int main()
 
             if (testMove == FIRE)
             {
-                //wip
+                // wip
                 firePosition[0][0] = tankPosition[0][0];
                 firePosition[0][1] = tankPosition[0][1];
-                while (isFireTrought(gridWorked[firePosition[0][0]][firePosition[0][1]]) || isFireDeflect(gridWorked[firePosition[0][0]][firePosition[0][1]]))
+                firePosition[1][0] = tankPosition[0][0];
+                firePosition[1][1] = tankPosition[0][1];
+
+                currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+
+                switch (currentTankDirection)
                 {
-                    // fire coo same as player
-                    // boucle tant que fire through
-                    // if deflect change moveid
-                    // stop at movable : make move
-                    // break at out of born, unmovable, shootbale
-                    // if shootble, kill/
+                case UP:
+                    firePosition[0][1] = tankPosition[0][1] - 1;
+                    break;
+                case RIGHT:
+                    firePosition[0][0] = tankPosition[0][0] + 1;
+                    break;
+                case DOWN:
+                    firePosition[0][1] = tankPosition[0][1] + 1;
+                    break;
+                case LEFT:
+                    firePosition[0][0] = tankPosition[0][0] - 1;
+                    break;
+                default:
+                    break;
                 }
-                deplacementsHypotheseMH[curseur] = testMove;
-                turnNumber--;
-                curseur++;
-                turnNumber++;
-                objectiveFunctionMH = objectiveFunctionMH - 2;
-                // printArray(gridWorked, numRows, numColumns);
+
+                // check out of borns and stopped
+                while (!(isOutOfBorder(firePosition, numRows, numColumns) || isFireStop(gridWorked[firePosition[0][0]][firePosition[0][1]])))
+                {
+                    if (isFireTrought(int elementID))
+                    {
+                        /* code */
+                    }
+                    else if (isShootable(int elementID))
+                    {
+                        if (isMovable(int elementID))
+                        {
+                            /* code */
+                        }
+                        else if (isTurnable(int elementID))
+                        {
+                            /* code */
+                        }
+                        else if (isFireDeflect(int elementID))
+                        {
+                            /* code */
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else if (/* condition */)
+                    {
+                        /* code */
+                    }
+                    else
+                    {
+                        /* code */
+                    }
+
+                    if (isFireTrought(gridWorked[firePosition[0][0]][firePosition[0][1]]))
+                    {
+                        // fire coo same as player
+                        // boucle tant que fire through
+                        // if deflect change moveid
+                        // stop at movable : make move
+                        // break at out of born, unmovable, shootbale
+                        // if shootble, kill/
+
+                        // // grid
+                        // bool isFloor(int elementID);
+                        // bool isOutOfBorder(int **objectPosition, int numRows, int numColumns);
+                        // // tank
+                        // bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, int nbColumns);
+                        // // elements
+                        // bool isMovable(int elementID);
+                        // bool isShootable(int elementID);
+                        // bool isTurnable(int elementID, int positionID);
+                        // bool isUnMovable(int elementID); // dep
+                        //                                  // fire
+                        // bool isFireTrought(int elementID);
+                        // bool isFireDeflect(int elementID, int positionID);
+                        // bool isFireStop(int elementID);
+                    }
+                    else if (isFireDeflect(gridWorked[firePosition[0][0]][firePosition[0][1]]))
+                    {
+                    }
+                    deplacementsHypotheseMH[curseur] = testMove;
+                    turnNumber--;
+                    curseur++;
+                    turnNumber++;
+                    objectiveFunctionMH = objectiveFunctionMH - 2;
+                    // printArray(gridWorked, numRows, numColumns);
+                }
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
             {
@@ -678,6 +759,8 @@ void firstHeuristique(int **tank, int **bases, int baseNumber)
 
 //////////////////////////////////////////////////////////////////
 // Array Functions //
+
+// dep
 bool firstTankPosition(int id, int *currentTankDirection)
 {
     switch (id)
@@ -726,6 +809,7 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int nbRows, i
         return true;
     case UP:
         // printf("[UP]\n");
+        // Already at max up position
         if (arrayTankCell[0][0] == 0)
         {
             return false;
@@ -823,6 +907,7 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
         // printf("F");
         return true;
     case UP:
+        // check if future ground is ok
         if (isFloor(arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]]))
         {
             // printf("yes Up\n");
@@ -869,9 +954,9 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
     return false;
 }
 
-bool isFloor(int floorID)
+bool isFloor(int elementID)
 {
-    switch (floorID)
+    switch (elementID)
     {
     case DIRT:
         return true;
@@ -912,17 +997,20 @@ bool isFloor(int floorID)
     return false;
 }
 
-bool isMovable(int movableID, int positionID)
+bool isMovable(int elementID, int positionID)
 {
-    switch (movableID)
+    switch (elementID)
     {
     case MOVABLEBLOC:
-        return false;
+        return true;
     case ANTITANKUP:
+        // positionID point to distination
         if (positionID == DOWN)
         {
+            // hear, this is killed
             return false;
         }
+        // hear, this is moved
         return true;
     case ANTITANKRIGHT:
         if (positionID == LEFT)
@@ -949,40 +1037,93 @@ bool isMovable(int movableID, int positionID)
     return false;
 }
 
-bool isShootable(int shootableID)
+bool isShootable(int elementID, int positionID)
 {
-    // case mirror and ennemy so add param position id
-    switch (shootableID)
+    switch (elementID)
     {
     case MOVABLEBLOC:
         return true;
     case BRICKS:
         return true;
+    // positionID point to distination
     case ANTITANKUP:
-        return true;
+        if (positionID == DOWN)
+        {
+            // hear, this is killed
+            return true;
+        }
+        return false;
     case ANTITANKRIGHT:
-        return true;
+        if (positionID == LEFT)
+        {
+            return true;
+        }
+        return false;
     case ANTITANKDOWN:
-        return true;
+        if (positionID == UP)
+        {
+            return true;
+        }
+        return false;
     case ANTITANKLEFT:
-        return true;
+        if (positionID == RIGHT)
+        {
+            return true;
+        }
+        return false;
     case MIRRORUPRIGHT:
+        // positionID point to distination
+        if (positionID == UP || positionID == RIGHT)
+        {
+            // is deflected
+            return false;
+        }
+        // isMoved
         return true;
     case MIRRORRIGHTDOWN:
+        if (positionID == RIGHT || positionID == DOWN)
+        {
+            return false;
+        }
         return true;
     case MIRRORDOWNLEFT:
+        if (positionID == DOWN || positionID == LEFT)
+        {
+            return false;
+        }
         return true;
     case MIRRORLEFTUP:
-        return true;
-    case CRYSTALBLOCK:
+        if (positionID == LEFT || positionID == UP)
+        {
+            return false;
+        }
         return true;
     case ROTATIVEMIRRORUPRIGHT:
+        // positionID point to distination
+        if (positionID == UP || positionID == RIGHT)
+        {
+            // is deflected
+            return false;
+        }
+        // isTurned
         return true;
     case ROTATIVEMIRRORRIGHTDOWN:
+        if (positionID == RIGHT || positionID == DOWN)
+        {
+            return false;
+        }
         return true;
     case ROTATIVEMIRRORDOWNLEFT:
+        if (positionID == DOWN || positionID == LEFT)
+        {
+            return false;
+        }
         return true;
     case ROTATIVEMIRRORLEFTUP:
+        if (positionID == LEFT || positionID == UP)
+        {
+            return false;
+        }
         return true;
     default:
         // printf("other shootable %d\n", shootableID);
@@ -1085,10 +1226,13 @@ bool isFireDeflect(int elementID, int positionID)
     switch (elementID)
     {
     case MIRRORUPRIGHT:
+        // positionID point to distination
         if (positionID == UP || positionID == RIGHT)
         {
+            // isDeflect
             return true;
         }
+        // moved
         return false;
     case MIRRORRIGHTDOWN:
         if (positionID == RIGHT || positionID == DOWN)
@@ -1109,10 +1253,13 @@ bool isFireDeflect(int elementID, int positionID)
         }
         return false;
     case ROTATIVEMIRRORUPRIGHT:
+        // positionID point to distination
         if (positionID == UP || positionID == RIGHT)
         {
+            // isDeflect
             return true;
         }
+        // is turned
         return false;
     case ROTATIVEMIRRORRIGHTDOWN:
         if (positionID == RIGHT || positionID == DOWN)
@@ -1134,6 +1281,44 @@ bool isFireDeflect(int elementID, int positionID)
         return false;
     default:
         printf("other deflect %d\n", positionID);
+        return false;
+    }
+    return false;
+}
+
+bool isTurnable(int elementID, int positionID)
+{
+    switch (elementID)
+    {
+    case ROTATIVEMIRRORUPRIGHT:
+        // positionID point to distination
+        if (positionID == UP || positionID == RIGHT)
+        {
+            // is deflected
+            return false;
+        }
+        // isTurned
+        return true;
+    case ROTATIVEMIRRORRIGHTDOWN:
+        if (positionID == RIGHT || positionID == DOWN)
+        {
+            return false;
+        }
+        return true;
+    case ROTATIVEMIRRORDOWNLEFT:
+        if (positionID == DOWN || positionID == LEFT)
+        {
+            return false;
+        }
+        return true;
+    case ROTATIVEMIRRORLEFTUP:
+        if (positionID == LEFT || positionID == UP)
+        {
+            return false;
+        }
+        return true;
+    default:
+        // printf("other shootable %d\n", shootableID);
         return false;
     }
     return false;
@@ -1238,4 +1423,32 @@ int replayDeplacements(char deplacementLetter)
     default:
         return NOMOVE;
     }
+}
+
+bool isFireStop(int elementID)
+{
+    switch (elementID)
+    {
+    case SOLIDBLOCK:
+        return true;
+    case ANTITANKUPDEAD:
+        return true;
+    case ANTITANKRIGHTDEAD:
+        return true;
+    case ANTITANKDOWNDEAD:
+        return true;
+    case ANTITANKLEFTDEAD:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool isOutOfBorder(int **objectPosition, int numRows, int numColumns)
+{
+    if (objectPosition[0][0] < 0 || objectPosition[0][0] > numRows || objectPosition[0][1] < 0 || objectPosition[0][0] > numColumns)
+    {
+        return true;
+    }
+    return false;
 }
