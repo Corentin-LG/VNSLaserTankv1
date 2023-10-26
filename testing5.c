@@ -414,8 +414,7 @@ int main()
         tankPosition[0][1] = intermEphemere;
         // stop if tank == base
         while (!(tankPosition[0][0] == basesPosition[0][0] &&
-                 tankPosition[0][1] == basesPosition[0][1]) ||
-               turnNumber < 50)
+                 tankPosition[0][1] == basesPosition[0][1]))
         {
             int testMove = getRandomMove();
 
@@ -435,8 +434,8 @@ int main()
                 // set aim direction
                 currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
                 currentFireDirection = currentTankDirection;
-                printArray(gridWorked, numRows, numColumns);
-                printf("ctd %d, cfd %d, tp00 %d, tp 01 %d, gwtt %d\n", currentTankDirection, currentFireDirection, tankPosition[0][0], tankPosition[0][0], gridWorked[tankPosition[0][0]][tankPosition[0][1]]);
+                // printArray(gridWorked, numRows, numColumns);
+                // printf("ctd %d, cfd %d, tp00 %d, tp 01 %d, gwtt %d\n", currentTankDirection, currentFireDirection, tankPosition[0][0], tankPosition[0][0], gridWorked[tankPosition[0][0]][tankPosition[0][1]]);
 
                 // position + 1
                 switch (currentTankDirection)
@@ -457,7 +456,7 @@ int main()
                     printf("errorMov %d\n");
                     break;
                 }
-                printf("fp00 %d, fp01 %d\n", firePosition[0][0], firePosition[0][1]);
+                // printf("fp00 %d, fp01 %d\n", firePosition[0][0], firePosition[0][1]);
                 // bug out of borns
 
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -473,11 +472,11 @@ int main()
                 if (!isOutOfBorder(firePosition, numRows, numColumns))
                 {
                     firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
-                    printf("ft %d tn %d\n", firedTileID, turnNumber);
+                    // printf("ft %d tn %d\n", firedTileID, turnNumber);
                     fireDead = false;
                 }
                 // while // wip weloop
-                while (!(isOutOfBorder(firePosition, numRows, numColumns) || isFireStop(firedTileID) || fireDead) && turnNumber < 50)
+                while (!(isOutOfBorder(firePosition, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
                 {
                     // printf("im here\n");
                     // printf("outB = %d; fp00 = %d; fp01 = %d; nr = %d, nc = %d\n", isOutOfBorder(firePosition, numRows, numColumns), firePosition[0][0], firePosition[0][1], numRows, numColumns);
@@ -490,14 +489,14 @@ int main()
                     //    printf("r %d, c %d \n",numRows, numColumns);
                     // }
                     // printf("fp00 %d, fp01 %d \n",firePosition[0][0], firePosition[0][1]);
-                    printf("bf\n");
-                    firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
-                    printf("tile %d, ift = %d; is = %d\n", firedTileID, isFireTrought(firedTileID), isShootable(firedTileID, currentFireDirection));
-                    printf("af\n");
+                    // printf("bf\n");
+                    // firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+                    // printf("tile %d, ift = %d; is = %d\n", firedTileID, isFireTrought(firedTileID), isShootable(firedTileID, currentFireDirection));
+                    // printf("af\n");
                     fireDead = false;
                     if (isFireTrought(firedTileID))
                     {
-                        printf("throught\n");
+                        // printf("throught %d\n", turnNumber);
                         switch (currentFireDirection)
                         {
                         case UP:
@@ -529,7 +528,7 @@ int main()
                             printf("\n");
                             printArray(gridGround, numRows, numColumns);
                             printf("\n");
-                            printf("fp00 %d, fp01 %d bricks\n", firePosition[0][0], firePosition[0][1]);
+                            // printf("fp00 %d, fp01 %d bricks\n", firePosition[0][0], firePosition[0][1]);
                             gridGround[firePosition[0][0]][firePosition[0][1]] = DIRT;
                             gridWorked[firePosition[0][0]][firePosition[0][1]] = DIRT;
                             printArray(gridWorked, numRows, numColumns);
@@ -539,7 +538,7 @@ int main()
                             break;
 
                         default:
-                            printf("bangid = %d tn %d\n", firedTileID, turnNumber);
+                            // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
                             break;
                         }
                         fireDead = true;
@@ -566,33 +565,44 @@ int main()
                     else
                     {
                         printf("elif fireTiled firedTileID=%d ; currentFireDirection=%d\n", firedTileID, currentFireDirection);
+                        printf("elif fp00=%d ; fp01=%d\n", firePosition[0][0], firePosition[0][1]);
                         fireDead = true;
+                        goto nextFirePosition;
                     }
                 nextFirePosition:
-                    printf("endFire %d\n", turnNumber);
+                    // printf("endFire %d\n", turnNumber);
+                    fireDead = true;
+                    if (!isOutOfBorder(firePosition, numRows, numColumns))
+                    {
+                        
+                        printf("notOut fp00 = %d, fp01 = %d\n", firePosition[0][0], firePosition[0][1]);
+                        firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+                        // printf("ft %d tn %d\n", firedTileID, turnNumber);
+                        fireDead = false;
+                    }
                 }
-                printf("endFireCmpt %d\n", turnNumber);
+                // printf("endFireCmpt %d\n", turnNumber);
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////
                 // what appended for this new position?
                 // check out of borns and stopped
-                printf("es %d\n", turnNumber);
+                // printf("es %d\n", turnNumber);
                 deplacementsHypotheseMH[curseur] = testMove;
                 curseur++;
                 turnNumber++;
                 objectiveFunctionMH = objectiveFunctionMH - 2;
-                printf("es2 %d\n", turnNumber);
+                // printf("es2 %d\n", turnNumber);
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove && testMove != FIRE)
             {
-                printf("rote1 %d\n", turnNumber);
+                // printf("rote1 %d\n", turnNumber);
                 gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
                 deplacementsHypotheseMH[curseur] = testMove;
                 turnNumber--;
                 curseur++;
                 turnNumber++;
-                printf("rote %d\n", turnNumber);
+                // printf("rote %d\n", turnNumber);
             }
             else
             {
@@ -600,23 +610,24 @@ int main()
                 {
                     if (moveTank(tankPosition, testMove, gridWorked, gridGround))
                     {
-                        printf("mv1 %d\n", turnNumber);
+                        // printf("mv1 %d\n", turnNumber);
                         deplacementsHypotheseMH[curseur] = testMove;
                         curseur++;
                         turnNumber++;
                         objectiveFunctionMH--;
-                        printf("mv %d\n", turnNumber);
+                        // printf("mv %d\n", turnNumber);
                     }
-                    printf("legal %d\n", turnNumber);
+                    // printf("legal %d\n", turnNumber);
                 }
                 else
                 {
-                    printf("nonlegal %d\n", turnNumber);
+                    // printf("nonlegal %d\n", turnNumber);
                 }
-                printf("endmv %d\n", turnNumber);
+                // printf("endmv %d\n", turnNumber);
             }
-            printf("endAction %d\n", turnNumber);
+            // printf("endAction %d\n", turnNumber);
         }
+        nextAction:
         curseurDeplacementsMH = curseur;
         printf("2curserMH %d ; 2curserH %d\n", curseurDeplacementsMH, curseurDeplacementsHypothese);
 
@@ -1485,7 +1496,7 @@ bool isFireStop(int elementID)
 
 bool isOutOfBorder(int **objectPosition, int numRows, int numColumns)
 {
-    if (objectPosition[0][0] < 0 || objectPosition[0][0] >= numRows || objectPosition[0][1] < 0 || objectPosition[0][0] >= numColumns)
+    if (objectPosition[0][0] < 0 || objectPosition[0][0] >= numRows || objectPosition[0][1] < 0 || objectPosition[0][1] >= numColumns)
     {
         return true;
     }
