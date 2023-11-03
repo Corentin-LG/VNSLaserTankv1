@@ -384,6 +384,8 @@ int main()
     curseurDeplacementsHypothese = curseur;
     curseurDeplacementsRetenu = curseur;
     printf("curserH %d ; curserR %d\n", curseurDeplacementsHypothese, curseurDeplacementsRetenu);
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////
