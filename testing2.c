@@ -145,14 +145,14 @@ int main()
     // Global Var //
     srand(time(NULL));
     setlocale(LC_ALL, "");
-    // const char *filename = "Special-I.lt4";
-    // const char *filename = "Sokoban-II.lt4";
-    // const char *filename = "No_HS-LPB.lt4";
-    // const char *filename = "LaserTank.lt4";
-    // const char *filename = "Gary-II.lt4";
-    // const char *filename = "Challenge-IV.lt4";
-    // const char *filename = "Beginner-II.lt4";
-    const char *filename = "testing.lt4";
+    // const char *filename = ".\\Grids\\Special-I.lt4";
+    // const char *filename = ".\\Grids\\Sokoban-II.lt4";
+    // const char *filename = ".\\Grids\\No_HS-LPB.lt4";
+    // const char *filename = ".\\Grids\\LaserTank.lt4";
+    // const char *filename = ".\\Grids\\Gary-II.lt4";
+    // const char *filename = ".\\Grids\\Challenge-IV.lt4";
+    // const char *filename = ".\\Grids\\Beginner-II.lt4";
+    const char *filename = ".\\TestingGrids\\testing.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
