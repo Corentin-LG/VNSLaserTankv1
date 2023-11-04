@@ -45,12 +45,12 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid);
 bool moveTank(int **tankPosition, int testMoveID, int **gridWorked, int **gridGround);
 
 // Movables
-void movableAction(int firedTileID, int **firePosition, int currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int numRows, int numColumns);
+bool movableAction(int firedTileID, int **firePosition, int currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int numRows, int numColumns);
 
 // Grids
 void resetGridWorked(int **gridOrigin, int **gridWorked, int numRows, int numCols);
 void resetGridGround(int **gridOrigin, int **gridGround, int numRows, int numCols);
-void resetGridMovables(int **gridOrigin, int **gridMovables, int numRows, int numCols);
+void resetGridMovables(int **gridOrigin, int **gridMovables, int **gridGround, int numRows, int numCols);
 
 // depreci
 void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid);
@@ -152,7 +152,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing.lt4";
+    const char *filename = ".\\TestingGrids\\testing3.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -308,6 +308,7 @@ int main()
                     if (isMovableAtBeginning(tableConversionSimple[k].valeur))
                     {
                         gridMovables[i][j] = tableConversionSimple[k].valeur;
+                        gridGround[i][j] = DIRT;
                     }
                     break;
                 }
@@ -325,7 +326,7 @@ int main()
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // First "Solution" //
-    printf("test\n");
+    printf("FirstSolution\n");
 
     int curseur = 0;
     int turnNumber = 0;
@@ -403,7 +404,7 @@ int main()
         // reset grid
         resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
         resetGridGround(gridOrigin, gridGround, numRows, numColumns);
-        resetGridMovables(gridOrigin, gridMovables, numRows, numColumns);
+        resetGridMovables(gridOrigin, gridMovables, gridGround, numRows, numColumns);
         // reset cmpt
         turnNumber = 0;
         curseur = 0;
@@ -467,7 +468,15 @@ int main()
                         {
                         case MOVABLEBLOC:
                             printf("move !!! \n");
-                            movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
+                            printf("f00 = %d, f01 %d, forientation = %d\n", firePosition[0][0], firePosition[0][1], currentFireDirection);
+                            if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns)){
+                                printf("moved ok \n");
+                            }
+                            else
+                            {
+                               printf("moved NO \n");
+                            }
+                            
                             printf("finishedmove\n");
                             break;
 
@@ -495,6 +504,8 @@ int main()
                     {
                         printf("elif fireTiled firedTileID=%d ; currentFireDirection=%d\n", firedTileID, currentFireDirection);
                         printf("elif fp00=%d ; fp01=%d\n", firePosition[0][0], firePosition[0][1]);
+                        resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+                        printArray(gridWorked, numRows, numColumns);
                         fireDead = true;
                         goto nextFirePosition;
                     }
@@ -504,7 +515,7 @@ int main()
                     if (!isOutOfBorder(firePosition, numRows, numColumns))
                     {
 
-                        printf("notOut fp00 = %d, fp01 = %d\n", firePosition[0][0], firePosition[0][1]);
+                        printf("notOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
                     }
@@ -779,7 +790,7 @@ void getFirstShootNextCoo(int **tankPosition, int **firePosition, int currentTan
         firePosition[0][1] = tankPosition[0][1] - 1;
         break;
     default:
-        printf("errorMov %d\n");
+        printf("errorMov %d\n", currentTankDirection);
         break;
     }
 }
@@ -1375,7 +1386,7 @@ void resetGridGround(int **gridOrigin, int **gridGround, int numRows, int numCol
     }
 }
 
-void resetGridMovables(int **gridOrigin, int **gridMovables, int numRows, int numCols)
+void resetGridMovables(int **gridOrigin, int **gridMovables, int **gridGround, int numRows, int numCols)
 {
     for (int i = 0; i < numRows; i++)
     {
@@ -1385,6 +1396,7 @@ void resetGridMovables(int **gridOrigin, int **gridMovables, int numRows, int nu
             if (isMovableAtBeginning(gridOrigin[i][j]))
             {
                 gridMovables[i][j] = gridOrigin[i][j];
+                gridGround[i][j] = DIRT;
             }
         }
     }
@@ -1462,7 +1474,7 @@ void shotableAction(int firedTileID, int **firePosition, int currentFireDirectio
     }
 }
 
-void movableAction(int firedTileID, int **firePosition, int currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int numRows, int numColumns)
+bool movableAction(int firedTileID, int **firePosition, int currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int numRows, int numColumns)
 {
     printArray(gridWorked, numRows, numColumns);
     printf("\n");
@@ -1493,6 +1505,7 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     // copy ground at before location
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    return true;
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -1501,9 +1514,10 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    return true;
                 }
             }
-            break;
+            return false;
         case RIGHT:
             firePosition[0][1] = firePosition[0][1] + 1;
             if (!isOutOfBorder(firePosition, numRows, numColumns))
@@ -1514,6 +1528,7 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    return true;
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -1522,9 +1537,10 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    return true;
                 }
             }
-            break;
+            return false;
         case DOWN:
             firePosition[0][0] = firePosition[0][0] + 1;
             if (!isOutOfBorder(firePosition, numRows, numColumns))
@@ -1535,6 +1551,7 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    return true;
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -1543,9 +1560,10 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    return true;
                 }
             }
-            break;
+            return false;
         case LEFT:
             firePosition[0][1] = firePosition[0][1] - 1;
             if (!isOutOfBorder(firePosition, numRows, numColumns))
@@ -1556,6 +1574,7 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    return true;
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -1564,12 +1583,13 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    return true;
                 }
             }
-            break;
+            return false;
         default:
             printf("X%d ", currentFireDirection);
-            break;
+            return false;
         }
         printArray(gridWorked, numRows, numColumns);
         printf("\n");
@@ -1578,10 +1598,10 @@ void movableAction(int firedTileID, int **firePosition, int currentFireDirection
         printArray(gridGround, numRows, numColumns);
         printf("\n");
         printf("findmovable\n");
-        break;
+        return false;
 
     default:
         // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
-        break;
+        return false;
     }
 }

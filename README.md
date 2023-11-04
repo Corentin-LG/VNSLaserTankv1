@@ -22,9 +22,9 @@
 4 - [ ]
 
 ## 3 Règles à faire
-- [ ] MvBlock
+- [x] MvBlock
 - [ ] Enemy
-- [ ] 
+- [ ] change rnd solution
 - [ ]
 - [ ]
 - [ ]
