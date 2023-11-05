@@ -25,13 +25,15 @@
 - [x] MvBlock
 - [ ] Enemy
 - [ ] change rnd solution
+- [ ] ice
+- [ ] thin ice
+- [ ] reflect -> change currentFireDirection in *
+- [ ] trunables
 - [ ]
 - [ ]
 - [ ]
 - [ ]
 - [ ]
 - [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+
+rev all fn and declara 4 pointeurs
