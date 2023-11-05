@@ -36,4 +36,5 @@
 - [ ]
 - [ ]
 
-rev all fn and declara 4 pointeurs
+enhance cursor length -> long so the same for hyps
+curserH -192712320 ; curserR -192713072

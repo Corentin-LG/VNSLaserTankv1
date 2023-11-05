@@ -62,7 +62,9 @@ bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
 //////////////////////////////////////////////////////////////////
 // Reading Functions //
 void printArray(int **array, int *rows, int *cols);
-void printMovingLetters(int *array, int curseur);
+void printLittleArray(int **array, int rows, int cols);
+void printBaseArray(int **array, int *rows, int cols);
+void printMovingLetters(int *array, int *curseur);
 int replayDeplacements(char deplacementLetter);
 
 //////////////////////////////////////////////////////////////////
@@ -409,8 +411,8 @@ int main()
         }
     }
 
-    curseurDeplacementsHypothese = curseur;
-    curseurDeplacementsRetenu = curseur;
+    *curseurDeplacementsHypothese = curseur;
+    *curseurDeplacementsRetenu = curseur;
     printf("curserH %d ; curserR %d\n", curseurDeplacementsHypothese, curseurDeplacementsRetenu);
     ///////////////////////////
     // MHeuristique
@@ -646,9 +648,9 @@ int main()
     printf("gridMovables = lignes : %d et colonnes : %d\n", *numRows, *numColumns);
     printArray(gridMovables, numRows, numColumns);
     printf("tankp\n");
-    printArray(tankPosition, 2, 2);
+    printLittleArray(tankPosition, 2, 2);
     printf("basesp\n");
-    printArray(basesPosition, numBases, 2);
+    printBaseArray(basesPosition, numBases, 2);
     printf("meta\n");
     printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
     printf("hyp\n");
@@ -759,9 +761,33 @@ void printArray(int **array, int *rows, int *cols)
     }
 }
 
-void printMovingLetters(int *array, int curseur)
+void printLittleArray(int **array, int rows, int cols)
 {
-    for (int i = 0; i < curseur; i++)
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            printf("%3d ", array[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void printBaseArray(int **array, int *rows, int cols)
+{
+    for (int i = 0; i < *rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            printf("%3d ", array[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void printMovingLetters(int *array, int *curseur)
+{
+    for (int i = 0; i < *curseur; i++)
     {
         switch (array[i])
         {
