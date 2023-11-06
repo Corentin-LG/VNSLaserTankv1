@@ -38,3 +38,4 @@
 
 enhance cursor length -> long so the same for hyps
 curserH -192712320 ; curserR -192713072
+gridOrigin = lignes : 4 et colonnes : -3

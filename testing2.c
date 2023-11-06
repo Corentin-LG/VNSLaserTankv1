@@ -184,45 +184,25 @@ int main()
     int *deplacementsHypotheseMH = (int *)malloc((1000000) * sizeof(int));
     int *deplacementsRetenu = (int *)malloc((1000000) * sizeof(int));
 
-    // int curseurDeplacementsHypothese = 0;
-    // int curseurDeplacementsMH = 0;
-    // int curseurDeplacementsRetenu = 0;
-    int *curseurDeplacementsHypothese = NULL;
-    curseurDeplacementsHypothese = malloc(sizeof(int));
-    int *curseurDeplacementsMH = NULL;
-    curseurDeplacementsMH = malloc(sizeof(int));
-    int *curseurDeplacementsRetenu = NULL;
-    curseurDeplacementsRetenu = malloc(sizeof(int));
+    int *curseurDeplacementsHypothese = (int *)malloc(sizeof(int));
+    int *curseurDeplacementsMH = (int *)malloc(sizeof(int));
+    int *curseurDeplacementsRetenu = (int *)malloc(sizeof(int));
 
-    // int objectiveFunctionHypothese = 0;
-    // int objectiveFunctionMH = 0;
-    // int objectiveFunctionRetenu = 0;
-    int *objectiveFunctionHypothese = NULL;
-    objectiveFunctionHypothese = malloc(sizeof(int));
-    int *objectiveFunctionMH = NULL;
-    objectiveFunctionMH = malloc(sizeof(int));
-    int *objectiveFunctionRetenu = NULL;
-    objectiveFunctionRetenu = malloc(sizeof(int));
+    int *objectiveFunctionHypothese = (int *)malloc(sizeof(int));
+    int *objectiveFunctionMH = (int *)malloc(sizeof(int));
+    int *objectiveFunctionRetenu = (int *)malloc(sizeof(int));
 
     size_t deplacementsSize = sizeof(int) * 1000000;
     wchar_t header[1000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
-    // int numRows = 0;
-    // int numColumns = 0;
-    // int numBases = 0;
-    int *numRows = NULL;
-    numRows = malloc(sizeof(int));
-    int *numColumns = NULL;
-    numColumns = malloc(sizeof(int));
-    int *numBases = NULL;
-    numBases = malloc(sizeof(int));
-    // int currentTankDirection = 0;
-    // int currentFireDirection = 0;
-    int *currentTankDirection = NULL;
-    currentTankDirection = malloc(sizeof(int));
-    int *currentFireDirection = NULL;
-    currentFireDirection = malloc(sizeof(int));
+
+    int *numRows = (int *)malloc(sizeof(int));
+    int *numColumns = (int *)malloc(sizeof(int));
+    int *numBases = (int *)malloc(sizeof(int));
+
+    int *currentTankDirection = (int *)malloc(sizeof(int));
+    int *currentFireDirection = (int *)malloc(sizeof(int));
 
     //////////////////////////////////////////////////////////////////
     // Open File //
@@ -258,11 +238,19 @@ int main()
     {
         gridOrigin[i] = (int *)malloc((*numColumns) * sizeof(int));
     }
+    for (int i = 0; i < *numRows; i++)
+    {
+        memset(gridOrigin[i], NOTHING, *numColumns * sizeof(int));
+    }
 
     int **gridWorked = (int **)malloc((*numRows) * sizeof(int *));
     for (int i = 0; i < *numRows; i++)
     {
         gridWorked[i] = (int *)malloc((*numColumns) * sizeof(int));
+    }
+    for (int i = 0; i < *numRows; i++)
+    {
+        memset(gridWorked[i], NOTHING, (*numColumns) * sizeof(int));
     }
 
     int **gridGround = (int **)malloc((*numRows) * sizeof(int *));
@@ -270,11 +258,19 @@ int main()
     {
         gridGround[i] = (int *)malloc((*numColumns) * sizeof(int));
     }
+    for (int i = 0; i < *numRows; i++)
+    {
+        memset(gridGround[i], NOTHING, (*numColumns) * sizeof(int));
+    }
 
     int **gridMovables = (int **)malloc((*numRows) * sizeof(int *));
     for (int i = 0; i < *numRows; i++)
     {
         gridMovables[i] = (int *)malloc((*numColumns) * sizeof(int));
+    }
+    for (int i = 0; i < *numRows; i++)
+    {
+        memset(gridMovables[i], NOTHING, (*numColumns) * sizeof(int));
     }
 
     for (int i = 0; i < 5; i++)
@@ -342,6 +338,21 @@ int main()
         }
     }
     fclose(file);
+    printf("lignes = %d, colonnes = %d, bases = %d\n", *numRows, *numColumns, *numBases);
+    printf("o\n");
+    printArray(gridOrigin, numRows, numColumns);
+    printf("w\n");
+    printArray(gridWorked, numRows, numColumns);
+    printf("m\n");
+    printArray(gridMovables, numRows, numColumns);
+    printf("g\n");
+    printArray(gridGround, numRows, numColumns);
+    printf("b\n");
+    printBaseArray(basesPosition, numBases, 2);
+    printf("t\n");
+    printLittleArray(tankPosition, 2, 2);
+    printf("f\n");
+    printLittleArray(firePosition, 2, 2);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,15 +366,15 @@ int main()
     // here, if blanc it's cool
     for (int w = 0; w < curseur; w++)
     {
-        printf("%d|", deplacementsHypothese[w]);
+        printf("%d|\n", deplacementsHypothese[w]);
     }
     printf("\n");
     memset(deplacementsHypothese, -1, deplacementsSize);
     for (int w = 0; w < curseur; w++)
     {
-        printf("%d|", deplacementsHypothese[w]);
+        printf("%d|\n", deplacementsHypothese[w]);
     }
-    printf("\n");
+    printf("go first\n");
 
     while (!(tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
@@ -377,8 +388,8 @@ int main()
             turnNumber--;
             curseur++;
             turnNumber++;
-            objectiveFunctionHypothese = objectiveFunctionHypothese - 2;
-            objectiveFunctionRetenu = objectiveFunctionRetenu - 2;
+            // *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
+            // *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
         }
         else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
         {
@@ -400,8 +411,8 @@ int main()
                     deplacementsRetenu[curseur] = testMove;
                     curseur++;
                     turnNumber++;
-                    objectiveFunctionHypothese--;
-                    objectiveFunctionRetenu--;
+                    // *objectiveFunctionHypothese--;
+                    // *objectiveFunctionRetenu--;
                 }
             }
             else
@@ -413,7 +424,7 @@ int main()
 
     *curseurDeplacementsHypothese = curseur;
     *curseurDeplacementsRetenu = curseur;
-    printf("curserH %d ; curserR %d\n", curseurDeplacementsHypothese, curseurDeplacementsRetenu);
+    printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
     ///////////////////////////
     // MHeuristique
     bool fireDead = false;
@@ -470,7 +481,7 @@ int main()
                     if (isFireTrought(firedTileID))
                     {
                         // printf("throught %d\n", turnNumber);
-                        getFirstShootNextCoo(firePosition, firePosition, currentTankDirection);
+                        getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
                         fireDead = false;
                         goto nextFirePosition;
                     }
@@ -550,6 +561,10 @@ int main()
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
                     }
+                    else {
+                        printf("you're finished\n");
+                        printf("Out fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
+                    }
                 }
                 deplacementsHypotheseMH[curseur] = testMove;
                 curseur++;
@@ -573,7 +588,7 @@ int main()
                         deplacementsHypotheseMH[curseur] = testMove;
                         curseur++;
                         turnNumber++;
-                        objectiveFunctionMH--;
+                        // *objectiveFunctionMH--;
                     }
                 }
                 else
@@ -649,6 +664,8 @@ int main()
     printArray(gridMovables, numRows, numColumns);
     printf("tankp\n");
     printLittleArray(tankPosition, 2, 2);
+    printf("firep\n");
+    printLittleArray(firePosition, 2, 2);
     printf("basesp\n");
     printBaseArray(basesPosition, numBases, 2);
     printf("meta\n");
@@ -660,6 +677,7 @@ int main()
 
     //////////////////////////////////////////////////////////////////
     // Free Memory //
+    printf("free grids\n");
     if (gridOrigin != NULL)
     {
         for (int i = 0; i < *numRows; i++)
@@ -695,6 +713,7 @@ int main()
         }
         free(gridMovables);
     }
+    printf("free pos\n");
 
     if (tankPosition != NULL)
     {
@@ -705,6 +724,8 @@ int main()
         free(tankPosition);
     }
 
+    printf("free posf\n");
+
     if (firePosition != NULL)
     {
         for (int i = 0; i < 2; i++)
@@ -713,7 +734,7 @@ int main()
         }
         free(firePosition);
     }
-
+    printf("free posb\n");
     if (basesPosition != NULL)
     {
         for (int i = 0; i < 5; i++)
@@ -722,25 +743,27 @@ int main()
         }
         free(basesPosition);
     }
-
+    printf("free deplac\n");
     free(deplacementsHypotheseMH);
     free(deplacementsHypothese);
     free(deplacementsRetenu);
-
+    printf("free curs\n"); // bug
     free(curseurDeplacementsHypothese);
     free(curseurDeplacementsMH);
     free(curseurDeplacementsRetenu);
-
+    printf("free objectivs\n");
     free(objectiveFunctionHypothese);
     free(objectiveFunctionMH);
     free(objectiveFunctionRetenu);
-    
+    printf("free current\n");
     free(currentTankDirection);
     free(currentFireDirection);
-
+    printf("free nums\n");
     free(numRows);
     free(numColumns);
     free(numBases);
+
+    printf("finish\n");
 
     return 0;
 }
@@ -1450,7 +1473,7 @@ void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numC
             }
             if (gridOrigin[i][j] == 1)
             {
-                gridGround[i][j] = 5;
+                gridGround[i][j] = DIRT;
             }
         }
     }
