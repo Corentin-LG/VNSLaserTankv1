@@ -388,8 +388,8 @@ int main()
             turnNumber--;
             curseur++;
             turnNumber++;
-            // *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
-            // *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
+            *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
         }
         else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
         {
@@ -411,8 +411,8 @@ int main()
                     deplacementsRetenu[curseur] = testMove;
                     curseur++;
                     turnNumber++;
-                    // *objectiveFunctionHypothese--;
-                    // *objectiveFunctionRetenu--;
+                    *objectiveFunctionHypothese = *objectiveFunctionHypothese - 1;
+                    *objectiveFunctionRetenu = *objectiveFunctionRetenu - 1;
                 }
             }
             else
@@ -562,7 +562,7 @@ int main()
                         fireDead = false;
                     }
                     else {
-                        printf("you're finished\n");
+                        printf("you're finished :\n");
                         printf("Out fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                     }
                 }
@@ -588,7 +588,7 @@ int main()
                         deplacementsHypotheseMH[curseur] = testMove;
                         curseur++;
                         turnNumber++;
-                        // *objectiveFunctionMH--;
+                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
                     }
                 }
                 else
