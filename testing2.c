@@ -63,7 +63,7 @@ bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
 // Reading Functions //
 void printArray(int **array, int *rows, int *cols);
 void print2Array(int **array1, int **array2, int *rows, int *cols);
-void print3Array(int **array1, int **array2,int **array3, int *rows, int *cols);
+void print3Array(int **array1, int **array2, int **array3, int *rows, int *cols);
 void printLittleArray(int **array, int rows, int cols);
 void printBaseArray(int **array, int *rows, int cols);
 void printMovingLetters(int *array, int *curseur);
@@ -501,6 +501,10 @@ int main()
                         switch (firedTileID)
                         {
                         case MOVABLEBLOC:
+                        case MIRRORUPRIGHT:
+                        case MIRRORRIGHTDOWN:
+                        case MIRRORDOWNLEFT:
+                        case MIRRORLEFTUP:
                             printf("move !!! \n");
                             printf("f00 = %d, f01 %d, forientation = %d\n", firePosition[0][0], firePosition[0][1], *currentFireDirection);
                             if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
@@ -511,23 +515,7 @@ int main()
                             {
                                 printf("moved NO \n");
                             }
-
-                            printf("finishedmove\n");
                             break;
-                        case MIRRORUPRIGHT:
-                        case MIRRORRIGHTDOWN:
-                        case MIRRORDOWNLEFT:
-                        case MIRRORLEFTUP:
-                            printf("move mirror !!! \n");
-                            printf("f00 = %d, f01 %d, forientation = %d\n", firePosition[0][0], firePosition[0][1], *currentFireDirection);
-                            if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                            {
-                                printf("moved ok \n");
-                            }
-                            else
-                            {
-                                printf("moved NO \n");
-                            }
                         default:
                             printf("ismov firID %d\n", firedTileID);
                             break;
@@ -571,7 +559,6 @@ int main()
                     fireDead = true;
                     if (!isOutOfBorder(firePosition, numRows, numColumns))
                     {
-
                         printf("notOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
@@ -809,8 +796,7 @@ void print2Array(int **array1, int **array2, int *rows, int *cols)
     printf("\n");
 }
 
-
-void print3Array(int **array1, int **array2,int **array3, int *rows, int *cols)
+void print3Array(int **array1, int **array2, int **array3, int *rows, int *cols)
 {
     printf("array1\n");
     printArray(array1, rows, cols);
