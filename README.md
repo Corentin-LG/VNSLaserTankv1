@@ -17,7 +17,7 @@
 	3 - [ ]
 	3.1 - [x]
 	4 - [ ]
-2 - [ ]
+2 - [ ] le replay
 3 - [ ]
 4 - [ ]
 
@@ -27,8 +27,8 @@
 - [ ] change rnd solution
 - [ ] ice
 - [ ] thin ice
-- [ ] reflect -> change currentFireDirection in *
-- [ ] trunables
+- [x] reflect
+- [x] trunables
 - [ ]
 - [ ]
 - [ ]
@@ -39,3 +39,47 @@
 enhance cursor length -> long so the same for hyps
 curserH -192712320 ; curserR -192713072
 gridOrigin = lignes : 4 et colonnes : -3
+
+### tuiles faites :
+ - [x]	TankUp
+ - [x]	TankRight
+ - [x]	TankDown
+ - [x]	TankLeft
+ - [x]	Dirt
+ - [x]	Base
+ - [x]	Water
+ - [x]	SolidBlock
+ - [x]	MovableBloc
+ - [x]	Bricks
+ - [ ]	AntiTankUp
+ - [ ]	AntiTankRight
+ - [ ]	AntiTankDown
+ - [ ]	AntiTankLeft
+ - [x]	MirrorUpRight
+ - [x]	MirrorRightDown
+ - [x]	MirrorDownLeft
+ - [x]	MirrorLeftUp
+ - [ ]	WayUp
+ - [ ]	WayRight
+ - [ ]	WayDown
+ - [ ]	WayLeft
+ - [x]	CrystalBlock
+ - [ ]	RotativeMirrorUpRight
+ - [ ]	RotativeMirrorRightDown
+ - [ ]	RotativeMirrorDownLeft
+ - [ ]	RotativeMirrorLeftUp
+ - [ ]	Ice
+ - [ ]	ThinIce
+ - [ ]	TunnelRed
+ - [ ]	TunnelGreen
+ - [ ]	TunnelBlue
+ - [ ]	TunnelCyan
+ - [ ]	TunnelYellow
+ - [ ]	TunnelPink
+ - [ ]	TunnelWhite
+ - [ ]	TunnelDark
+ - [ ]	AntiTankUpDead
+ - [ ]	AntiTankRightDead
+ - [ ]	AntiTankDownDead
+ - [ ]	AntiTankLeftDead
+ - [x]	WaterFull

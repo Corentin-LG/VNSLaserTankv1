@@ -49,7 +49,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
 
 // Reflectables
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
-
+bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // Grids
 void resetGridWorked(int **gridOrigin, int **gridWorked, int *numRows, int *numCols);
 void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numCols);
@@ -523,7 +523,7 @@ int main()
                         fireDead = true;
                         goto nextFirePosition;
                     }
-                    // or deflect // wip
+                    // or deflect
                     else if (isFireDeflect(firedTileID, currentFireDirection))
                     {
                         printf("deflected\n");
@@ -538,13 +538,22 @@ int main()
                         fireDead = true; // only to test :-> erase
                         goto nextFirePosition;
                     }
-                    // // or turn
-                    // else if (isTurnable(firedTileID, currentFireDirection))
-                    // {
-                    //     printf("turned\n");
-                    //     fireDead = true;
-                    // }
-                    // // or error...
+                    // or turn
+                    else if (isTurnable(firedTileID, currentFireDirection))
+                    {
+                        printf("turned\n"); // wip
+                        if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                        {
+                            printf("turned ok \n");
+                        }
+                        else
+                        {
+                            printf("turned NO \n");
+                        }
+                        fireDead = true; // only to test :-> erase
+                        goto nextFirePosition;
+                    }
+                    // or error...
                     else
                     {
                         printf("elif fireTiled firedTileID=%d ; currentFireDirection=%d\n", firedTileID, *currentFireDirection);
@@ -1494,7 +1503,7 @@ void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numC
             {
                 gridGround[i][j] = gridOrigin[i][j];
             }
-            if (gridOrigin[i][j] == 1)
+            if (gridOrigin[i][j] == 1 || isMovableAtBeginning(gridOrigin[i][j]))
             {
                 gridGround[i][j] = DIRT;
             }
@@ -1955,6 +1964,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
     switch (firedTileID)
     {
     case MIRRORUPRIGHT:
+    case ROTATIVEMIRRORUPRIGHT:
 
         switch (*currentFireDirection)
         {
@@ -1984,7 +1994,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         printf("finddeflectable\n");
         return false;
     case MIRRORRIGHTDOWN:
-
+    case ROTATIVEMIRRORRIGHTDOWN:
         switch (*currentFireDirection)
         {
         case LEFT:
@@ -2013,6 +2023,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         printf("finddeflectable\n");
         return false;
     case MIRRORDOWNLEFT:
+    case ROTATIVEMIRRORDOWNLEFT:
         switch (*currentFireDirection)
         {
         case UP:
@@ -2041,7 +2052,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         printf("finddeflectable\n");
         return false;
     case MIRRORLEFTUP:
-
+    case ROTATIVEMIRRORLEFTUP:
         switch (*currentFireDirection)
         {
         case RIGHT:
@@ -2062,6 +2073,81 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
                 return true;
             }
             return false;
+        default:
+            printf("X%d ", *currentFireDirection);
+            return false;
+        }
+        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+        printf("finddeflectable\n");
+        return false;
+    default:
+        // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
+        return false;
+    }
+}
+
+bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+{
+    print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+    /// WIP !!! // return deplac or turn
+    switch (firedTileID)
+    {
+    case ROTATIVEMIRRORDOWNLEFT:
+
+        switch (*currentFireDirection)
+        {
+        case DOWN:
+        case LEFT:
+            gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORLEFTUP;
+            print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+            return true;
+        default:
+            printf("X%d ", *currentFireDirection);
+            return false;
+        }
+        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+        printf("finddeflectable\n");
+        return false;
+    case ROTATIVEMIRRORLEFTUP:
+
+        switch (*currentFireDirection)
+        {
+        case LEFT:
+        case UP:
+            gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORUPRIGHT;
+            print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+            return true;
+        default:
+            printf("X%d ", *currentFireDirection);
+            return false;
+        }
+        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+        printf("finddeflectable\n");
+        return false;
+    case ROTATIVEMIRRORUPRIGHT:
+        switch (*currentFireDirection)
+        {
+        case UP:
+        case RIGHT:
+            gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORRIGHTDOWN;
+            print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+            return true;
+        default:
+            printf("X%d ", *currentFireDirection);
+            return false;
+        }
+        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+        printf("finddeflectable\n");
+        return false;
+    case ROTATIVEMIRRORRIGHTDOWN:
+
+        switch (*currentFireDirection)
+        {
+        case RIGHT:
+        case DOWN:
+            gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORDOWNLEFT;
+            print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+            return true;
         default:
             printf("X%d ", *currentFireDirection);
             return false;
