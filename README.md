@@ -64,10 +64,10 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [ ]	WayDown
  - [ ]	WayLeft
  - [x]	CrystalBlock
- - [ ]	RotativeMirrorUpRight
- - [ ]	RotativeMirrorRightDown
- - [ ]	RotativeMirrorDownLeft
- - [ ]	RotativeMirrorLeftUp
+ - [x]	RotativeMirrorUpRight
+ - [x]	RotativeMirrorRightDown
+ - [x]	RotativeMirrorDownLeft
+ - [x]	RotativeMirrorLeftUp
  - [ ]	Ice
  - [ ]	ThinIce
  - [ ]	TunnelRed

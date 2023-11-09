@@ -535,7 +535,7 @@ int main()
                         {
                             printf("deflected NO \n");
                         }
-                        fireDead = true; // only to test :-> erase
+                        fireDead = false; // only to test :-> erase
                         goto nextFirePosition;
                     }
                     // or turn
@@ -565,8 +565,7 @@ int main()
                     }
                 nextFirePosition:
                     // printf("endFire %d\n", turnNumber);
-                    fireDead = true;
-                    if (!isOutOfBorder(firePosition, numRows, numColumns))
+                    if (!isOutOfBorder(firePosition, numRows, numColumns) && !fireDead)
                     {
                         printf("notOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
