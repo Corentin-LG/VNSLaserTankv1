@@ -21,9 +21,10 @@ bool firstTankPosition(int id, int *currentTankDirection);
 // isSomething
 // grid
 bool isFloor(int elementID);
-bool isOutOfBorder(int **objectPosition, int *numRows, int *numColumns);
+bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns);
 // tank
 bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
+// bool onFirstHighWay(int **tankPosition, int *currentTankDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // elements
 bool isMovable(int elementID, int *positionID);
 bool isMovableAtBeginning(int elementID);
@@ -470,14 +471,14 @@ int main()
                 // position + 1
                 getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
                 fireDead = true;
-                if (!isOutOfBorder(firePosition, numRows, numColumns))
+                if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
                 {
                     firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                     // printf("ft %d tn %d\n", firedTileID, turnNumber);
                     fireDead = false;
                 }
 
-                while (!(isOutOfBorder(firePosition, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
+                while (!(isOutOfBorder(firePosition, 0, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
                 {
                     fireDead = false;
                     if (isFireTrought(firedTileID))
@@ -565,7 +566,7 @@ int main()
                     }
                 nextFirePosition:
                     // printf("endFire %d\n", turnNumber);
-                    if (!isOutOfBorder(firePosition, numRows, numColumns) && !fireDead)
+                    if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
                     {
                         printf("notOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
@@ -1564,7 +1565,7 @@ bool isFireStop(int elementID)
     }
 }
 
-bool isOutOfBorder(int **objectPosition, int *numRows, int *numColumns)
+bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns)
 {
     if (objectPosition[0][0] < 0 || objectPosition[0][0] >= *numRows || objectPosition[0][1] < 0 || objectPosition[0][1] >= *numColumns)
     {
@@ -1613,7 +1614,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             // check if future ground is ok
             firePosition[0][0] = firePosition[0][0] - 1;
             // assume is next block position
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             { // attention no WAYurdl
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1641,7 +1642,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case RIGHT:
             firePosition[0][1] = firePosition[0][1] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1666,7 +1667,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case DOWN:
             firePosition[0][0] = firePosition[0][0] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1691,7 +1692,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case LEFT:
             firePosition[0][1] = firePosition[0][1] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1726,7 +1727,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
         {
         case UP:
             firePosition[0][0] = firePosition[0][0] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1751,7 +1752,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case RIGHT:
             firePosition[0][1] = firePosition[0][1] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1785,7 +1786,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
         {
         case RIGHT:
             firePosition[0][1] = firePosition[0][1] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1808,7 +1809,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case DOWN:
             firePosition[0][0] = firePosition[0][0] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1842,7 +1843,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
         {
         case DOWN:
             firePosition[0][0] = firePosition[0][0] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1865,7 +1866,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case LEFT:
             firePosition[0][1] = firePosition[0][1] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1899,7 +1900,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
         {
         case UP:
             firePosition[0][0] = firePosition[0][0] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1922,7 +1923,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             return false;
         case LEFT:
             firePosition[0][1] = firePosition[0][1] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
@@ -1970,7 +1971,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case DOWN:
             *currentFireDirection = RIGHT;
             firePosition[0][1] = firePosition[0][1] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -1979,7 +1980,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case LEFT:
             *currentFireDirection = UP;
             firePosition[0][0] = firePosition[0][0] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -1999,7 +2000,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case LEFT:
             *currentFireDirection = DOWN;
             firePosition[0][0] = firePosition[0][0] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2008,7 +2009,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case UP:
             *currentFireDirection = RIGHT;
             firePosition[0][1] = firePosition[0][1] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2028,7 +2029,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case UP:
             *currentFireDirection = LEFT;
             firePosition[0][1] = firePosition[0][1] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2037,7 +2038,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case RIGHT:
             *currentFireDirection = DOWN;
             firePosition[0][0] = firePosition[0][0] + 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2057,7 +2058,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case RIGHT:
             *currentFireDirection = UP;
             firePosition[0][0] = firePosition[0][0] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2066,7 +2067,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         case DOWN:
             *currentFireDirection = LEFT;
             firePosition[0][1] = firePosition[0][1] - 1;
-            if (!isOutOfBorder(firePosition, numRows, numColumns))
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
