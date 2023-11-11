@@ -23,7 +23,7 @@ bool firstTankPosition(int id, int *currentTankDirection);
 bool isFloor(int elementID);
 bool isOutOfBorder(int **objectPosition, int *numRows, int *numColumns);
 // tank
-bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
+bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
 // elements
 bool isMovable(int elementID, int *positionID);
 bool isMovableAtBeginning(int elementID);
@@ -39,10 +39,10 @@ void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTa
 void shotableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridGround, int *numRows, int *numColumns);
 
 // Ground
-bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid);
+bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
 
 // Tank
-bool moveTank(int **tankPosition, int testMoveID, int **gridWorked, int **gridGround);
+bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked, int **gridGround);
 
 // Movables
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
@@ -405,9 +405,9 @@ int main()
         else
         {
             // fully random wip
-            if (isLegalMove(tankPosition, testMove, gridWorked, numRows, numColumns))
+            if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
             {
-                if (moveTank(tankPosition, testMove, gridWorked, gridGround))
+                if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
                 {
                     deplacementsHypothese[curseur] = testMove;
                     deplacementsRetenu[curseur] = testMove;
@@ -592,9 +592,9 @@ int main()
             }
             else
             {
-                if (isLegalMove(tankPosition, testMove, gridWorked, numRows, numColumns))
+                if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
                 {
-                    if (moveTank(tankPosition, testMove, gridWorked, gridGround))
+                    if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
                     {
                         deplacementsHypotheseMH[curseur] = testMove;
                         curseur++;
@@ -929,7 +929,7 @@ int getRandomMove()
 
 //////////////////////////////////////////////////////////////////
 // Elements Functions //
-bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, int *nbColumns)
+bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns)
 {
     // il faut trouver si oui ou non, le tank peut se déplacer
     switch (moveID)
@@ -940,13 +940,13 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, 
     case UP:
         // printf("[UP]\n");
         // Already at max up position
-        if (arrayTankCell[0][0] == 0)
+        if (arrayTankCell[tankCoo][0] == 0)
         {
             return false;
         }
         else
         {
-            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            if (nextFloor(arrayTankCell, tankCoo, moveID, arrayGrid))
             {
                 return true;
             }
@@ -957,13 +957,13 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, 
         }
     case RIGHT:
         // printf("[RIGHT]\n");
-        if (arrayTankCell[0][1] == *nbColumns - 1)
+        if (arrayTankCell[tankCoo][1] == *nbColumns - 1)
         {
             return false;
         }
         else
         {
-            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            if (nextFloor(arrayTankCell, tankCoo, moveID, arrayGrid))
             {
                 return true;
             }
@@ -974,13 +974,13 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, 
         }
     case DOWN:
         // printf("[DOWN]\n");
-        if (arrayTankCell[0][0] == *nbRows - 1)
+        if (arrayTankCell[tankCoo][0] == *nbRows - 1)
         {
             return false;
         }
         else
         {
-            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            if (nextFloor(arrayTankCell, tankCoo, moveID, arrayGrid))
             {
                 return true;
             }
@@ -991,13 +991,13 @@ bool isLegalMove(int **arrayTankCell, int moveID, int **arrayGrid, int *nbRows, 
         }
     case LEFT:
         // printf("[LEFT]\n");
-        if (arrayTankCell[0][1] == 0)
+        if (arrayTankCell[tankCoo][1] == 0)
         {
             return false;
         }
         else
         {
-            if (nextFloor(arrayTankCell, moveID, arrayGrid))
+            if (nextFloor(arrayTankCell, tankCoo, moveID, arrayGrid))
             {
                 return true;
             }
@@ -1028,13 +1028,13 @@ void moveOnGrid(int **arrayTankCell, int moveID, int **arrayGrid)
     // faire le déplacement
 }
 
-bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
+bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
 {
     switch (moveID)
     {
     case UP:
         // check if future ground is ok
-        if (isFloor(arrayGrid[arrayTankCell[0][0] - 1][arrayTankCell[0][1]]))
+        if (isFloor(arrayGrid[arrayTankCell[tankCoo][0] - 1][arrayTankCell[tankCoo][1]]))
         {
             return true;
         }
@@ -1043,7 +1043,7 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
             return false;
         }
     case RIGHT:
-        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] + 1]))
+        if (isFloor(arrayGrid[arrayTankCell[tankCoo][0]][arrayTankCell[tankCoo][1] + 1]))
         {
             return true;
         }
@@ -1052,7 +1052,7 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
             return false;
         }
     case DOWN:
-        if (isFloor(arrayGrid[arrayTankCell[0][0] + 1][arrayTankCell[0][1]]))
+        if (isFloor(arrayGrid[arrayTankCell[tankCoo][0] + 1][arrayTankCell[tankCoo][1]]))
         {
             return true;
         }
@@ -1061,7 +1061,7 @@ bool nextFloor(int **arrayTankCell, int moveID, int **arrayGrid)
             return false;
         }
     case LEFT:
-        if (isFloor(arrayGrid[arrayTankCell[0][0]][arrayTankCell[0][1] - 1]))
+        if (isFloor(arrayGrid[arrayTankCell[tankCoo][0]][arrayTankCell[tankCoo][1] - 1]))
         {
             return true;
         }
@@ -1450,31 +1450,31 @@ bool isTurnable(int elementID, int *positionID)
     return false;
 }
 
-bool moveTank(int **tankPosition, int testMoveID, int **gridWorked, int **gridGround)
+bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked, int **gridGround)
 {
     switch (testMoveID)
     {
     case FIRE:
         return true;
     case UP:
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
-        tankPosition[0][0] = tankPosition[0][0] - 1;
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = UP;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        tankPosition[tankCoo][0] = tankPosition[tankCoo][0] - 1;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = UP;
         return true;
     case RIGHT:
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
-        tankPosition[0][1] = tankPosition[0][1] + 1;
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = RIGHT;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        tankPosition[tankCoo][1] = tankPosition[tankCoo][1] + 1;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = RIGHT;
         return true;
     case DOWN:
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
-        tankPosition[0][0] = tankPosition[0][0] + 1;
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = DOWN;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        tankPosition[tankCoo][0] = tankPosition[tankCoo][0] + 1;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = DOWN;
         return true;
     case LEFT:
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = gridGround[tankPosition[0][0]][tankPosition[0][1]];
-        tankPosition[0][1] = tankPosition[0][1] - 1;
-        gridWorked[tankPosition[0][0]][tankPosition[0][1]] = LEFT;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        tankPosition[tankCoo][1] = tankPosition[tankCoo][1] - 1;
+        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = LEFT;
         return true;
     }
     return false;
