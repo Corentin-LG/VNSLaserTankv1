@@ -47,6 +47,7 @@ bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked,
 
 // Movables
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
+void mirrorPosition(int **tankPosition, int fromCoo, int toCoo);
 
 // Reflectables
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
@@ -165,7 +166,7 @@ int main()
 
     printf("%s\n", filename);
 
-    int **tankPosition = (int **)malloc((2) * sizeof(int *));
+    int **tankPosition = (int **)malloc((3) * sizeof(int *));
     for (int i = 0; i < 2; i++)
     {
         tankPosition[i] = (int *)malloc((2) * sizeof(int));
@@ -309,9 +310,14 @@ int main()
                     if (tableConversionSimple[k].valeur == TANKUP)
                     {
                         tankPosition[0][0] = i;
-                        tankPosition[1][0] = i;
                         tankPosition[0][1] = j;
+                        tankPosition[1][0] = i;
                         tankPosition[1][1] = j;
+                        tankPosition[1][2] = j;
+                        // tankPosition[2][0] = i;
+                        // tankPosition[2][1] = j;
+                        // mirrorPosition(tankPosition, 0, 1);
+                        // mirrorPosition(tankPosition, 0, 2);
                         // assume tank spawn on dirt
                         gridGround[i][j] = DIRT;
                     }
@@ -729,7 +735,7 @@ int main()
 
     if (tankPosition != NULL)
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
             free(tankPosition[i]);
         }
@@ -2159,4 +2165,10 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
         // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
         return false;
     }
+}
+
+void mirrorPosition(int **tankPosition, int fromCoo, int toCoo)
+{
+    tankPosition[1][0] = tankPosition[0][0];
+    tankPosition[1][1] = tankPosition[0][1];
 }

@@ -163,8 +163,8 @@ int main()
 
     printf("%s\n", filename);
 
-    int **tankPosition = (int **)malloc((3) * sizeof(int *));
-    for (int i = 0; i < 2; i++)
+    int **tankPosition = (int **)malloc((2) * sizeof(int *));
+    for (int i = 0; i < 3; i++)
     {
         tankPosition[i] = (int *)malloc((2) * sizeof(int));
     }
@@ -341,8 +341,8 @@ int main()
                         tankPosition[1][1] = j;
                         tankPosition[2][0] = i;
                         tankPosition[2][1] = j;
-                        // mirrorPosition(tankPosition, 0, 1);
-                        // mirrorPosition(tankPosition, 0, 2);
+                        mirrorPosition(tankPosition, 0, 1);
+                        mirrorPosition(tankPosition, 0, 2);
                         // assume tank spawn on dirt
                         gridGround[i][j] = DIRT;
                     }
