@@ -493,6 +493,7 @@ int main()
 
             if (testMove == FIRE)
             {
+                printf("fire cursor = %d\n\n", curseur);
                 // reset position at origin
                 firePosition[0][0] = tankPosition[0][0];
                 firePosition[0][1] = tankPosition[0][1];
@@ -526,7 +527,7 @@ int main()
                     // or explode
                     else if (isShootable(firedTileID, currentFireDirection))
                     {
-                        printf("bang %d\n", turnNumber);
+                        printf("bang , cursor = %d\n", curseur);
                         shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridGround, numRows, numColumns);
                         fireDead = true;
                         goto nextFirePosition;
@@ -541,7 +542,7 @@ int main()
                         case MIRRORRIGHTDOWN:
                         case MIRRORDOWNLEFT:
                         case MIRRORLEFTUP:
-                            printf("move !!! \n");
+                            printf("move !!! , cursor = %d\n", curseur);
                             printf("f00 = %d, f01 %d, forientation = %d\n", firePosition[0][0], firePosition[0][1], *currentFireDirection);
                             if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                             {
@@ -562,7 +563,7 @@ int main()
                     // or deflect
                     else if (isFireDeflect(firedTileID, currentFireDirection))
                     {
-                        printf("deflected\n");
+                        printf("deflected, cursor = %d\n", curseur);
                         if (deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                         {
                             printf("deflected ok \n");
@@ -577,7 +578,7 @@ int main()
                     // or turn
                     else if (isTurnable(firedTileID, currentFireDirection))
                     {
-                        printf("turned\n");
+                        printf("turned, cursor = %d\n", curseur);
                         if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                         {
                             printf("turned ok \n");
@@ -604,14 +605,14 @@ int main()
                     // printf("endFire %d\n", turnNumber);
                     if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
                     {
-                        printf("notOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
+                        printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
                     }
                     else
                     {
-                        printf("you're finished :\n");
-                        printf("Out fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
+                        printf("\nyou're finished :\n");
+                        printf("Out fp00 = %d, fp01 = %d, cursor = %d\n\n", firePosition[0][0], firePosition[0][1], curseur);
                     }
                 }
                 deplacementsHypotheseMH[curseur] = testMove;
@@ -621,6 +622,7 @@ int main()
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove && testMove != FIRE)
             {
+                printf("turn cursor = %d\n\n", curseur);
                 gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
                 deplacementsHypotheseMH[curseur] = testMove;
                 turnNumber--;
@@ -629,6 +631,7 @@ int main()
             }
             else
             {
+                printf("move cursor = %d\n\n", curseur);
                 // here cases with ice, way, enemy, tunnel
                 // wip
                 if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
@@ -2025,7 +2028,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
         {
         case LEFT:
             *currentFireDirection = DOWN;
-            firePosition[0][0] = firePosition[0][0] - 1;
+            firePosition[0][0] = firePosition[0][0] + 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
