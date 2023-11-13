@@ -22,13 +22,17 @@ bool isFloor(int elementID);
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns);
 // tank
 bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
-bool onFirstHighWay(int **tankPosition, int *currentTankDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
+bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
+bool isHighWay(int elementID);
+
 // elements
 bool isMovable(int elementID, int *positionID);
 bool isMovableAtBeginning(int elementID);
 bool isShootable(int elementID, int *positionID);
 bool isTurnable(int elementID, int *positionID);
 bool isDeathDestination(int curentTile);
+bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
+
 // fire
 bool isFireTrought(int elementID);
 bool isFireDeflect(int elementID, int *positionID);
@@ -158,7 +162,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing3.lt4";
+    const char *filename = ".\\TestingGrids\\testing6.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -337,10 +341,6 @@ int main()
                     {
                         tankPosition[0][0] = i;
                         tankPosition[0][1] = j;
-                        tankPosition[1][0] = i;
-                        tankPosition[1][1] = j;
-                        tankPosition[2][0] = i;
-                        tankPosition[2][1] = j;
                         mirrorPosition(tankPosition, 0, 1);
                         mirrorPosition(tankPosition, 0, 2);
                         // assume tank spawn on dirt
@@ -465,6 +465,7 @@ int main()
     bool fireDead = false;
     int intermEphemere = 0;
     int firedTileID = 0;
+    *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
 
     do
     {
@@ -486,6 +487,7 @@ int main()
         mirrorPosition(tankPosition, 2, 0);
         mirrorPosition(tankPosition, 2, 1);
         // stop if tank == base
+        // while
         while (!(tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -493,7 +495,7 @@ int main()
 
             if (testMove == FIRE)
             {
-                printf("fire cursor = %d\n\n", curseur);
+                // printf("fire cursor = %d\n\n", curseur);
                 // reset position at origin
                 firePosition[0][0] = tankPosition[0][0];
                 firePosition[0][1] = tankPosition[0][1];
@@ -506,6 +508,10 @@ int main()
 
                 // position + 1
                 getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
+                // if (turnNumber > 50) {
+                //     goto bugtest;
+                // }
+                //         turnNumber++; //sup
                 fireDead = true;
                 if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
                 {
@@ -605,14 +611,14 @@ int main()
                     // printf("endFire %d\n", turnNumber);
                     if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
                     {
-                        printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
+                        // printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
                     }
                     else
                     {
-                        printf("\nyou're finished :\n");
-                        printf("Out fp00 = %d, fp01 = %d, cursor = %d\n\n", firePosition[0][0], firePosition[0][1], curseur);
+                        // printf("\nyou're finished :\n");
+                        // printf("Out fp00 = %d, fp01 = %d, cursor = %d\n\n", firePosition[0][0], firePosition[0][1], curseur);
                     }
                 }
                 deplacementsHypotheseMH[curseur] = testMove;
@@ -622,8 +628,9 @@ int main()
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove && testMove != FIRE)
             {
-                printf("turn cursor = %d\n\n", curseur);
+                // printf("turn cursor = %d\n\n", curseur);
                 gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
+                *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
                 deplacementsHypotheseMH[curseur] = testMove;
                 turnNumber--;
                 curseur++;
@@ -636,6 +643,7 @@ int main()
                 // wip
                 if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
                 {
+
                     // ici, on sait que la prochaine case est un way
                     // il faut donc tester si le way ne mene pas à la mort
 
@@ -644,30 +652,42 @@ int main()
                     mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
                     mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
                     mirrorPosition(tankPosition, 0, 1);
+                    printf("begin hiw\n");
 
-                    // if (onFirstHighWay(tankPosition, currentTankDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                    // {
-                    //     mirrorPosition(tankPosition, 1, 0);
-                    //     deplacementsHypotheseMH[curseur] = testMove;
-                    //     curseur++;
-                    //     turnNumber++;
-                    //     *objectiveFunctionMH = *objectiveFunctionMH - 1;
-                    // }
-                    // else
-                    // {
-                    //     mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
-                    //     mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
-                    //     mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
-                    //     mirrorPosition(tankPosition, 0, 1);
-                    // }
-
-                    if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
+                    if (nextHighWay(tankPosition, 1, testMove, gridWorked))
                     {
-                        deplacementsHypotheseMH[curseur] = testMove;
-                        curseur++;
-                        turnNumber++;
-                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                        if (moveTank(tankPosition, 1, testMove, gridWorked, gridGround))
+                        {
+                            if (onFirstHighWay(tankPosition, testMove, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                            {
+                                mirrorPosition(tankPosition, 1, 0);
+                                deplacementsHypotheseMH[curseur] = testMove;
+                                curseur++;
+                                turnNumber++;
+                                *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                                goto afterHighWay;
+                            }
+                            else
+                            {
+                                mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
+                                mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
+                                mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
+                                mirrorPosition(tankPosition, 0, 1);
+                            }
+                        }
                     }
+                    else
+                    {
+                        if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
+                        {
+                            deplacementsHypotheseMH[curseur] = testMove;
+                            curseur++;
+                            turnNumber++;
+                            *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                        }
+                    }
+
+                afterHighWay:
                 }
                 else
                 {
@@ -682,7 +702,7 @@ int main()
     } while (*curseurDeplacementsMH > 50 && turnNumber < 50);
     // > 20 not fast at all, 30 -> 5 seconds
     // while (curseurDeplacementsMH > curseurDeplacementsHypothese);
-
+// bugtest:
     *curseurDeplacementsMH = curseur;
     printf("curserHM %d\n", *curseurDeplacementsMH);
 
@@ -2195,135 +2215,160 @@ void mirrorPosition(int **tankPosition, int fromCoo, int toCoo)
     tankPosition[toCoo][1] = tankPosition[fromCoo][1];
 }
 
-bool onFirstHighWay(int **tankPosition, int *currentTankDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     bool isOnHighWay = true;
+    // print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
 
     // n+1 deja testé
-    if (moveTank(tankPosition, 1, *currentTankDirection, gridWorked, gridGround))
+    // if (moveTank(tankPosition, 1, moveID, gridWorked, gridGround))
+    // {
+    printf("onfirstHW %d\n", moveID);
+    print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+    // here on way
+    while (isOnHighWay)
     {
-        // here on way
-        while (isOnHighWay)
+        printf("start highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
+        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+        switch (gridGround[tankPosition[1][0]][tankPosition[1][1]])
         {
-            printf("start highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
-            print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
-            switch (gridWorked[tankPosition[1][0]][tankPosition[1][1]])
+        case WAYUP:
+            tankPosition[1][0] = tankPosition[1][0] - 1;
+            // here on after way
+            if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
             {
-            case WAYUP:
-                tankPosition[1][0] = tankPosition[1][0] - 1;
-                // here on after way
-                if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
+                // other tunnel/enemy way to die // !!! prevent circle WIP
+                if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
                 {
-                    // other tunnel/enemy way to die // !!! prevent circle WIP
-                    if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
-                    {
-                        return false;
-                    }
-                    // check you can move properly
-                    tankPosition[1][0] = tankPosition[1][0] + 1;
-                    if (isLegalMove(tankPosition, 1, UP, gridWorked, numRows, numColumns))
-                    {
-                        // next way or tile
-                        moveTank(tankPosition, 1, UP, gridWorked, gridGround);
-                    }
-                    else
-                    {
-                        // you were already blocked by stop tile
-                        isOnHighWay = false;
-                    }
+                    printf("death\n");
+                    return false;
                 }
-                else
-                {
-                    // you were already blocked by grid's borders
-                    tankPosition[1][0] = tankPosition[1][0] + 1;
-                    isOnHighWay = false;
-                }
-                break;
-            case WAYRIGHT:
-                tankPosition[1][1] = tankPosition[1][1] + 1;
-                if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
-                {
-                    if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
-                    {
-                        return false;
-                    }
-                    tankPosition[1][1] = tankPosition[1][1] - 1;
-                    if (isLegalMove(tankPosition, 1, RIGHT, gridWorked, numRows, numColumns))
-                    {
-                        // tankPosition[1][1] = tankPosition[1][1] - 1;
-                        moveTank(tankPosition, 1, RIGHT, gridWorked, gridGround);
-                    }
-                    else
-                    {
-                        // tankPosition[1][1] = tankPosition[1][1] - 1;
-                        isOnHighWay = false;
-                    }
-                }
-                else
-                {
-                    tankPosition[1][1] = tankPosition[1][1] - 1;
-                    isOnHighWay = false;
-                }
-                break;
-            case WAYDOWN:
+                // check you can move properly
                 tankPosition[1][0] = tankPosition[1][0] + 1;
-                if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
+                if (isLegalMove(tankPosition, 1, UP, gridWorked, numRows, numColumns))
                 {
-                    if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
+                    // next way or tile
+                    moveTank(tankPosition, 1, UP, gridWorked, gridGround);
+                    printf("legalmove\n");
+                    print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+
+                    if (!onFirstHighWay(tankPosition, UP, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
+                        printf("return false\n");
+                        print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                         return false;
-                    }
-                    if (isLegalMove(tankPosition, 1, DOWN, gridWorked, numRows, numColumns))
-                    {
-                        tankPosition[1][0] = tankPosition[1][0] + 1;
-                        moveTank(tankPosition, 1, DOWN, gridWorked, gridGround);
-                    }
-                    else
-                    {
-                        tankPosition[1][0] = tankPosition[1][0] - 1;
-                        isOnHighWay = false;
                     }
                 }
                 else
                 {
-                    tankPosition[1][0] = tankPosition[1][0] - 1;
+                    // you were already blocked by stop tile
                     isOnHighWay = false;
+                    printf("illegal move\n");
+                    print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 }
-                break;
-            case WAYLEFT:
-                tankPosition[1][1] = tankPosition[1][1] + 1;
-                if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
-                {
-                    if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
-                    {
-                        return false;
-                    }
-                    if (isLegalMove(tankPosition, 1, LEFT, gridWorked, numRows, numColumns))
-                    {
-                        tankPosition[1][1] = tankPosition[1][1] + 1;
-                        moveTank(tankPosition, 1, LEFT, gridWorked, gridGround);
-                    }
-                    else
-                    {
-                        tankPosition[1][1] = tankPosition[1][1] + 1;
-                        isOnHighWay = false;
-                    }
-                }
-                else
-                {
-                    tankPosition[1][1] = tankPosition[1][1] + 1;
-                    isOnHighWay = false;
-                }
-                break;
-            default:
-                printf("stop highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
-                isOnHighWay = false;
-                break;
             }
+            else
+            {
+                // you were already blocked by grid's borders
+                tankPosition[1][0] = tankPosition[1][0] + 1;
+                printf("outborder\n");
+                print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+                isOnHighWay = false;
+            }
+            break;
+        case WAYRIGHT:
+            tankPosition[1][1] = tankPosition[1][1] + 1;
+            if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
+            {
+                if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
+                {
+                    return false;
+                }
+                tankPosition[1][1] = tankPosition[1][1] - 1;
+                if (isLegalMove(tankPosition, 1, RIGHT, gridWorked, numRows, numColumns))
+                {
+                    moveTank(tankPosition, 1, RIGHT, gridWorked, gridGround);
+                    if (!onFirstHighWay(tankPosition, RIGHT, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    isOnHighWay = false;
+                }
+            }
+            else
+            {
+                tankPosition[1][1] = tankPosition[1][1] - 1;
+                isOnHighWay = false;
+            }
+            break;
+        case WAYDOWN:
+            tankPosition[1][0] = tankPosition[1][0] + 1;
+            if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
+            {
+                if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
+                {
+                    return false;
+                }
+                tankPosition[1][0] = tankPosition[1][0] - 1;
+                if (isLegalMove(tankPosition, 1, DOWN, gridWorked, numRows, numColumns))
+                {
+                    moveTank(tankPosition, 1, DOWN, gridWorked, gridGround);
+
+                    if (!onFirstHighWay(tankPosition, DOWN, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    isOnHighWay = false;
+                }
+            }
+            else
+            {
+                tankPosition[1][0] = tankPosition[1][0] - 1;
+                isOnHighWay = false;
+            }
+        case WAYLEFT:
+            tankPosition[1][1] = tankPosition[1][1] - 1;
+            if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
+            {
+                if (isDeathDestination(gridWorked[tankPosition[1][0]][tankPosition[1][1]]))
+                {
+                    return false;
+                }
+                tankPosition[1][1] = tankPosition[1][1] + 1;
+                if (isLegalMove(tankPosition, 1, LEFT, gridWorked, numRows, numColumns))
+                {
+                    moveTank(tankPosition, 1, LEFT, gridWorked, gridGround);
+                    if (!onFirstHighWay(tankPosition, LEFT, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    isOnHighWay = false;
+                }
+            }
+            else
+            {
+                tankPosition[1][1] = tankPosition[1][1] + 1;
+                isOnHighWay = false;
+            }
+            break;
+        default:
+            printf("stop highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
+            isOnHighWay = false;
+            break;
         }
-        printf("end of highway\n");
-        return true;
     }
+    printf("end of highway\n");
+    return true;
+    // }
 }
 
 bool isDeathDestination(int curentTile)
@@ -2343,4 +2388,75 @@ bool isDeathDestination(int curentTile)
     default:
         break;
     }
+}
+
+bool isHighWay(int elementID)
+{
+    switch (elementID)
+    {
+    case WAYUP:
+        return true;
+    case WAYRIGHT:
+        return true;
+    case WAYDOWN:
+        return true;
+    case WAYLEFT:
+        return true;
+    // case ICE:
+    //     return true;
+    // case THINICE:
+    //     return true;
+    default:
+        printf("not highway %d\n", elementID);
+        return false;
+    }
+    return false;
+}
+
+bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
+{
+    switch (moveID)
+    {
+    case UP:
+        // check if future ground is ok
+        if (isHighWay(arrayGrid[arrayTankCell[tankCoo][0] - 1][arrayTankCell[tankCoo][1]]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case RIGHT:
+        if (isHighWay(arrayGrid[arrayTankCell[tankCoo][0]][arrayTankCell[tankCoo][1] + 1]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case DOWN:
+        if (isHighWay(arrayGrid[arrayTankCell[tankCoo][0] + 1][arrayTankCell[tankCoo][1]]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case LEFT:
+        if (isHighWay(arrayGrid[arrayTankCell[tankCoo][0]][arrayTankCell[tankCoo][1] - 1]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    default:
+        printf("X%d ", moveID);
+        return false;
+    }
+    return false;
 }
