@@ -30,7 +30,7 @@
 - [x] reflect
 - [x] trunables
 - [x] way
-- [ ] display with spe coos
+- [x] display with spe coos
 - [ ]
 - [ ]
 - [ ]
