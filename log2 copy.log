@@ -1,0 +1,758 @@
+lignes = 4, colonnes = 3, bases = 1
+o
+ 20  20   6 
+ 19  22   8 
+ 20  19   8 
+ 19  22   1 
+w
+ 20  20   6 
+ 19  22   8 
+ 20  19   8 
+ 19  22   1
+m
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+g
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+b
+  0   2 
+t
+  3   2
+  3   2
+  3   2
+f
+  0   0
+  0   0
+FirstSolution
+
+go first
+curserH 44 ; curserR 44
+move cursor = 2
+
+move cursor = 8
+
+move cursor = 8
+
+move cursor = 10
+
+move cursor = 10
+
+move cursor = 18
+
+move cursor = 33
+
+move cursor = 34
+
+move cursor = 54
+
+move cursor = 54
+
+move cursor = 54
+
+move cursor = 60
+
+move cursor = 61
+
+move cursor = 62
+
+move cursor = 62
+
+move cursor = 63
+
+move cursor = 64
+
+move cursor = 71
+
+move cursor = 75
+
+move cursor = 75
+
+move cursor = 81
+
+begin hiw
+onfirstHW 4array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+ 19   4   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 4
+array1
+ 20  20   6
+ 19  22   8
+ 20  19   8 
+ 19   4   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 4
+end of highway
+move cursor = 90
+
+move cursor = 90
+
+move cursor = 91
+
+move cursor = 93
+
+begin hiw
+onfirstHW 1array1
+ 20  20   6
+ 19  22   8 
+ 20   1   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 1
+array1
+ 20  20   6
+ 19  22   8
+ 20   1   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 1
+end of highway
+move cursor = 99
+
+begin hiw
+onfirstHW 4array1
+ 20  20   6
+ 19  22   8
+  4  19   8 
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 4
+array1
+ 20  20   6
+ 19  22   8
+  4  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0 
+ 19  22   5
+
+stop highway 4
+end of highway
+move cursor = 104
+
+begin hiw
+onfirstHW 3array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+  3  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 3
+array1
+ 20  20   6
+ 19  22   8 
+ 20  19   8
+  3  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 3
+end of highway
+move cursor = 106
+
+begin hiw
+onfirstHW 2array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+ 19   2   5
+array2
+  0   0   0
+  0   0   0 
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 2
+array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+ 19   2   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 2
+end of highway
+move cursor = 110
+
+begin hiw
+onfirstHW 4array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+  4  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0 
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 4
+array1
+ 20  20   6
+ 19  22   8
+ 20  19   8
+  4  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 4
+end of highway
+move cursor = 122
+
+begin hiw
+onfirstHW 1array1
+ 20  20   6
+ 19  22   8
+  1  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 1
+array1
+ 20  20   6
+ 19  22   8
+  1  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0 
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 1
+end of highway
+move cursor = 123
+
+begin hiw
+onfirstHW 1array1
+ 20  20   6
+  1  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0 
+ 20  19   0
+ 19  22   5
+
+start highway 1
+array1
+ 20  20   6
+  1  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 1
+end of highway
+move cursor = 126
+
+begin hiw
+onfirstHW 2array1
+ 20  20   6 
+ 19   2   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 2
+array1
+ 20  20   6
+ 19   2   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0 
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 2
+end of highway
+move cursor = 131
+
+begin hiw
+onfirstHW 4array1
+ 20  20   6
+  4  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 4
+array1
+ 20  20   6
+  4  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 4
+end of highway
+move cursor = 136
+
+begin hiw
+onfirstHW 2array1
+ 20  20   6 
+ 19   2   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 2
+array1
+ 20  20   6
+ 19   2   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 2
+end of highway
+move cursor = 137
+
+move cursor = 142
+
+begin hiw
+onfirstHW 4array1
+ 20  20   6
+  4  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 4
+array1
+ 20  20   6
+  4  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 4
+end of highway
+move cursor = 144
+
+begin hiw
+onfirstHW 3array1
+ 20  20   6
+ 19  22   8
+  3  19   8 
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 3
+array1
+ 20  20   6
+ 19  22   8
+  3  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 3
+end of highway
+move cursor = 149
+
+begin hiw
+onfirstHW 1array1
+ 20  20   6
+  1  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 1
+array1
+ 20  20   6
+  1  22   8
+ 20  19   8 
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 1
+end of highway
+move cursor = 151
+
+begin hiw
+onfirstHW 1array1
+  1  20   6
+ 19  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0 
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 1
+array1
+  1  20   6
+ 19  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 1
+end of highway
+move cursor = 154
+
+move cursor = 154
+
+move cursor = 156
+
+begin hiw
+onfirstHW 2array1
+ 20   2   6
+ 19  22   8
+ 20  19   8
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+start highway 2
+array1
+ 20   2   6
+ 19  22   8
+ 20  19   8 
+ 19  22   5
+array2
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+array3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+
+stop highway 2
+end of highway
+move cursor = 157
+
+begin hiw
+not highway 6
+2curserMH 158 ; 2curserH 44
+curserHM 158
+gridOrigin = lignes : 4 et colonnes : 3
+ 20  20   6
+ 19  22   8
+ 20  19   8 
+ 19  22   1
+gridWorked = lignes : 4 et colonnes : 3
+ 20  20   2
+ 19  22   8
+ 20  19   8
+ 19  22   5
+gridGround = lignes : 4 et colonnes : 3
+ 20  20   6
+ 19  22   0
+ 20  19   0
+ 19  22   5
+gridMovables = lignes : 4 et colonnes : 3
+  0   0   0
+  0   0   0
+  0   0   0
+  0   0   0
+tankp
+  0   2
+  0   1
+  3   2
+firep
+ -1   0
+  0   0
+basesp
+  0   2
+meta
+LDUDFUDFRDRFULFDFRDRLRDRFLUFFFLDFURFUFDFUFFDRDULDRDUFRFUFRDRUFDFFFLDLFUFRDFFFLDLFLFFFUDRLDFFUURDURLLUFLDDRRLRLLFFFRURFURFUUURFRDRULLFUFRRDUDFLLDDFLRUUFUFFLRRR
+hyp
+LDFLLLULFUFFFRDFLFFURDURFUFUUFUFRULFFFRFLRRR
+retenu
+LDFLLLULFUFFFRDFLFFURDURFUFUUFUFRULFFFRFLRRR
+free grids
+free pos
+free posf
+free posb
+free deplac
+free curs
+free objectivs
+free current
+free nums
+finish
+PS C:\Users\cocol\Documents\HEH 2023\OptimisationCombinatoire\Projet\DeuxièmeTest>
+
+
+
+
+
+
+
+
+
+
+
+
