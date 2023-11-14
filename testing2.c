@@ -8,8 +8,8 @@
 // !! wayURDR as floor for movables
 //////////////////////////////////////////////////////////////////
 // Global Functions //
-int getRandomMove();
 
+int getRandomMove();
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
@@ -18,61 +18,67 @@ int getRandomMove();
 
 // isSomething
 // grid
+
 bool isFloor(int elementID);
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns);
 // tank
+
 bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
 bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 bool isHighWay(int elementID);
-
 // elements
+
 bool isMovable(int elementID, int *positionID);
 bool isMovableAtBeginning(int elementID);
 bool isShootable(int elementID, int *positionID);
 bool isTurnable(int elementID, int *positionID);
 bool isDeathDestination(int curentTile);
 bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
-
 // fire
+
 bool isFireTrought(int elementID);
 bool isFireDeflect(int elementID, int *positionID);
 bool isFireStop(int elementID);
 
 void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTankDirection);
 void shotableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridGround, int *numRows, int *numColumns);
-
 // Ground
-bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
 
+bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
 // Tank
+
 bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked, int **gridGround);
 void mirrorPosition(int **tankPosition, int fromCoo, int toCoo);
-
 // Movables
-bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 
+bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // Reflectables
+
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // Grids
+
 void resetGridWorked(int **gridOrigin, int **gridWorked, int *numRows, int *numCols);
 void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numCols);
 void resetGridMovables(int **gridOrigin, int **gridMovables, int **gridGround, int *numRows, int *numCols);
 void mirrorGrid(int **gridFrom, int **gridTo, int *numRows, int *numCols);
-
 // depreci
+
 bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid);
 //////////////////////////////////////////////////////////////////
 // Reading Functions //
+
 void printArray(int **array, int *rows, int *cols);
 void print2Array(int **array1, int **array2, int *rows, int *cols);
 void print3Array(int **array1, int **array2, int **array3, int *rows, int *cols);
+void printArrayBraket(int **array1, int *rows, int *cols, int bRow, int bCol);
+void print2ArrayBraket(int **array1, int **array2, int *rows, int *cols, int bRow, int bCol);
+void print3ArrayBraket(int **array1, int **array2, int **array3, int *rows, int *cols, int bRow, int bCol);
 void printLittleArray(int **array, int rows, int cols);
 void printBaseArray(int **array, int *rows, int cols);
 void printMovingLetters(int *array, int *curseur);
 void printMovingLettersWithoutPointor(int *array, int curseur);
 int replayDeplacements(char deplacementLetter);
-
 //////////////////////////////////////////////////////////////////
 // Structs //
 struct ConversionTable
@@ -163,7 +169,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing6.lt4";
+    const char *filename = ".\\TestingGrids\\testing4.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -376,13 +382,13 @@ int main()
 
     printf("lignes = %d, colonnes = %d, bases = %d\n", *numRows, *numColumns, *numBases);
     printf("o\n");
-    printArray(gridOrigin, numRows, numColumns);
+    printArrayBraket(gridOrigin, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
     printf("w\n");
-    printArray(gridWorked, numRows, numColumns);
+    printArrayBraket(gridWorked, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
     printf("m\n");
-    printArray(gridMovables, numRows, numColumns);
+    printArrayBraket(gridMovables, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
     printf("g\n");
-    printArray(gridGround, numRows, numColumns);
+    printArrayBraket(gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
     printf("b\n");
     printBaseArray(basesPosition, numBases, 2);
     printf("t\n");
@@ -904,6 +910,8 @@ int main()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Reading Functions //
+
+// Display a grid
 void printArray(int **array, int *rows, int *cols)
 {
     for (int i = 0; i < *rows; i++)
@@ -916,6 +924,27 @@ void printArray(int **array, int *rows, int *cols)
     }
 }
 
+// Display a grid with brakets
+void printArrayBraket(int **array, int *rows, int *cols, int bRow, int bCol)
+{
+    for (int i = 0; i < *rows; i++)
+    {
+        for (int j = 0; j < *cols; j++)
+        {
+            if (i == bRow && j == bCol)
+            {
+                printf("[%d] ", array[i][j]);
+            }
+            else
+            {
+                printf("%3d ", array[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Display 2 grids
 void print2Array(int **array1, int **array2, int *rows, int *cols)
 {
     printf("array1\n");
@@ -925,6 +954,17 @@ void print2Array(int **array1, int **array2, int *rows, int *cols)
     printf("\n");
 }
 
+// Display 2 grids with brakets
+void print2ArrayBraket(int **array1, int **array2, int *rows, int *cols, int bRow, int bCol)
+{
+    printf("array1\n");
+    printArrayBraket(array1, rows, cols, bRow, bCol);
+    printf("array2\n");
+    printArrayBraket(array2, rows, cols, bRow, bCol);
+    printf("\n");
+}
+
+// Display 3 grids
 void print3Array(int **array1, int **array2, int **array3, int *rows, int *cols)
 {
     printf("array1\n");
@@ -936,6 +976,19 @@ void print3Array(int **array1, int **array2, int **array3, int *rows, int *cols)
     printf("\n");
 }
 
+// Display 3 grids with brakets
+void print3ArrayBraket(int **array1, int **array2, int **array3, int *rows, int *cols, int bRow, int bCol)
+{
+    printf("array1\n");
+    printArrayBraket(array1, rows, cols, bRow, bCol);
+    printf("array2\n");
+    printArrayBraket(array2, rows, cols, bRow, bCol);
+    printf("array3\n");
+    printArrayBraket(array3, rows, cols, bRow, bCol);
+    printf("\n");
+}
+
+// Display pear(s) of Coordinates
 void printLittleArray(int **array, int rows, int cols)
 {
     for (int i = 0; i < rows; i++)
@@ -948,6 +1001,7 @@ void printLittleArray(int **array, int rows, int cols)
     }
 }
 
+// Display only Bases' pear(s) of Coordinates
 void printBaseArray(int **array, int *rows, int cols)
 {
     for (int i = 0; i < *rows; i++)
@@ -960,6 +1014,7 @@ void printBaseArray(int **array, int *rows, int cols)
     }
 }
 
+// Display Moving's vector
 void printMovingLetters(int *array, int *curseur)
 {
     for (int i = 0; i < *curseur; i++)
@@ -989,6 +1044,7 @@ void printMovingLetters(int *array, int *curseur)
     printf("\n");
 }
 
+// Display Moving's vector without pointor
 void printMovingLettersWithoutPointor(int *array, int curseur)
 {
     for (int i = 0; i < curseur; i++)
@@ -1025,6 +1081,7 @@ void firstHeuristique(int **tank, int **bases, int baseNumber)
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
+// apply next coordinates for fire from tank
 void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTankDirection)
 {
     switch (*currentTankDirection)
@@ -1049,6 +1106,8 @@ void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTa
 
 //////////////////////////////////////////////////////////////////
 // Global Functions //
+
+// return 0 to 4
 int getRandomMove()
 {
     int randomNumber = rand() % 5;
@@ -1057,6 +1116,8 @@ int getRandomMove()
 
 //////////////////////////////////////////////////////////////////
 // Elements Functions //
+
+// know next move legality for parametric array
 bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns)
 {
     // il faut trouver si oui ou non, le tank peut se déplacer
@@ -1146,6 +1207,7 @@ bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid)
     // il faut trouver si oui ou non, le tank peut faire son tire
 }
 
+// know if next tile is floor for parametric array
 bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
 {
     switch (moveID)
@@ -1239,6 +1301,7 @@ bool isFloor(int elementID)
     return false;
 }
 
+// only mirror and antitank
 bool isMovable(int elementID, int *positionID)
 {
     switch (elementID)
@@ -1307,6 +1370,7 @@ bool isMovable(int elementID, int *positionID)
     return false;
 }
 
+// only Bm, antitank and mirror
 bool isMovableAtBeginning(int elementID)
 {
     switch (elementID)
@@ -1336,6 +1400,7 @@ bool isMovableAtBeginning(int elementID)
     return false;
 }
 
+// only bric and antitank
 bool isShootable(int elementID, int *positionID)
 {
     switch (elementID)
@@ -1526,6 +1591,7 @@ bool isTurnable(int elementID, int *positionID)
     return false;
 }
 
+// n : Ground -> Work ; n+1 : URDL ~if tank/mobale ?
 bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked, int **gridGround)
 {
     switch (testMoveID)
@@ -1556,6 +1622,7 @@ bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked,
     return false;
 }
 
+// copy from -> paste to
 void mirrorGrid(int **gridFrom, int **gridTo, int *numRows, int *numCols)
 {
     for (int i = 0; i < *numRows; i++)
@@ -1567,6 +1634,7 @@ void mirrorGrid(int **gridFrom, int **gridTo, int *numRows, int *numCols)
     }
 }
 
+// copy from gridOrigin
 void resetGridWorked(int **gridOrigin, int **gridWorked, int *numRows, int *numCols)
 {
     for (int i = 0; i < *numRows; i++)
@@ -1578,6 +1646,7 @@ void resetGridWorked(int **gridOrigin, int **gridWorked, int *numRows, int *numC
     }
 }
 
+// copy from gridOrigin -> paste to gridGround
 void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numCols)
 {
     for (int i = 0; i < *numRows; i++)
@@ -1597,6 +1666,7 @@ void resetGridGround(int **gridOrigin, int **gridGround, int *numRows, int *numC
     }
 }
 
+// copy from gridOrigin -> paste to gridMovable // isMovableAtBeginning
 void resetGridMovables(int **gridOrigin, int **gridMovables, int **gridGround, int *numRows, int *numCols)
 {
     for (int i = 0; i < *numRows; i++)
@@ -1613,6 +1683,7 @@ void resetGridMovables(int **gridOrigin, int **gridMovables, int **gridGround, i
     }
 }
 
+// depreciated : char to number
 int replayDeplacements(char deplacementLetter)
 {
     switch (deplacementLetter)
@@ -1632,6 +1703,7 @@ int replayDeplacements(char deplacementLetter)
     }
 }
 
+// only solid block and atdead
 bool isFireStop(int elementID)
 {
     switch (elementID)
@@ -1651,6 +1723,7 @@ bool isFireStop(int elementID)
     }
 }
 
+// true for >=-1 and <=numX
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns)
 {
     if (objectPosition[objectCoo][0] < 0 || objectPosition[objectCoo][0] >= *numRows || objectPosition[objectCoo][1] < 0 || objectPosition[objectCoo][1] >= *numColumns)
@@ -1660,6 +1733,7 @@ bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numCo
     return false;
 }
 
+// brick and at ~at not implemented
 void shotableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridGround, int *numRows, int *numColumns)
 {
     // brick and antitank
@@ -1685,6 +1759,7 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
     }
 }
 
+// water case ok ~missing way and ice
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
@@ -2045,6 +2120,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
     }
 }
 
+// mirror and rmirror ok
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
@@ -2247,21 +2323,20 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
     }
 }
 
+// copy from -> paste to
 void mirrorPosition(int **tankPosition, int fromCoo, int toCoo)
 {
     tankPosition[toCoo][0] = tankPosition[fromCoo][0];
     tankPosition[toCoo][1] = tankPosition[fromCoo][1];
 }
 
+// recursive ok ~missing ice and Bm/Mirror
 bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     bool isOnHighWay = true;
     // you r on n+1
     printf("onfirstHW %d\n", moveID);
-    // print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
     // here on way
-    // while (isOnHighWay)
-    // {
     printf("start highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
     print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
     // follow n+1 tile where u are
@@ -2287,7 +2362,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
                 // next way or tile // move in n+2
                 moveTank(tankPosition, 1, UP, gridWorked, gridGround);
                 printf("legalmove\n");
-                print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
                 // check if n+2 is HW
                 if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
                 {
@@ -2309,8 +2384,6 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             else
             {
                 // you were already blocked by stop tile
-                // isOnHighWay = false;
-
                 printf("illegal move\n");
                 print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
                 return true;
@@ -2322,11 +2395,9 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             tankPosition[1][0] = tankPosition[1][0] + 1;
             printf("outborder\n");
             print3Array(gridWorked, gridMovables, gridGround, numRows, numColumns);
-            // isOnHighWay = false;
             return true;
         }
         break;
-        //////////////////////////////////////////////////////////////////
     case WAYRIGHT:
         tankPosition[1][1] = tankPosition[1][1] + 1;
         if (!(isOutOfBorder(tankPosition, 1, numRows, numColumns)))
@@ -2476,6 +2547,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
     // }
 }
 
+// only water ~missing tunnel
 bool isDeathDestination(int curentTile)
 {
     switch (curentTile)
@@ -2496,6 +2568,7 @@ bool isDeathDestination(int curentTile)
     }
 }
 
+// True if Way or Ice
 bool isHighWay(int elementID)
 {
     switch (elementID)
@@ -2519,6 +2592,7 @@ bool isHighWay(int elementID)
     return false;
 }
 
+// true if next tile is way
 bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
 {
     switch (moveID)

@@ -29,8 +29,8 @@
 - [ ] thin ice
 - [x] reflect
 - [x] trunables
-- [ ]
-- [ ]
+- [x] way
+- [ ] display with spe coos
 - [ ]
 - [ ]
 - [ ]
@@ -59,10 +59,10 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [x]	MirrorRightDown
  - [x]	MirrorDownLeft
  - [x]	MirrorLeftUp
- - [ ]	WayUp
- - [ ]	WayRight
- - [ ]	WayDown
- - [ ]	WayLeft
+ - [x]	WayUp
+ - [x]	WayRight
+ - [x]	WayDown
+ - [x]	WayLeft
  - [x]	CrystalBlock
  - [x]	RotativeMirrorUpRight
  - [x]	RotativeMirrorRightDown
