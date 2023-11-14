@@ -1704,6 +1704,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             { // attention no WAYurdl
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
+                    /// !!! if ice !!!
                     // replace element in new location
                     gridGround[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
@@ -1817,6 +1818,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
+                    /// !!! ice !!!!
                     // erase movable block
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     // copy ground at before location
