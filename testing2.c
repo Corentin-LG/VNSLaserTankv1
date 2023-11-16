@@ -418,54 +418,54 @@ int main()
     }
     printf("go first\n");
 
-    while (!(tankPosition[0][0] == basesPosition[0][0] &&
-             tankPosition[0][1] == basesPosition[0][1]))
-    {
-        int testMove = getRandomMove();
+    // while (!(tankPosition[0][0] == basesPosition[0][0] &&
+    //          tankPosition[0][1] == basesPosition[0][1]))
+    // {
+    //     int testMove = getRandomMove();
 
-        if (testMove == FIRE)
-        {
-            deplacementsHypothese[curseur] = testMove;
-            deplacementsRetenu[curseur] = testMove;
-            turnNumber--;
-            curseur++;
-            turnNumber++;
-            *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
-            *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
-        }
-        else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
-        {
-            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
-            deplacementsHypothese[curseur] = testMove;
-            deplacementsRetenu[curseur] = testMove;
-            turnNumber--;
-            curseur++;
-            turnNumber++;
-        }
-        else
-        {
-            // fully random wip
-            if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
-            {
-                if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
-                {
-                    deplacementsHypothese[curseur] = testMove;
-                    deplacementsRetenu[curseur] = testMove;
-                    curseur++;
-                    turnNumber++;
-                    *objectiveFunctionHypothese = *objectiveFunctionHypothese - 1;
-                    *objectiveFunctionRetenu = *objectiveFunctionRetenu - 1;
-                }
-            }
-            else
-            {
-                // printf("nonlegal\n");
-            }
-        }
-    }
+    //     if (testMove == FIRE)
+    //     {
+    //         deplacementsHypothese[curseur] = testMove;
+    //         deplacementsRetenu[curseur] = testMove;
+    //         turnNumber--;
+    //         curseur++;
+    //         turnNumber++;
+    //         *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
+    //         *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
+    //     }
+    //     else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
+    //     {
+    //         gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
+    //         deplacementsHypothese[curseur] = testMove;
+    //         deplacementsRetenu[curseur] = testMove;
+    //         turnNumber--;
+    //         curseur++;
+    //         turnNumber++;
+    //     }
+    //     else
+    //     {
+    //         // fully random wip
+    //         if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
+    //         {
+    //             if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
+    //             {
+    //                 deplacementsHypothese[curseur] = testMove;
+    //                 deplacementsRetenu[curseur] = testMove;
+    //                 curseur++;
+    //                 turnNumber++;
+    //                 *objectiveFunctionHypothese = *objectiveFunctionHypothese - 1;
+    //                 *objectiveFunctionRetenu = *objectiveFunctionRetenu - 1;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // printf("nonlegal\n");
+    //         }
+    //     }
+    // }
 
-    *curseurDeplacementsHypothese = curseur;
-    *curseurDeplacementsRetenu = curseur;
+    *curseurDeplacementsHypothese = 0;
+    *curseurDeplacementsRetenu = 0;
     printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
     ///////////////////////////
     // MHeuristique
@@ -1599,22 +1599,54 @@ bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked,
     case FIRE:
         return true;
     case UP:
-        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        if (gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] == THINICE)
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+            gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+        }
+        else
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        }
         tankPosition[tankCoo][0] = tankPosition[tankCoo][0] - 1;
         gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = UP;
         return true;
     case RIGHT:
-        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        if (gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] == THINICE)
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+            gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+        }
+        else
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        }
         tankPosition[tankCoo][1] = tankPosition[tankCoo][1] + 1;
         gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = RIGHT;
         return true;
     case DOWN:
-        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        if (gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] == THINICE)
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+            gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+        }
+        else
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        }
         tankPosition[tankCoo][0] = tankPosition[tankCoo][0] + 1;
         gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = DOWN;
         return true;
     case LEFT:
-        gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        if (gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] == THINICE)
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+            gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = WATER;
+        }
+        else
+        {
+            gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+        }
         tankPosition[tankCoo][1] = tankPosition[tankCoo][1] - 1;
         gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = LEFT;
         return true;
@@ -2533,16 +2565,12 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
         }
         break;
     case ICE:
-        // move tank if its legal
-        //  us tankID
-        //  wip bug
         if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
         {
             moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
             printf("legalICEmove\n");
             if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
             {
-                // keep moving so nomove ko ?
                 if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
                     printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
@@ -2560,10 +2588,24 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
         break;
     case THINICE:
         // move tank if its legal same but replace by water
-        if (isLegalMove(tankPosition, 1, gridWorked[tankPosition[1][0]][tankPosition[1][1]], gridWorked, numRows, numColumns))
+        if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
         {
-            // test si remplacer par water direct ? ground car vu de haut ok
-            moveTank(tankPosition, 1, gridWorked[tankPosition[1][0]][tankPosition[1][1]], gridWorked, gridGround);
+            moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
+            printf("legalICEmove\n");
+            if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
+            {
+                if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                {
+                    printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
+                    printf("return false\n");
+                    print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                    return false;
+                }
+            }
+            else if (isFloor(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
+            {
+                return true;
+            }
         }
         break;
     default:

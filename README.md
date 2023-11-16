@@ -68,8 +68,8 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [x]	RotativeMirrorRightDown
  - [x]	RotativeMirrorDownLeft
  - [x]	RotativeMirrorLeftUp
- - [ ]	Ice
- - [ ]	ThinIce
+ - [x]	Ice
+ - [x]	ThinIce
  - [ ]	TunnelRed
  - [ ]	TunnelGreen
  - [ ]	TunnelBlue
