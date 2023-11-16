@@ -169,7 +169,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing8.lt4";
+    const char *filename = ".\\TestingGrids\\testing7.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -417,52 +417,6 @@ int main()
         printf("%d|\n", deplacementsHypothese[w]);
     }
     printf("go first\n");
-
-    // while (!(tankPosition[0][0] == basesPosition[0][0] &&
-    //          tankPosition[0][1] == basesPosition[0][1]))
-    // {
-    //     int testMove = getRandomMove();
-
-    //     if (testMove == FIRE)
-    //     {
-    //         deplacementsHypothese[curseur] = testMove;
-    //         deplacementsRetenu[curseur] = testMove;
-    //         turnNumber--;
-    //         curseur++;
-    //         turnNumber++;
-    //         *objectiveFunctionHypothese = *objectiveFunctionHypothese - 2;
-    //         *objectiveFunctionRetenu = *objectiveFunctionRetenu - 2;
-    //     }
-    //     else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove)
-    //     {
-    //         gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
-    //         deplacementsHypothese[curseur] = testMove;
-    //         deplacementsRetenu[curseur] = testMove;
-    //         turnNumber--;
-    //         curseur++;
-    //         turnNumber++;
-    //     }
-    //     else
-    //     {
-    //         // fully random wip
-    //         if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
-    //         {
-    //             if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
-    //             {
-    //                 deplacementsHypothese[curseur] = testMove;
-    //                 deplacementsRetenu[curseur] = testMove;
-    //                 curseur++;
-    //                 turnNumber++;
-    //                 *objectiveFunctionHypothese = *objectiveFunctionHypothese - 1;
-    //                 *objectiveFunctionRetenu = *objectiveFunctionRetenu - 1;
-    //             }
-    //         }
-    //         else
-    //         {
-    //             // printf("nonlegal\n");
-    //         }
-    //     }
-    // }
 
     *curseurDeplacementsHypothese = 0;
     *curseurDeplacementsRetenu = 0;
@@ -712,7 +666,7 @@ int main()
         *curseurDeplacementsMH = curseur;
         printf("2curserMH %d ; 2curserH %d ; turnNB %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese, turnNumber);
 
-    } while (*curseurDeplacementsMH > 50 && turnNumber < 50);
+    } while (*curseurDeplacementsMH > 500 && turnNumber < 500);
     // > 20 not fast at all, 30 -> 5 seconds
     // while (curseurDeplacementsMH > curseurDeplacementsHypothese);
     // bugtest:

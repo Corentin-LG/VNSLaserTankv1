@@ -1,13 +1,11 @@
-Rows: 6
-Cols: 9
+Rows: 4
+Cols: 5
 Name: NOTHING HERE
 Author: CORENTIN
 Hint: right away.
 Difficulty: -1
 
-D D w D b D w D D
-D D w D D D w D D
-D D w D B D w D D
-D D w D D D w D D
-D D D w D w D D D
-D D D w Tu w D D D
+i i i i Wd
+i Bs D D b
+i Bs Bs Bs Bs
+Wu D i i Tu
