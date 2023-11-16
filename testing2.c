@@ -169,7 +169,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing4.lt4";
+    const char *filename = ".\\TestingGrids\\testing8.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -706,11 +706,11 @@ int main()
                     // printf("nonlegal %d\n", turnNumber);
                 }
             }
+        afterHighWay:
+        nextAction:
         }
-    afterHighWay:
-    nextAction:
         *curseurDeplacementsMH = curseur;
-        printf("2curserMH %d ; 2curserH %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese);
+        printf("2curserMH %d ; 2curserH %d ; turnNB %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese, turnNumber);
 
     } while (*curseurDeplacementsMH > 50 && turnNumber < 50);
     // > 20 not fast at all, 30 -> 5 seconds
@@ -1301,7 +1301,7 @@ bool isFloor(int elementID)
     return false;
 }
 
-// only mirror and antitank
+// only mirror and antitank ~treat Bm different ?
 bool isMovable(int elementID, int *positionID)
 {
     switch (elementID)
@@ -1723,7 +1723,7 @@ bool isFireStop(int elementID)
     }
 }
 
-// true for >=-1 and <=numX
+// true for >=-1 and <=numX; easier for fire calc
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns)
 {
     if (objectPosition[objectCoo][0] < 0 || objectPosition[objectCoo][0] >= *numRows || objectPosition[objectCoo][1] < 0 || objectPosition[objectCoo][1] >= *numColumns)
@@ -2338,7 +2338,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
     printf("onfirstHW %d\n", moveID);
     // here on way
     printf("start highway %d\n", gridWorked[tankPosition[1][0]][tankPosition[1][1]]);
-    print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+    print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
     // follow n+1 tile where u are
     switch (gridGround[tankPosition[1][0]][tankPosition[1][1]])
     {
@@ -2351,7 +2351,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             if (isDeathDestination(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
             {
                 printf("death\n"); // plouf
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 return false;
             }
             // check you can move properly //ok so backward ur sigth
@@ -2366,11 +2366,11 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
                 if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
                 {
                     // check for n+2
-                    if (!onFirstHighWay(tankPosition, NOMOVE, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    if (!onFirstHighWay(tankPosition, UP, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
                         printf("return false\n");
-                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         return false;
                     }
                 }
@@ -2384,7 +2384,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             {
                 // you were already blocked by stop tile
                 printf("illegal move\n");
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 return true;
             }
         }
@@ -2393,7 +2393,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             // you were already blocked by grid's borders
             tankPosition[1][0] = tankPosition[1][0] + 1;
             printf("outborder\n");
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
             return true;
         }
         break;
@@ -2414,11 +2414,11 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
                 printf("legalmove\n");
                 if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
                 {
-                    if (!onFirstHighWay(tankPosition, NOMOVE, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    if (!onFirstHighWay(tankPosition, RIGHT, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
                         printf("return false\n");
-                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         return false;
                     }
                 }
@@ -2430,7 +2430,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             else
             {
                 printf("illegal move\n");
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 return true;
             }
         }
@@ -2438,7 +2438,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
         {
             tankPosition[1][1] = tankPosition[1][1] - 1;
             printf("outborder\n");
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
             return true;
         }
         break;
@@ -2459,11 +2459,11 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
                 printf("legalmove\n");
                 if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
                 {
-                    if (!onFirstHighWay(tankPosition, NOMOVE, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    if (!onFirstHighWay(tankPosition, DOWN, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
                         printf("return false\n");
-                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         return false;
                     }
                 }
@@ -2475,7 +2475,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             else
             {
                 printf("illegal move\n");
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 return true;
             }
         }
@@ -2483,7 +2483,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
         {
             tankPosition[1][0] = tankPosition[1][0] - 1;
             printf("outborder\n");
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
             return true;
         }
         break;
@@ -2504,11 +2504,11 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
                 printf("legalmove\n");
                 if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
                 {
-                    if (!onFirstHighWay(tankPosition, NOMOVE, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    if (!onFirstHighWay(tankPosition, LEFT, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
                         printf("return false\n");
-                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         return false;
                     }
                 }
@@ -2520,7 +2520,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
             else
             {
                 printf("illegal move\n");
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 return true;
             }
         }
@@ -2528,8 +2528,42 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
         {
             tankPosition[1][1] = tankPosition[1][1] + 1;
             printf("outborder\n");
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns,tankPosition[1][0],tankPosition[1][1]);
+            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
             return true;
+        }
+        break;
+    case ICE:
+        // move tank if its legal
+        //  us tankID
+        //  wip bug
+        if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
+        {
+            moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
+            printf("legalICEmove\n");
+            if (isHighWay(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
+            {
+                // keep moving so nomove ko ?
+                if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                {
+                    printf("%d %d %d\n", gridGround[tankPosition[1][0]][tankPosition[1][1]], tankPosition[1][0], tankPosition[1][1]);
+                    printf("return false\n");
+                    print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                    return false;
+                }
+            }
+            else if (isFloor(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
+            {
+                return true;
+            }
+        }
+
+        break;
+    case THINICE:
+        // move tank if its legal same but replace by water
+        if (isLegalMove(tankPosition, 1, gridWorked[tankPosition[1][0]][tankPosition[1][1]], gridWorked, numRows, numColumns))
+        {
+            // test si remplacer par water direct ? ground car vu de haut ok
+            moveTank(tankPosition, 1, gridWorked[tankPosition[1][0]][tankPosition[1][1]], gridWorked, gridGround);
         }
         break;
     default:
@@ -2577,10 +2611,10 @@ bool isHighWay(int elementID)
         return true;
     case WAYLEFT:
         return true;
-    // case ICE:
-    //     return true;
-    // case THINICE:
-    //     return true;
+    case ICE:
+        return true;
+    case THINICE:
+        return true;
     default:
         printf("not highway %d\n", elementID);
         return false;
