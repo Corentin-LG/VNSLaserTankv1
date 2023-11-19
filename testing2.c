@@ -677,45 +677,34 @@ int main()
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Write Output //
+    printf("hyp\n");
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
 
-    // //////////////////////////////////////////////////////////////////
-    // // Replay //
+    // Degrossissement
+    mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+    mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+    mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
+    mirrorPosition(tankPosition, 0, 1);
 
-    // // need further modif
-    // tankPosition[0][0] = tankPosition[1][0];
-    // tankPosition[0][1] = tankPosition[1][1];
-    // resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+    curseur = 0;
+    // trouver last F
+    // trouver le next F
+    // enlever tout les dpl-1 entre les 2
+    // trouver n=n+1
+    // par rapport au dernier n=n-1
+    printf("hyp\n");
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
 
-    // // prendre la méta heur pour l'instant et son curseur
-    // // faire la boucle de déplacement et afficher
+    // curseurDeplacementsMH
+    // deplacementsHypotheseMH
 
-    // for (int i = 0; i < curseurDeplacementsMH; i++)
-    // {
-    //     printf("Move N° %d;\n", i);
-    //     if (deplacementsHypotheseMH[i] == FIRE)
-    //     {
-    //         printArray(gridWorked, numRows, numColumns);
-    //     }
-    //     else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != deplacementsHypotheseMH[i])
-    //     {
-    //         gridWorked[tankPosition[0][0]][tankPosition[0][1]] = deplacementsHypotheseMH[i];
-    //         printArray(gridWorked, numRows, numColumns);
-    //     }
-    //     else
-    //     {
-    //         if (isLegalMove(tankPosition, deplacementsHypotheseMH[i], gridWorked, numRows, numColumns))
-    //         {
-    //             if (moveTank(tankPosition, deplacementsHypotheseMH[i], gridWorked, gridGround))
-    //             {
-    //                 printArray(gridWorked, numRows, numColumns);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             // printf("nonlegal\n");
-    //         }
-    //     }
-    // }
+    //////////////////////////////////////////////////////////////////
+    // Replay //
+
+    for (int i = 0; i < *curseurDeplacementsMH + 1; i++)
+    {
+        /* code */
+    }
 
     //////////////////////////////////////////////////////////////////
     // Display //
@@ -2665,4 +2654,74 @@ bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
         return false;
     }
     return false;
+}
+
+void erazeUselessTurn(int *vector, int curseur)
+{
+    int beginCell = 0;
+    int endCell = 0;
+    int firstFire= 0;
+    int secondFire = 0;
+    bool finish = false;
+    int attention1= FIRE;
+    int attention2 = LEFT;
+    while (*curseur != endCell)
+    {
+        if (*curseur > 2)
+        {
+            for (int i = beginCell; i <= *curseur; i++)
+            {
+                // initiate
+                if (vector[i] == FIRE)
+                {
+                    firstFire = i;
+                    break;
+                }
+                else if (i == *curseur)
+                {
+                    return;
+                }
+            }
+
+            for (int i = firstFire+1; i <= *curseur; i++)
+            {
+                // initiate
+                if (vector[i] == FIRE)
+                {
+                    secondFire = i;
+                    break;
+                }
+                else if (i == *curseur)
+                {
+                    return;
+                }
+            }
+
+            if (i != 0 && vector[i] == firstSameMove)
+                {
+                    endCell = i;
+                    for (int j = beginCell; j <= secondSameMove; j++)
+                    {
+                        /* code */
+                    }
+
+                    break;
+                    break;
+                }
+        }
+        else
+        {
+            printf("trop petit\n");
+        }
+    }
+
+    // init
+    // begin 0
+    // fix 0 value
+
+    // search next same value
+    // eslse quit
+    // if fix = i ,
+    // begin to fix, fix+1 to end-i+fix-1 : copy i to end
+    // end = end-i+fix-1
 }
