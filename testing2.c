@@ -79,6 +79,7 @@ void printBaseArray(int **array, int *rows, int cols);
 void printMovingLetters(int *array, int *curseur);
 void printMovingLettersWithoutPointor(int *array, int curseur);
 int replayDeplacements(char deplacementLetter);
+void erazeUselessTurn(int *vector, int *curseur);
 //////////////////////////////////////////////////////////////////
 // Structs //
 struct ConversionTable
@@ -169,7 +170,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing7.lt4";
+    const char *filename = ".\\TestingGrids\\testing2.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -701,10 +702,13 @@ int main()
     //////////////////////////////////////////////////////////////////
     // Replay //
 
-    for (int i = 0; i < *curseurDeplacementsMH + 1; i++)
-    {
-        /* code */
-    }
+    erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
+    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
+
+    // for (int i = 0; i < *curseurDeplacementsMH + 1; i++)
+    // {
+    //     /* code */
+    // }
 
     //////////////////////////////////////////////////////////////////
     // Display //
@@ -2656,72 +2660,116 @@ bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
     return false;
 }
 
-void erazeUselessTurn(int *vector, int curseur)
+void erazeUselessTurn(int *vector, int *curseur)
 {
-    int beginCell = 0;
-    int endCell = 0;
-    int firstFire= 0;
-    int secondFire = 0;
-    bool finish = false;
-    int attention1= FIRE;
-    int attention2 = LEFT;
-    while (*curseur != endCell)
+    int lastFireCell = 0;  // rank
+    int lastDirection = 1; // up
+
+    for (int i = 0; i < *curseur; i++)
     {
-        if (*curseur > 2)
+        // printf("\n|i=%d; *curseur = %d\n", i, *curseur);
+        if (i == *curseur)
         {
-            for (int i = beginCell; i <= *curseur; i++)
+            printf("|breek\n");
+            break;
+        }
+        else if (vector[i] == 0 && lastFireCell == 0)
+        {
+            lastFireCell = i + 1; // rank
+            // printf("|lF1=%d __", lastFireCell);
+        }
+        else if (vector[i] == 0 && lastFireCell != 0)
+        {
+            if (i - lastFireCell == 0)
             {
-                // initiate
-                if (vector[i] == FIRE)
-                {
-                    firstFire = i;
-                    break;
-                }
-                else if (i == *curseur)
-                {
-                    return;
-                }
+                lastFireCell = lastFireCell + 1;
+                // printf("|lF2=%d __", lastFireCell);
+                goto skip;
             }
-
-            for (int i = firstFire+1; i <= *curseur; i++)
+            if (i - lastFireCell == 1)
             {
-                // initiate
-                if (vector[i] == FIRE)
-                {
-                    secondFire = i;
-                    break;
-                }
-                else if (i == *curseur)
-                {
-                    return;
-                }
+                lastFireCell = 0;
+                // printf("|lF3=%d __", lastFireCell);
+                goto skip;
             }
-
-            if (i != 0 && vector[i] == firstSameMove)
+        }
+        else if (vector[i] != 0)
+        {
+            if (vector[i] == lastDirection)
+            {
+                // reset
+                lastFireCell = 0;
+                // printf("|lF4=%d __", lastFireCell);
+                // for i -> i+1 next
+            }
+            else if (vector[i + 1] != 0 && vector[i + 1] != lastDirection && vector[i + 1] != vector[i])
+            {
+                // implicite: vector[i] != lastDirection
+                if (lastFireCell != 0)
                 {
-                    endCell = i;
-                    for (int j = beginCell; j <= secondSameMove; j++)
+                    for (int j = 0; j < *curseur - 1; j++)
                     {
-                        /* code */
+                        // erase
+                        vector[lastFireCell + j] = vector[lastFireCell + 1 + j];
                     }
-
-                    break;
-                    break;
                 }
+                else
+                {
+                    for (int j = 0; j < *curseur - 1; j++)
+                    {
+                        // erase
+                        vector[i + j] = vector[i + 1 + j];
+                    }
+                }
+                *curseur = *curseur - 1;
+                // printf("|c1=%d __", *curseur);
+                i = i - 1;
+                // printf("|i1=%d __", i);
+                // for (int k = 0; k < *curseur; k++)
+                // {
+                //     printf("%d ", tableau[k]);
+                // }
+            }
+            else if (vector[i + 1] == 0)
+            {
+                // turn
+                lastDirection = vector[i];
+                // printf("|ld1=%d __", lastDirection);
+                // reset
+                lastFireCell = 0;
+                // printf("|lF5=%d __", lastFireCell);
+            }
+            else if (vector[i + 1] == lastDirection)
+            {
+                if (vector[i + 2] == lastDirection)
+                {
+                    /* code */
+                    printf("|bruh __\n");
+                }
+                else if (vector[i + 2] != lastDirection)
+                {
+                    // delete 2
+                    for (int j = 0; j < *curseur - 2; j++)
+                    {
+                        // erase
+                        vector[i + j] = vector[i + 2 + j];
+                    }
+                    *curseur = *curseur - 2;
+                    // printf("|c2=%d __", *curseur);
+                    i = i - 1; //
+                    // printf("|i2=%d __", i);
+                }
+            }
+            else if (vector[i + 1] == vector[i])
+            {
+                // turn
+                lastDirection = vector[i];
+                // printf("|ld2=%d __", lastDirection);
+                // reset
+                lastFireCell = 0;
+                // printf("|lF6=%d __", lastFireCell);
+            }
         }
-        else
-        {
-            printf("trop petit\n");
-        }
+    skip:
     }
-
-    // init
-    // begin 0
-    // fix 0 value
-
-    // search next same value
-    // eslse quit
-    // if fix = i ,
-    // begin to fix, fix+1 to end-i+fix-1 : copy i to end
-    // end = end-i+fix-1
 }
