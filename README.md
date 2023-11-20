@@ -39,11 +39,7 @@
 enhance cursor length -> long so the same for hyps
 curserH -192712320 ; curserR -192713072
 gridOrigin = lignes : 4 et colonnes : -3
-int tableau[] = {0, /2, 3, 0, 2, 2, 4, 0, 0, 1, 1, 3, 2, 2, 3, 3, 0, 3, 1, 0};
-i7
-ld4
-lf8
-c
+
 ### tuiles faites :
  - [x]	TankUp
  - [x]	TankRight
