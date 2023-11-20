@@ -40,6 +40,9 @@ enhance cursor length -> long so the same for hyps
 curserH -192712320 ; curserR -192713072
 gridOrigin = lignes : 4 et colonnes : -3
 
+- replay no show godd deplacement
+- fire : if do nothing erase fire
+
 ### tuiles faites :
  - [x]	TankUp
  - [x]	TankRight

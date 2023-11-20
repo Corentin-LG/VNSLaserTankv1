@@ -677,38 +677,147 @@ int main()
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Write Output //
-    printf("hyp\n");
-    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-
     // Degrossissement
-    mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
-    mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
-    mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
-    mirrorPosition(tankPosition, 0, 1);
-
-    curseur = 0;
-    // trouver last F
-    // trouver le next F
-    // enlever tout les dpl-1 entre les 2
-    // trouver n=n+1
-    // par rapport au dernier n=n-1
     printf("hyp\n");
     printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-
-    // curseurDeplacementsMH
-    // deplacementsHypotheseMH
+    erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
+    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
 
     //////////////////////////////////////////////////////////////////
     // Replay //
 
-    erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
-    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
+    mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+    mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+    mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
+    mirrorPosition(tankPosition, 2, 0);
+    mirrorPosition(tankPosition, 2, 1);
+    *objectiveFunctionMH = 0;
+    *currentTankDirection = 1;
 
-    // for (int i = 0; i < *curseurDeplacementsMH + 1; i++)
-    // {
-    //     /* code */
-    // }
+    for (int i = 0; i < *curseurDeplacementsMH; i++)
+    {
+        int testMove2 = deplacementsHypotheseMH[i];
+        if (testMove2 == FIRE)
+        {
+            firePosition[0][0] = tankPosition[0][0];
+            firePosition[0][1] = tankPosition[0][1];
+            firePosition[1][0] = tankPosition[0][0];
+            firePosition[1][1] = tankPosition[0][1];
+            *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+            *currentFireDirection = *currentTankDirection;
+            getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
+            fireDead = true;
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
+            {
+                firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+                fireDead = false;
+            }
+            while (!(isOutOfBorder(firePosition, 0, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
+            {
+                fireDead = false;
+                if (isFireTrought(firedTileID))
+                {
+                    getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
+                    fireDead = false;
+                    goto nextFirePosition2;
+                }
+                else if (isShootable(firedTileID, currentFireDirection))
+                {
+                    shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridGround, numRows, numColumns);
+                    fireDead = true;
+                    goto nextFirePosition2;
+                }
+                else if (isMovable(firedTileID, currentFireDirection) || firedTileID == MOVABLEBLOC)
+                {
+                    switch (firedTileID)
+                    {
+                    case MOVABLEBLOC:
+                    case MIRRORUPRIGHT:
+                    case MIRRORRIGHTDOWN:
+                    case MIRRORDOWNLEFT:
+                    case MIRRORLEFTUP:
+                        if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                        {
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                    fireDead = true;
+                    goto nextFirePosition2;
+                }
+                else if (isFireDeflect(firedTileID, currentFireDirection))
+                {
+                    if (deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                    }
+                    fireDead = false;
+                    goto nextFirePosition2;
+                }
+                else if (isTurnable(firedTileID, currentFireDirection))
+                {
+                    if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                    }
+                    fireDead = true;
+                    goto nextFirePosition2;
+                }
+                else
+                {
+                    resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+                    resetGridWorked(gridOrigin, gridWorkedCopy, numRows, numColumns);
+                    fireDead = true;
+                    goto nextFirePosition2;
+                }
+            nextFirePosition2:
+                if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
+                {
+                    firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+                    fireDead = false;
+                }
+            }
+            *objectiveFunctionMH = *objectiveFunctionMH - 2;
+        }
+        else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove2 && testMove2 != FIRE)
+        {
+            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove2;
+            *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+        }
+        else
+        {
+            if (isLegalMove(tankPosition, 0, testMove2, gridWorked, numRows, numColumns))
+            {
+                mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+                mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+                mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
+                mirrorPosition(tankPosition, 0, 1);
+                if (nextHighWay(tankPosition, 1, testMove2, gridWorked))
+                {
+                    if (moveTank(tankPosition, 1, testMove2, gridWorked, gridGround))
+                    {
+                        if (onFirstHighWay(tankPosition, testMove2, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                        {
+                            mirrorPosition(tankPosition, 1, 0);
+                            *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove2;
+                            *currentTankDirection = testMove2;
+                            goto afterHighWay2;
+                        }
+                    }
+                }
+                else
+                {
+                    if (moveTank(tankPosition, 0, testMove2, gridWorked, gridGround))
+                    {
+                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                    }
+                }
+            }
+        }
+    afterHighWay2:
+        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+        /////////////////////////////////////
+    }
 
     //////////////////////////////////////////////////////////////////
     // Display //
@@ -2744,6 +2853,7 @@ void erazeUselessTurn(int *vector, int *curseur)
                 if (vector[i + 2] == lastDirection)
                 {
                     /* code */
+                    printf("vi-1=%d, vi=%d, vi+1=%d, vi+2=%d, ld=%d\n", vector[i - 1], vector[i], vector[i + 1], vector[i + 2],lastDirection);
                     printf("|bruh __\n");
                 }
                 else if (vector[i + 2] != lastDirection)
