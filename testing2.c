@@ -679,13 +679,15 @@ int main()
 
     // Degrossissement
     printf("hyp\n");
-    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
     erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
     printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
 
     //////////////////////////////////////////////////////////////////
     // Replay //
-
+    resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+    resetGridMovables(gridOrigin, gridMovables, gridGround, numRows, numColumns);
+    resetGridGround(gridOrigin, gridGround, numRows, numColumns);
     mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
     mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
     mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
@@ -693,16 +695,19 @@ int main()
     mirrorPosition(tankPosition, 2, 1);
     *objectiveFunctionMH = 0;
     *currentTankDirection = 1;
-
+    int lastDirection2 = UP;
+    int testMove2;
+// ko
     for (int i = 0; i < *curseurDeplacementsMH; i++)
     {
-        int testMove2 = deplacementsHypotheseMH[i];
+        testMove2 = deplacementsHypotheseMH[i];
         if (testMove2 == FIRE)
         {
             firePosition[0][0] = tankPosition[0][0];
             firePosition[0][1] = tankPosition[0][1];
             firePosition[1][0] = tankPosition[0][0];
             firePosition[1][1] = tankPosition[0][1];
+            printf("i=%d; bf td=%d; gWT0=%d\n", i, *currentTankDirection, gridWorked[tankPosition[0][0]][tankPosition[0][1]]);
             *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
             *currentFireDirection = *currentTankDirection;
             getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
@@ -719,14 +724,13 @@ int main()
                 {
                     getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
                     fireDead = false;
-                    goto nextFirePosition2;
                 }
                 else if (isShootable(firedTileID, currentFireDirection))
                 {
                     shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridGround, numRows, numColumns);
                     fireDead = true;
-                    goto nextFirePosition2;
                 }
+                // or move
                 else if (isMovable(firedTileID, currentFireDirection) || firedTileID == MOVABLEBLOC)
                 {
                     switch (firedTileID)
@@ -736,89 +740,78 @@ int main()
                     case MIRRORRIGHTDOWN:
                     case MIRRORDOWNLEFT:
                     case MIRRORLEFTUP:
-                        if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                        {
-                        }
+                        movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
                         break;
                     default:
+                        printf("ismov firID %d\n", firedTileID);
                         break;
                     }
                     fireDead = true;
-                    goto nextFirePosition2;
                 }
                 else if (isFireDeflect(firedTileID, currentFireDirection))
                 {
-                    if (deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                    {
-                    }
+                    deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
                     fireDead = false;
-                    goto nextFirePosition2;
                 }
                 else if (isTurnable(firedTileID, currentFireDirection))
                 {
-                    if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                    {
-                    }
+                    turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
                     fireDead = true;
-                    goto nextFirePosition2;
                 }
                 else
                 {
+                    printf("elif fireTiled firedTileID=%d ; currentFireDirection=%d\n", firedTileID, *currentFireDirection);
+                    printf("elif fp00=%d ; fp01=%d\n", firePosition[0][0], firePosition[0][1]);
                     resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
                     resetGridWorked(gridOrigin, gridWorkedCopy, numRows, numColumns);
+                    printArray(gridWorked, numRows, numColumns);
                     fireDead = true;
-                    goto nextFirePosition2;
                 }
-            nextFirePosition2:
                 if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
                 {
                     firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                     fireDead = false;
                 }
+                else
+                {
+                    printf("\nyou're finished :\n");
+                    printf("Out fp00 = %d, fp01 = %d\n", firePosition[0][0], firePosition[0][1]);
+                }
             }
             *objectiveFunctionMH = *objectiveFunctionMH - 2;
         }
-        else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove2 && testMove2 != FIRE)
+        else if (testMove2 != lastDirection2 && testMove2 != FIRE)
         {
             gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove2;
-            *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
         }
-        else
+        else if (nextHighWay(tankPosition, 1, testMove2, gridWorked))
         {
-            if (isLegalMove(tankPosition, 0, testMove2, gridWorked, numRows, numColumns))
+            if (moveTank(tankPosition, 1, testMove2, gridWorked, gridGround))
             {
-                mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
-                mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
-                mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
-                mirrorPosition(tankPosition, 0, 1);
-                if (nextHighWay(tankPosition, 1, testMove2, gridWorked))
+                if (onFirstHighWay(tankPosition, testMove2, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
-                    if (moveTank(tankPosition, 1, testMove2, gridWorked, gridGround))
-                    {
-                        if (onFirstHighWay(tankPosition, testMove2, gridWorked, gridMovables, gridGround, numRows, numColumns))
-                        {
-                            mirrorPosition(tankPosition, 1, 0);
-                            *objectiveFunctionMH = *objectiveFunctionMH - 1;
-                            gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove2;
-                            *currentTankDirection = testMove2;
-                            goto afterHighWay2;
-                        }
-                    }
-                }
-                else
-                {
-                    if (moveTank(tankPosition, 0, testMove2, gridWorked, gridGround))
-                    {
-                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
-                    }
+                    mirrorPosition(tankPosition, 1, 0);
+                    *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                    gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove2;
+                    *currentTankDirection = testMove2;
                 }
             }
         }
-    afterHighWay2:
-        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
-        /////////////////////////////////////
+        else
+        {
+            if (moveTank(tankPosition, 0, testMove2, gridWorked, gridGround))
+            {
+                deplacementsHypotheseMH[curseur] = testMove2;
+                *objectiveFunctionMH = *objectiveFunctionMH - 1;
+            }
+        }
+        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
     }
-
+    mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+    mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+    mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
+    mirrorPosition(tankPosition, 2, 0);
+    mirrorPosition(tankPosition, 2, 1);
     //////////////////////////////////////////////////////////////////
     // Display //
     printf("gridOrigin = lignes : %d et colonnes : %d\n", *numRows, *numColumns);
@@ -1138,6 +1131,7 @@ void firstHeuristique(int **tank, int **bases, int baseNumber)
 // Array Functions //
 
 // apply next coordinates for fire from tank
+// UP to LEFT : 1 to 4; not FIRE and not 5
 void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTankDirection)
 {
     switch (*currentTankDirection)
@@ -1155,7 +1149,7 @@ void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTa
         firePosition[0][1] = tankPosition[0][1] - 1;
         break;
     default:
-        printf("errorMov %d\n", *currentTankDirection);
+        printf("errorMove %d\n", *currentTankDirection);
         break;
     }
 }
@@ -2853,7 +2847,7 @@ void erazeUselessTurn(int *vector, int *curseur)
                 if (vector[i + 2] == lastDirection)
                 {
                     /* code */
-                    printf("vi-1=%d, vi=%d, vi+1=%d, vi+2=%d, ld=%d\n", vector[i - 1], vector[i], vector[i + 1], vector[i + 2],lastDirection);
+                    printf("vi-1=%d, vi=%d, vi+1=%d, vi+2=%d, ld=%d\n", vector[i - 1], vector[i], vector[i + 1], vector[i + 2], lastDirection);
                     printf("|bruh __\n");
                 }
                 else if (vector[i + 2] != lastDirection)
