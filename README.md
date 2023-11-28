@@ -54,10 +54,10 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [x]	SolidBlock
  - [x]	MovableBloc
  - [x]	Bricks
- - [ ]	AntiTankUp
- - [ ]	AntiTankRight
- - [ ]	AntiTankDown
- - [ ]	AntiTankLeft
+ - [x]	AntiTankUp
+ - [x]	AntiTankRight
+ - [x]	AntiTankDown
+ - [x]	AntiTankLeft
  - [x]	MirrorUpRight
  - [x]	MirrorRightDown
  - [x]	MirrorDownLeft
@@ -81,8 +81,8 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [ ]	TunnelPink
  - [ ]	TunnelWhite
  - [ ]	TunnelDark
- - [ ]	AntiTankUpDead
- - [ ]	AntiTankRightDead
- - [ ]	AntiTankDownDead
- - [ ]	AntiTankLeftDead
+ - [x]	AntiTankUpDead
+ - [x]	AntiTankRightDead
+ - [x]	AntiTankDownDead
+ - [x]	AntiTankLeftDead
  - [x]	WaterFull

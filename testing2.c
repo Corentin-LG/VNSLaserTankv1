@@ -3280,7 +3280,7 @@ bool isHighWay(int elementID)
     case THINICE:
         return true;
     default:
-        printf("not highway %d\n", elementID);
+        printf("not highway id:%d\n", elementID);
         return false;
     }
     return false;
@@ -3453,24 +3453,24 @@ void erazeUselessTurn(int *vector, int *curseur)
 bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *numColumns)
 {
     int rangeAT[1][2];
-    printf("ATA !!\n");
+    // printf("ATA !!\n");
 
     for (int i = UP; i <= LEFT; i++)
     {
-        printf("ATA !! %d\n", i);
+        // printf("ATA !! %d\n", i);
         rangeAT[0][0] = tankPosition[0][0];
         rangeAT[0][1] = tankPosition[0][1];
         switch (i)
         {
         case UP:
-            printf("ATA up %d tp %d\n", i, tankPosition[0][0]);
+            // printf("ATA up %d tp %d\n", i, tankPosition[0][0]);
             if (tankPosition[0][0] > 0)
             {
                 for (int j = 1; j <= tankPosition[0][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[0][0] - j;
-                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
-                    printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKDOWN)
                     {
                         printf("up ok\n");
@@ -3479,30 +3479,30 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printf("no upped at bc bolcked\n");
-                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                        // printf("no upped at bc bolcked\n");
+                        // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
-                    printf("for up\n");
+                    // printf("for up\n");
                 }
             }
             else
             {
-                printf("no upped at\n");
-                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
-                printf("no upped at\n");
+                // printf("no upped at\n");
+                // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                // printf("no upped at\n");
                 goto nextCross;
             }
             goto nextCross;
 
         case RIGHT:
-            printf("ATA r %d tp %d\n", i, tankPosition[0][1]);
+            // printf("ATA r %d tp %d\n", i, tankPosition[0][1]);
             if (tankPosition[0][1] < *numColumns - 1)
             {
                 for (int j = 1; j <= *numColumns - 1 - tankPosition[0][1]; j++)
                 {
                     rangeAT[0][1] = tankPosition[0][1] + j;
-                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKLEFT)
                     {
                         printf("r ok\n");
@@ -3511,29 +3511,29 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printf("no righted at bc bolcked\n");
-                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                        // printf("no righted at bc bolcked\n");
+                        // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
-                printf("no righted at\n");
+                // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                // printf("no righted at\n");
                 goto nextCross;
             }
             goto nextCross;
 
         case DOWN:
-            printf("ATA d %d tp %d\n", i, tankPosition[0][0]);
+            // printf("ATA d %d tp %d\n", i, tankPosition[0][0]);
 
             if (tankPosition[0][0] > *numRows - 1)
             {
                 for (int j = 1; j <= *numRows - 1 - tankPosition[0][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[0][0] + j;
-                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKUP)
                     {
                         printf("d ok\n");
@@ -3542,27 +3542,27 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printf("no downed at bc bolcked\n");
-                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                        // printf("no downed at bc bolcked\n");
+                        // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
-                printf("no downed at\n");
+                // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                // printf("no downed at\n");
                 goto nextCross;
             }
             goto nextCross;
         case LEFT:
-            printf("ATA l %d tp %d\n", i, tankPosition[0][1]);
+            // printf("ATA l %d tp %d\n", i, tankPosition[0][1]);
             if (tankPosition[0][1] > 0)
             {
                 for (int j = 1; j <= tankPosition[0][1]; j++)
                 {
                     rangeAT[0][1] = tankPosition[0][1] - j;
-                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKRIGHT)
                     {
                         printf("l ok\n");
@@ -3571,16 +3571,16 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printf("no lefted at bc bolcked\n");
-                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                        // printf("no lefted at bc bolcked\n");
+                        // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
-                printf("no lefted at\n");
+                // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                // printf("no lefted at\n");
                 goto nextCross;
             }
             goto nextCross;
@@ -3593,3 +3593,14 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
     printf("no AT action\n");
     return false;
 }
+
+// tunnel :
+// si 1 seul tu meurs
+// si 2 mais 1 blocqué, tu restes
+// si débloqué tu te tp puis vérif si mort -> tir seulement
+
+//chek if on t (mv aussi)
+//check all grid status at work
+// calc fire
+
+// paral : pour chaque base
