@@ -692,10 +692,21 @@ int main()
                     {
                         if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
                         {
-                            deplacementsHypotheseMH[curseur] = testMove;
-                            curseur++;
-                            turnNumber++;
-                            *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                            if (antiTankAction(tankPosition, gridWorked, numRows, numColumns))
+                            {
+                                printf("ata DEADt only mv\n");
+                                mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
+                                mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
+                                mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
+                                mirrorPosition(tankPosition, 1, 0);
+                            }
+                            else
+                            {
+                                deplacementsHypotheseMH[curseur] = testMove;
+                                curseur++;
+                                turnNumber++;
+                                *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                            }
                         }
                     }
                 }
@@ -3442,123 +3453,142 @@ void erazeUselessTurn(int *vector, int *curseur)
 bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *numColumns)
 {
     int rangeAT[1][2];
-    rangeAT[0][0] = tankPosition[0][0];
-    rangeAT[0][1] = tankPosition[0][1];
+    printf("ATA !!\n");
 
     for (int i = UP; i <= LEFT; i++)
     {
+        printf("ATA !! %d\n", i);
+        rangeAT[0][0] = tankPosition[0][0];
+        rangeAT[0][1] = tankPosition[0][1];
         switch (i)
         {
         case UP:
+            printf("ATA up %d tp %d\n", i, tankPosition[0][0]);
             if (tankPosition[0][0] > 0)
             {
                 for (int j = 1; j <= tankPosition[0][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[0][0] - j;
+                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKDOWN)
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                        printf("up ok\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return true;
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         printf("no upped at bc bolcked\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
+                    printf("for up\n");
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                 printf("no upped at\n");
-                return false;
+                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                printf("no upped at\n");
+                goto nextCross;
             }
-            break;
+            goto nextCross;
 
         case RIGHT:
-            if (tankPosition[0][1] > *numColumns - 1)
+            printf("ATA r %d tp %d\n", i, tankPosition[0][1]);
+            if (tankPosition[0][1] < *numColumns - 1)
             {
                 for (int j = 1; j <= *numColumns - 1 - tankPosition[0][1]; j++)
                 {
                     rangeAT[0][1] = tankPosition[0][1] + j;
+                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKLEFT)
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                        printf("r ok\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return true;
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         printf("no righted at bc bolcked\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                 printf("no righted at\n");
-                return false;
+                goto nextCross;
             }
-            break;
+            goto nextCross;
 
         case DOWN:
+            printf("ATA d %d tp %d\n", i, tankPosition[0][0]);
+
             if (tankPosition[0][0] > *numRows - 1)
             {
                 for (int j = 1; j <= *numRows - 1 - tankPosition[0][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[0][0] + j;
+                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKUP)
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                        printf("d ok\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return true;
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         printf("no downed at bc bolcked\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                 printf("no downed at\n");
-                return false;
+                goto nextCross;
             }
-            break;
+            goto nextCross;
         case LEFT:
+            printf("ATA l %d tp %d\n", i, tankPosition[0][1]);
             if (tankPosition[0][1] > 0)
             {
                 for (int j = 1; j <= tankPosition[0][1]; j++)
                 {
                     rangeAT[0][1] = tankPosition[0][1] - j;
+                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKRIGHT)
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                        printf("l ok\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return true;
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
                     {
-                        printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
                         printf("no lefted at bc bolcked\n");
+                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return false;
                     }
                 }
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, tankPosition[1][0], tankPosition[1][1]);
+                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                 printf("no lefted at\n");
-                return false;
+                goto nextCross;
             }
-            break;
+            goto nextCross;
         default:
             printf("err move atAction %d\n", i);
             return false;
         }
+    nextCross:
     }
     printf("no AT action\n");
     return false;
