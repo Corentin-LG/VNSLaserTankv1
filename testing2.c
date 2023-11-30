@@ -182,7 +182,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing9.lt4";
+    const char *filename = ".\\TestingGrids\\testing10.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -3655,13 +3655,9 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
     return false;
 }
 
-// cheat 4 tankCoo : tankCoo + 1 % 2
+// only 4 tank
 bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
-    // supfn have tpo != tp1
-    // wip
-    // what move ? sub or sup fn
-
     // get tunnelNumber
     int tunnelColor = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
     int tunnelNumber = 0;
