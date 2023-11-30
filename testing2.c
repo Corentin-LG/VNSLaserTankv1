@@ -20,12 +20,14 @@ int getRandomMove();
 // grid
 
 bool isFloor(int elementID);
+bool isTunnel(int elementID);
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns);
 // tank
 
 bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
 bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 bool isHighWay(int elementID);
+bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // elements
 
 bool isMovable(int elementID, int *positionID);
@@ -39,7 +41,7 @@ bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
 bool isFireTrought(int elementID);
 bool isFireDeflect(int elementID, int *positionID);
 bool isFireStop(int elementID);
-bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *numColumns);
+bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numRows, int *numColumns);
 
 void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTankDirection);
 void shotableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
@@ -180,7 +182,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing7.lt4";
+    const char *filename = ".\\TestingGrids\\testing9.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -486,6 +488,7 @@ int main()
 
                 // position + 1
                 getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
+                // print2ArrayBraket(gridWorked, gridGround, numRows, numColumns, tankPosition[0][0],tankPosition[0][1]);
                 // if (turnNumber > 50) {
                 //     goto bugtest;
                 // }
@@ -505,6 +508,7 @@ int main()
                     {
                         // printf("throught %d\n", turnNumber);
                         getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
+                        print2ArrayBraket(gridWorked, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                         fireDead = false;
                         goto nextFirePosition;
                     }
@@ -513,7 +517,7 @@ int main()
                     {
                         printf("bang , cursor = %d\n", curseur);
                         shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
-                        if (antiTankAction(tankPosition, gridWorked, numRows, numColumns))
+                        if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                         {
                             mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
                             mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
@@ -527,6 +531,7 @@ int main()
                     // or move
                     else if (isMovable(firedTileID, currentFireDirection) || firedTileID == MOVABLEBLOC)
                     {
+                        // tunnel case !!!!!!!!!!!!!!!!!
                         switch (firedTileID)
                         {
                         case MOVABLEBLOC:
@@ -553,7 +558,7 @@ int main()
                             printf("!!! ismov firID %d\n", firedTileID);
                             break;
                         }
-                        if (antiTankAction(tankPosition, gridWorked, numRows, numColumns))
+                        if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                         {
                             printf("ata DEADt\n");
                             mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
@@ -627,7 +632,7 @@ int main()
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove && testMove != FIRE)
             {
-                // printf("turn cursor = %d\n\n", curseur);
+                printf("turn cursor = %d\n\n", curseur);
                 gridWorked[tankPosition[0][0]][tankPosition[0][1]] = testMove;
                 *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
                 deplacementsHypotheseMH[curseur] = testMove;
@@ -658,7 +663,15 @@ int main()
                             // you r on way so what way ?
                             if (onFirstHighWay(tankPosition, testMove, gridWorked, gridMovables, gridGround, numRows, numColumns))
                             {
-                                if (antiTankAction(tankPosition, gridWorked, numRows, numColumns))
+                                if (isTunnel(gridGround[tankPosition[1][0]][tankPosition[1][1]]))
+                                {
+                                    if (!tunnelTPTank(tankPosition, 1, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                                    {
+                                        printf("TP DEADt\n");
+                                        goto deadHighWay;
+                                    }
+                                }
+                                if (antiTankAction(tankPosition, 1, gridWorked, numRows, numColumns))
                                 {
                                     printf("ata DEADt\n");
                                     goto deadHighWay;
@@ -692,7 +705,22 @@ int main()
                     {
                         if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
                         {
-                            if (antiTankAction(tankPosition, gridWorked, numRows, numColumns))
+                            printArrayBraket(gridWorked, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+                            printf("bf tp? gd%d tp10 %d tp11 %d\n",gridGround[tankPosition[0][0]][tankPosition[0][1]], tankPosition[0][0], tankPosition[0][1]);
+                            // wip
+                            if (isTunnel(gridGround[tankPosition[0][0]][tankPosition[0][1]]))
+                            {
+                                printf("it's tuinnel\n");
+                                if (!tunnelTPTank(tankPosition, 0, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                                {
+                                    printf("TP DEAD only mv\n");
+                                    mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
+                                    mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
+                                    mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
+                                    mirrorPosition(tankPosition, 1, 0);
+                                }
+                            }
+                            if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                             {
                                 printf("ata DEADt only mv\n");
                                 mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
@@ -702,6 +730,8 @@ int main()
                             }
                             else
                             {
+                                printf("ok no at\n");
+                                mirrorPosition(tankPosition, 0, 1);
                                 deplacementsHypotheseMH[curseur] = testMove;
                                 curseur++;
                                 turnNumber++;
@@ -717,6 +747,7 @@ int main()
             }
         afterHighWay:
         nextAction:
+        printf("mirroring %d\n", curseur);
             mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
             mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
             mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
@@ -1082,6 +1113,7 @@ void printArray(int **array, int *rows, int *cols)
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 // Display a grid with brakets
@@ -1102,6 +1134,7 @@ void printArrayBraket(int **array, int *rows, int *cols, int bRow, int bCol)
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 // Display a grid with |
@@ -1122,6 +1155,7 @@ void printArrayTarget(int **array, int *rows, int *cols, int bRow, int bCol)
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 // Display 2 grids
@@ -1504,6 +1538,33 @@ bool isFloor(int elementID)
     case TUNNELDARK:
         return true;
     case WATERFULL:
+        return true;
+    default:
+        // printf("other floor %d\n", floorID);
+        return false;
+    }
+    return false;
+}
+
+bool isTunnel(int elementID)
+{
+    switch (elementID)
+    {
+    case TUNNELRED:
+        return true;
+    case TUNNELGREEN:
+        return true;
+    case TUNNELBLUE:
+        return true;
+    case TUNNELCYAN:
+        return true;
+    case TUNNELYELLOW:
+        return true;
+    case TUNNELPINK:
+        return true;
+    case TUNNELWHITE:
+        return true;
+    case TUNNELDARK:
         return true;
     default:
         // printf("other floor %d\n", floorID);
@@ -3450,7 +3511,7 @@ void erazeUselessTurn(int *vector, int *curseur)
     }
 }
 
-bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *numColumns)
+bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numRows, int *numColumns)
 {
     int rangeAT[1][2];
     // printf("ATA !!\n");
@@ -3458,17 +3519,17 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
     for (int i = UP; i <= LEFT; i++)
     {
         // printf("ATA !! %d\n", i);
-        rangeAT[0][0] = tankPosition[0][0];
-        rangeAT[0][1] = tankPosition[0][1];
+        rangeAT[0][0] = tankPosition[tankCoo][0];
+        rangeAT[0][1] = tankPosition[tankCoo][1];
         switch (i)
         {
         case UP:
-            // printf("ATA up %d tp %d\n", i, tankPosition[0][0]);
-            if (tankPosition[0][0] > 0)
+            // printf("ATA up %d tp %d\n", i, tankPosition[tankCoo][0]);
+            if (tankPosition[tankCoo][0] > 0)
             {
-                for (int j = 1; j <= tankPosition[0][0]; j++)
+                for (int j = 1; j <= tankPosition[tankCoo][0]; j++)
                 {
-                    rangeAT[0][0] = tankPosition[0][0] - j;
+                    rangeAT[0][0] = tankPosition[tankCoo][0] - j;
                     // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKDOWN)
@@ -3496,12 +3557,12 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
             goto nextCross;
 
         case RIGHT:
-            // printf("ATA r %d tp %d\n", i, tankPosition[0][1]);
-            if (tankPosition[0][1] < *numColumns - 1)
+            // printf("ATA r %d tp %d\n", i, tankPosition[tankCoo][1]);
+            if (tankPosition[tankCoo][1] < *numColumns - 1)
             {
-                for (int j = 1; j <= *numColumns - 1 - tankPosition[0][1]; j++)
+                for (int j = 1; j <= *numColumns - 1 - tankPosition[tankCoo][1]; j++)
                 {
-                    rangeAT[0][1] = tankPosition[0][1] + j;
+                    rangeAT[0][1] = tankPosition[tankCoo][1] + j;
                     // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKLEFT)
                     {
@@ -3526,13 +3587,13 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
             goto nextCross;
 
         case DOWN:
-            // printf("ATA d %d tp %d\n", i, tankPosition[0][0]);
+            // printf("ATA d %d tp %d\n", i, tankPosition[tankCoo][0]);
 
-            if (tankPosition[0][0] > *numRows - 1)
+            if (tankPosition[tankCoo][0] > *numRows - 1)
             {
-                for (int j = 1; j <= *numRows - 1 - tankPosition[0][0]; j++)
+                for (int j = 1; j <= *numRows - 1 - tankPosition[tankCoo][0]; j++)
                 {
-                    rangeAT[0][0] = tankPosition[0][0] + j;
+                    rangeAT[0][0] = tankPosition[tankCoo][0] + j;
                     // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKUP)
                     {
@@ -3556,12 +3617,12 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
             }
             goto nextCross;
         case LEFT:
-            // printf("ATA l %d tp %d\n", i, tankPosition[0][1]);
-            if (tankPosition[0][1] > 0)
+            // printf("ATA l %d tp %d\n", i, tankPosition[tankCoo][1]);
+            if (tankPosition[tankCoo][1] > 0)
             {
-                for (int j = 1; j <= tankPosition[0][1]; j++)
+                for (int j = 1; j <= tankPosition[tankCoo][1]; j++)
                 {
-                    rangeAT[0][1] = tankPosition[0][1] - j;
+                    rangeAT[0][1] = tankPosition[tankCoo][1] - j;
                     // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKRIGHT)
                     {
@@ -3594,13 +3655,100 @@ bool antiTankAction(int **tankPosition, int **gridWorked, int *numRows, int *num
     return false;
 }
 
+// cheat 4 tankCoo : tankCoo + 1 % 2
+bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+{
+    // supfn have tpo != tp1
+    // wip
+    // what move ? sub or sup fn
+
+    // get tunnelNumber
+    int tunnelColor = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+    int tunnelNumber = 0;
+    for (int i = 0; i < *numRows; i++)
+    {
+        for (int j = 0; j < *numColumns; j++)
+        {
+            if (gridGround[i][j] == tunnelColor)
+            {
+                tunnelNumber = tunnelNumber + 1;
+            }
+        }
+    }
+    if (tunnelNumber == 1)
+    {
+        printf("tp kill !!!!\n");
+        return false;
+    }
+
+    printf("tunnel nmb %d colo %d\n", tunnelNumber, tunnelColor);
+
+    // get tunnelTankCoo + fill arrayTunnel
+    int arrayTunnel[tunnelNumber][2];
+    tunnelNumber = 0;
+    int tunnelTankCoo = 0;
+    for (int i = 0; i < *numRows; i++)
+    {
+        for (int j = 0; j < *numColumns; j++)
+        {
+            if (gridGround[i][j] == tunnelColor)
+            {
+                if (tankPosition[tankCoo][0] == i && tankPosition[tankCoo][1] == j)
+                {
+                    tunnelTankCoo = tunnelNumber;
+                }
+                printf("ggij %d\n", gridGround[i][j]);
+                arrayTunnel[tunnelNumber][0] = i;
+                arrayTunnel[tunnelNumber][1] = j;
+                tunnelNumber = tunnelNumber + 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < tunnelNumber; i++)
+    {
+        printf("array Tunnel : %d ; %d\n", arrayTunnel[i][0], arrayTunnel[i][1]);
+    }
+
+    // tp to right tunnel
+    for (int k = 0; k < tunnelNumber; k++)
+    {
+        if (k != tunnelTankCoo)
+        {
+            // if next tunnel empty
+            if (gridWorked[arrayTunnel[k][0]][arrayTunnel[k][1]] == gridGround[arrayTunnel[k][0]][arrayTunnel[k][1]])
+            {
+                printf("begin tp !\n");
+                printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+
+                printf("tp0 %d tp1 %d !\n", tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+                printf("at0 %d at1 %d !\n", arrayTunnel[k][0], arrayTunnel[k][1]);
+                gridWorked[arrayTunnel[k][0]][arrayTunnel[k][1]] = gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+                printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+
+                printf("gw tp %d ; gd tp %d !\n", gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]], gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]]);
+                gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]] = gridGround[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]];
+                printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+
+                tankPosition[tankCoo][0] = arrayTunnel[k][0];
+                tankPosition[tankCoo][1] = arrayTunnel[k][1];
+                printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+                printf("end tp !\n");
+                return true;
+            }
+        }
+    }
+    printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+    printf("no tp...\n");
+    return true;
+}
 // tunnel :
 // si 1 seul tu meurs
 // si 2 mais 1 blocqué, tu restes
 // si débloqué tu te tp puis vérif si mort -> tir seulement
 
-//chek if on t (mv aussi)
-//check all grid status at work
-// calc fire
+// chek if on t (mv aussi)
+// check all grid status at work
+//  calc fire
 
 // paral : pour chaque base
