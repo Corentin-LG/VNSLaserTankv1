@@ -14,7 +14,7 @@
 1 - [ ]
 	1 - [x]
 	2 - [x]
-	3 - [ ]
+	3 - [x]
 	3.1 - [x]
 	4 - [ ]
 2 - [ ] le replay
@@ -22,14 +22,14 @@
 4 - [ ]
 
 ## 3 Règles à faire
-- [x] MvBlock
+- [ ] MvBlock
 - [ ] Enemy
 - [ ] change rnd solution
 - [ ] ice
 - [ ] thin ice
-- [x] reflect
-- [x] trunables
-- [x] way
+- [ ] reflect
+- [ ] trunables
+- [ ] way
 - [x] display with spe coos
 - [ ] replay
 - [ ]
@@ -52,27 +52,27 @@ gridOrigin = lignes : 4 et colonnes : -3
  - [x]	Base
  - [x]	Water
  - [x]	SolidBlock
- - [x]	MovableBloc
+ - [ ]	MovableBloc
  - [x]	Bricks
- - [x]	AntiTankUp
- - [x]	AntiTankRight
- - [x]	AntiTankDown
- - [x]	AntiTankLeft
- - [x]	MirrorUpRight
- - [x]	MirrorRightDown
- - [x]	MirrorDownLeft
- - [x]	MirrorLeftUp
- - [x]	WayUp
- - [x]	WayRight
- - [x]	WayDown
- - [x]	WayLeft
- - [x]	CrystalBlock
+ - [ ]	AntiTankUp
+ - [ ]	AntiTankRight
+ - [ ]	AntiTankDown
+ - [ ]	AntiTankLeft
+ - [ ]	MirrorUpRight
+ - [ ]	MirrorRightDown
+ - [ ]	MirrorDownLeft
+ - [ ]	MirrorLeftUp
+ - [ ]	WayUp
+ - [ ]	WayRight
+ - [ ]	WayDown
+ - [ ]	WayLeft
+ - [ ]	CrystalBlock
  - [x]	RotativeMirrorUpRight
  - [x]	RotativeMirrorRightDown
  - [x]	RotativeMirrorDownLeft
  - [x]	RotativeMirrorLeftUp
- - [x]	Ice
- - [x]	ThinIce
+ - [ ]	Ice
+ - [ ]	ThinIce
  - [ ]	TunnelRed
  - [ ]	TunnelGreen
  - [ ]	TunnelBlue

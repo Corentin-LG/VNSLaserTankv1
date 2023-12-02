@@ -36,6 +36,7 @@ bool isShootable(int elementID, int *positionID);
 bool isTurnable(int elementID, int *positionID);
 bool isDeathDestination(int curentTile);
 bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid);
+bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
 // fire
 
 bool isFireTrought(int elementID);
@@ -182,7 +183,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing10.lt4";
+    const char *filename = ".\\TestingGrids\\testing12.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -517,6 +518,7 @@ int main()
                     {
                         printf("bang , cursor = %d\n", curseur);
                         shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
+                        // when brick explode
                         if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                         {
                             mirrorGrid(gridWorkedCopy, gridWorked, numRows, numColumns);
@@ -531,7 +533,9 @@ int main()
                     // or move
                     else if (isMovable(firedTileID, currentFireDirection) || firedTileID == MOVABLEBLOC)
                     {
-                        // tunnel case !!!!!!!!!!!!!!!!!
+                        // tunnel case in movableAction
+                        // save 0 tp and grids
+                        // if at false : save n+1
                         switch (firedTileID)
                         {
                         case MOVABLEBLOC:
@@ -706,7 +710,7 @@ int main()
                         if (moveTank(tankPosition, 0, testMove, gridWorked, gridGround))
                         {
                             printArrayBraket(gridWorked, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
-                            printf("bf tp? gd%d tp10 %d tp11 %d\n",gridGround[tankPosition[0][0]][tankPosition[0][1]], tankPosition[0][0], tankPosition[0][1]);
+                            printf("bf tp? gd%d tp10 %d tp11 %d\n", gridGround[tankPosition[0][0]][tankPosition[0][1]], tankPosition[0][0], tankPosition[0][1]);
                             // wip
                             if (isTunnel(gridGround[tankPosition[0][0]][tankPosition[0][1]]))
                             {
@@ -747,7 +751,7 @@ int main()
             }
         afterHighWay:
         nextAction:
-        printf("mirroring %d\n", curseur);
+            printf("mirroring %d\n", curseur);
             mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
             mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
             mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
@@ -2148,7 +2152,6 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             { // attention no WAYurdl
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
-                    /// !!! if ice !!!
                     // replace element in new location
                     gridGround[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
@@ -2158,6 +2161,24 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                // wip // is ice/thinice and no mv
+                // if is tunnel -> tunnelfn
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2184,6 +2205,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2209,6 +2246,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2233,6 +2285,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2270,6 +2337,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2292,6 +2375,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2327,6 +2426,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2349,6 +2464,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2384,6 +2515,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2406,6 +2553,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2441,6 +2604,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2463,6 +2642,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2503,6 +2698,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2526,6 +2737,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2548,6 +2775,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2580,6 +2823,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2606,6 +2865,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2628,6 +2903,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2659,6 +2950,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2681,6 +2988,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2707,6 +3030,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -2738,6 +3077,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2761,6 +3116,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
+                    gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
                 {
@@ -2783,6 +3154,22 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
+                }
+                if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
+                {
+                    gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
+                    gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
+                    gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
+                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
 
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
@@ -3037,7 +3424,7 @@ void mirrorPosition(int **tankPosition, int fromCoo, int toCoo)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// recursive ok ~missing ice and Bm/Mirror
+// recursive ok ~missing ice and Bm/Mirror -> new fn//wip
 bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     bool isOnHighWay = true;
@@ -3293,6 +3680,75 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
     return true;
     // }
 }
+
+// // wip
+// //  recursive ok ~missing ice and Bm/Mirror -> new fn//wip
+// bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+// {
+//     bool isOnHighWay = true;
+//     // you r on n+1
+//     printf("onfirsICE %d\n", moveID);
+//     // here on way
+//     printf("start ice %d\n", gridWorked[movableX][movableY]);
+//     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+//     // follow n+1 tile where u are
+//     switch (gridGround[movableX][movableY])
+//     {
+//     case ICE:
+//     //movableAction()
+//         if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
+//         {
+//             moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
+//             printf("legalICEmove\n");
+//             if (isHighWay(gridGround[movableX][movableY]))
+//             {
+//                 if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
+//                 {
+//                     printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
+//                     printf("return false\n");
+//                     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+//                     return false;
+//                 }
+//             }
+//             else if (isFloor(gridGround[movableX][movableY]))
+//             {
+//                 return true;
+//             }
+//         }
+
+//         break;
+//     case THINICE:
+//         // move tank if its legal same but replace by water
+//         if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
+//         {
+//             moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
+//             printf("legalICEmove\n");
+//             if (isHighWay(gridGround[movableX][movableY]))
+//             {
+//                 if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
+//                 {
+//                     printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
+//                     printf("return false\n");
+//                     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+//                     return false;
+//                 }
+//             }
+//             else if (isFloor(gridGround[movableX][movableY]))
+//             {
+//                 return true;
+//             }
+//         }
+//         break;
+//     default:
+//         printf("stop highway %d\n", gridWorked[movableX][movableY]);
+//         isOnHighWay = false;
+//         break;
+//     }
+//     // }
+//     printf("end of highway\n");
+//     return true;
+//     // }
+// }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3302,21 +3758,13 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// only water ~missing tunnel
+// only water ~change name ?
 bool isDeathDestination(int curentTile)
 {
     switch (curentTile)
     {
     case WATER:
         return true;
-    // case TUNNELRED:
-    // case TUNNELGREEN:
-    // case TUNNELBLUE:
-    // case TUNNELCYAN:
-    // case TUNNELYELLOW:
-    // case TUNNELPINK:
-    // case TUNNELWHITE:
-    // case TUNNELDARK:
     default:
         return false;
         break;
@@ -3396,6 +3844,7 @@ bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
     return false;
 }
 
+// if brue -> thnik 0..n-1 + n+1..+00 ?
 void erazeUselessTurn(int *vector, int *curseur)
 {
     int lastFireCell = 0;  // rank
@@ -3511,6 +3960,7 @@ void erazeUselessTurn(int *vector, int *curseur)
     }
 }
 
+// every fire or move
 bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numRows, int *numColumns)
 {
     int rangeAT[1][2];
@@ -3738,13 +4188,97 @@ bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridM
     printf("no tp...\n");
     return true;
 }
-// tunnel :
-// si 1 seul tu meurs
-// si 2 mais 1 blocqué, tu restes
-// si débloqué tu te tp puis vérif si mort -> tir seulement
 
-// chek if on t (mv aussi)
-// check all grid status at work
-//  calc fire
+// only 4 mv
+bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+{
+    // get tunnelNumber
+    int tunnelColor = gridGround[movableX][movableY];
+    int tunnelNumber = 0;
+    for (int i = 0; i < *numRows; i++)
+    {
+        for (int j = 0; j < *numColumns; j++)
+        {
+            if (gridGround[i][j] == tunnelColor)
+            {
+                tunnelNumber = tunnelNumber + 1;
+            }
+        }
+    }
+
+    if (tunnelNumber == 0)
+    {
+        printf("tp m ERROR!!\n");
+        return false;
+    }
+
+    if (tunnelNumber == 1)
+    {
+        gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        printf("tp eraze m!!\n");
+        return true;
+    }
+
+    printf("tunnel nmb %d colo %dm\n", tunnelNumber, tunnelColor);
+
+    // get tunnelMVCoo + fill arrayTunnel
+    int arrayTunnel[tunnelNumber][2];
+    tunnelNumber = 0;
+    int tunnelMVCoo = 0;
+    for (int i = 0; i < *numRows; i++)
+    {
+        for (int j = 0; j < *numColumns; j++)
+        {
+            if (gridGround[i][j] == tunnelColor)
+            {
+                if (movableX == i && movableY == j)
+                {
+                    tunnelMVCoo = tunnelNumber;
+                }
+                printf("ggij m%d\n", gridGround[i][j]);
+                arrayTunnel[tunnelNumber][0] = i;
+                arrayTunnel[tunnelNumber][1] = j;
+                tunnelNumber = tunnelNumber + 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < tunnelNumber; i++)
+    {
+        printf("array Tunnel m : %d ; %d\n", arrayTunnel[i][0], arrayTunnel[i][1]);
+    }
+
+    // tp to right tunnel
+    for (int k = 0; k < tunnelNumber; k++)
+    {
+        if (k != tunnelMVCoo)
+        {
+            // if next tunnel empty
+            if (gridWorked[arrayTunnel[k][0]][arrayTunnel[k][1]] == gridGround[arrayTunnel[k][0]][arrayTunnel[k][1]])
+            {
+                printf("begin tp m!\n");
+                printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
+
+                printf("tp0 %d tp1 %d m!\n", movableX, movableY);
+                printf("at0 %d at1 %d m!\n", arrayTunnel[k][0], arrayTunnel[k][1]);
+                gridWorked[arrayTunnel[k][0]][arrayTunnel[k][1]] = gridWorked[movableX][movableY];
+                printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
+
+                printf("gw tp %d ; gd tp %d m!\n", gridWorked[movableX][movableY], gridGround[movableX][movableY]);
+                gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+                printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
+                printf("end tp m!\n");
+                return true;
+            }
+        }
+    }
+    printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
+    printf("no tp...m\n");
+    return true;
+}
+// movables :
+// tp . + ice only
+// other +1
+// destroy mv
 
 // paral : pour chaque base
