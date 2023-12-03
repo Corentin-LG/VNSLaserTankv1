@@ -56,6 +56,13 @@ void mirrorPosition(int **tankPosition, int fromCoo, int toCoo);
 // Movables
 
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
+bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
+bool isMovableFloor(int elementID);
+bool isLegalMVMove(int movableX, int movableY, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
+bool nextMoovableFloor(int movableX, int movableY, int moveID, int **arrayGrid);
+bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, int **gridMovables, int **gridGround);
+
+bool isIce(int elementID);
 // Reflectables
 
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns);
@@ -472,6 +479,7 @@ int main()
         while (!(tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
         {
+        beforFire:
             int testMove = getRandomMove();
 
             if (testMove == FIRE)
@@ -525,7 +533,7 @@ int main()
                             mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
                             mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
                             fireDead = false;
-                            goto nextFirePosition;
+                            goto beforFire;
                         }
                         fireDead = true;
                         goto nextFirePosition;
@@ -569,7 +577,7 @@ int main()
                             mirrorGrid(gridMovablesCopy, gridMovables, numRows, numColumns);
                             mirrorGrid(gridGroundCopy, gridGround, numRows, numColumns);
                             fireDead = false;
-                            goto nextFirePosition;
+                            goto beforFire;
                         }
                         fireDead = true;
                         goto nextFirePosition;
@@ -613,26 +621,29 @@ int main()
                         resetGridWorked(gridOrigin, gridWorkedCopy, numRows, numColumns);
                         printArray(gridWorked, numRows, numColumns);
                         fireDead = true;
-                        goto nextFirePosition;
+                        goto beforFire;
                     }
                 nextFirePosition:
                     // printf("endFire %d\n", turnNumber);
                     if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
                     {
-                        // printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
+                        printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], curseur);
                         firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
                         fireDead = false;
                     }
                     else
                     {
-                        // printf("\nyou're finished :\n");
-                        // printf("Out fp00 = %d, fp01 = %d, cursor = %d\n\n", firePosition[0][0], firePosition[0][1], curseur);
+                        printf("\nyou're finished :\n");
+                        printf("Out fp00 = %d, fp01 = %d, cursor = %d\n\n", firePosition[0][0], firePosition[0][1], curseur);
                     }
                 }
                 deplacementsHypotheseMH[curseur] = testMove;
                 curseur++;
                 turnNumber++;
                 *objectiveFunctionMH = *objectiveFunctionMH - 2;
+                mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+                mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+                mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
             }
             else if (gridWorked[tankPosition[0][0]][tankPosition[0][1]] != testMove && testMove != FIRE)
             {
@@ -648,7 +659,6 @@ int main()
             {
                 // printf("move cursor = %d\n\n", curseur);
                 // here cases with ice, way, enemy, tunnel
-                // wip
                 // if n+1 ok
                 if (isLegalMove(tankPosition, 0, testMove, gridWorked, numRows, numColumns))
                 {
@@ -1451,6 +1461,91 @@ bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, 
     return false;
 }
 
+// know next move legality for parametric array
+bool isLegalMVMove(int movableX, int movableY, int moveID, int **arrayGrid, int *nbRows, int *nbColumns)
+{
+    // il faut trouver si oui ou non, le tank peut se déplacer
+    switch (moveID)
+    {
+    case FIRE:
+        // printf("F");
+        return true;
+    case UP:
+        // printf("[UP]\n");
+        // Already at max up position
+        if (movableX == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextMoovableFloor(movableX, movableY, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case RIGHT:
+        // printf("[RIGHT]\n");
+        if (movableY == *nbColumns - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextMoovableFloor(movableX, movableY, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case DOWN:
+        // printf("[DOWN]\n");
+        if (movableX == *nbRows - 1)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextMoovableFloor(movableX, movableY, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    case LEFT:
+        // printf("[LEFT]\n");
+        if (movableY == 0)
+        {
+            return false;
+        }
+        else
+        {
+            if (nextMoovableFloor(movableX, movableY, moveID, arrayGrid))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    default:
+        printf("illegalMove = %d\n", moveID);
+        return false;
+    }
+    return false;
+}
+
 bool autoKill(int **arrayTankCell, int positionID, int **arrayGrid)
 {
     // il faut trouver si oui ou non, le tank peut faire son tire
@@ -1505,6 +1600,54 @@ bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
     return false;
 }
 
+bool nextMoovableFloor(int movableX, int movableY, int moveID, int **arrayGrid)
+{
+    switch (moveID)
+    {
+    case UP:
+        // check if future ground is ok
+        if (isMovableFloor(arrayGrid[movableX - 1][movableY]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case RIGHT:
+        if (isMovableFloor(arrayGrid[movableX][movableY + 1]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case DOWN:
+        if (isMovableFloor(arrayGrid[movableX + 1][movableY]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    case LEFT:
+        if (isMovableFloor(arrayGrid[movableX][movableY - 1]))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    default:
+        printf("X%d ", moveID);
+        return false;
+    }
+    return false;
+}
+
 bool isFloor(int elementID)
 {
     switch (elementID)
@@ -1513,7 +1656,55 @@ bool isFloor(int elementID)
         return true;
     case BASE:
         return true;
-    case WAYUP: // attention
+    case WAYUP:
+        return true;
+    case WAYRIGHT:
+        return true;
+    case WAYDOWN:
+        return true;
+    case WAYLEFT:
+        return true;
+    case ICE:
+        return true;
+    case THINICE:
+        return true;
+    case TUNNELRED:
+        return true;
+    case TUNNELGREEN:
+        return true;
+    case TUNNELBLUE:
+        return true;
+    case TUNNELCYAN:
+        return true;
+    case TUNNELYELLOW:
+        return true;
+    case TUNNELPINK:
+        return true;
+    case TUNNELWHITE:
+        return true;
+    case TUNNELDARK:
+        return true;
+    case WATERFULL:
+        return true;
+    default:
+        // printf("other floor %d\n", floorID);
+        return false;
+    }
+    return false;
+}
+
+bool isMovableFloor(int elementID)
+{
+    switch (elementID)
+    {
+    case DIRT:
+        return true;
+    case BASE:
+        return true;
+    // adding
+    case WATER:
+        return true;
+    case WAYUP:
         return true;
     case WAYRIGHT:
         return true;
@@ -1930,6 +2121,92 @@ bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked,
     return false;
 }
 
+// n : Ground -> Work ; n+1 : URDL ~if tank/mobale ?
+bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, int **gridMovables, int **gridGround)
+{
+    int movableID = 0;
+    switch (testMoveID)
+    {
+    case UP:
+        movableID = gridWorked[movableX][movableY];
+        if (gridGround[movableX][movableY] == THINICE)
+        {
+            gridWorked[movableX][movableY] = WATER;
+            gridGround[movableX][movableY] = WATER;
+        }
+        else if (gridGround[movableX][movableY] == WATER)
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            return false;
+        }
+        else
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        }
+        movableX = movableX - 1;
+        gridWorked[movableX][movableY] = movableID;
+        return true;
+    case RIGHT:
+        movableID = gridWorked[movableX][movableY];
+        if (gridGround[movableX][movableY] == THINICE)
+        {
+            gridWorked[movableX][movableY] = WATER;
+            gridGround[movableX][movableY] = WATER;
+        }
+        else if (gridGround[movableX][movableY] == WATER)
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            return false;
+        }
+        else
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        }
+        movableY = movableY + 1;
+        gridWorked[movableX][movableY] = movableID;
+        return true;
+    case DOWN:
+        movableID = gridWorked[movableX][movableY];
+        if (gridGround[movableX][movableY] == THINICE)
+        {
+            gridWorked[movableX][movableY] = WATER;
+            gridGround[movableX][movableY] = WATER;
+        }
+        else if (gridGround[movableX][movableY] == WATER)
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            return false;
+        }
+        else
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        }
+        movableX = movableX + 1;
+        gridWorked[movableX][movableY] = movableID;
+        return true;
+    case LEFT:
+        movableID = gridWorked[movableX][movableY];
+        if (gridGround[movableX][movableY] == THINICE)
+        {
+            gridWorked[movableX][movableY] = WATER;
+            gridGround[movableX][movableY] = WATER;
+        }
+        else if (gridGround[movableX][movableY] == WATER)
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            return false;
+        }
+        else
+        {
+            gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        }
+        movableY = movableY - 1;
+        gridWorked[movableX][movableY] = movableID;
+        return true;
+    }
+    return false;
+}
+
 // copy from -> paste to
 void mirrorGrid(int **gridFrom, int **gridTo, int *numRows, int *numCols)
 {
@@ -2132,7 +2409,7 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Bm+mirror+AT : water case ok ~missing way and ice
+// Bm+mirror+AT : water case ok ~missing way and ice // can return false and continue
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
@@ -2162,8 +2439,6 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
-                // wip // is ice/thinice and no mv
-                // if is tunnel -> tunnelfn
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
@@ -2180,14 +2455,19 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                         return true;
                     }
                 }
-
+                // isMovable always false 4 mv
                 if (isFloor(gridGround[firePosition[0][0]][firePosition[0][1]]) && !isMovable(gridMovables[firePosition[0][0]][firePosition[0][1]], currentFireDirection))
-                {
+                { // ok because water always treated
                     gridMovables[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // return directly false if no ICE/THINICE
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2229,6 +2509,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2269,6 +2553,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2309,6 +2597,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2329,10 +2621,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             {
                 if (gridGround[firePosition[0][0]][firePosition[0][1]] == WATER)
                 {
-                    /// !!! ice !!!!
-                    // erase movable block
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
-                    // copy ground at before location
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
@@ -2361,6 +2650,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2400,6 +2693,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2450,6 +2747,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2489,6 +2790,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2539,6 +2844,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2578,6 +2887,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2628,6 +2941,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2667,6 +2984,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2678,8 +2999,6 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
         print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
         printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
-        //////////wip and revert true/false
-        // int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns
     case ANTITANKUP:
         // positionID point to distination
         switch (*currentFireDirection)
@@ -2722,6 +3041,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2761,6 +3084,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2800,6 +3127,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2808,7 +3139,9 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             printf("X%d ", *currentFireDirection);
             return false;
         }
-        ///
+        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        printf("findmovable cfd %d\n", *currentFireDirection);
+        return false;
     case ANTITANKRIGHT:
         switch (*currentFireDirection)
         {
@@ -2847,6 +3180,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2889,6 +3226,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2928,6 +3269,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -2936,6 +3281,9 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             printf("X%d ", *currentFireDirection);
             return false;
         }
+        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        printf("findmovable cfd %d\n", *currentFireDirection);
+        return false;
     case ANTITANKDOWN:
         switch (*currentFireDirection)
         {
@@ -2974,6 +3322,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3013,6 +3365,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3055,6 +3411,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3063,6 +3423,9 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             printf("X%d ", *currentFireDirection);
             return false;
         }
+        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        printf("findmovable cfd %d\n", *currentFireDirection);
+        return false;
     case ANTITANKLEFT:
         switch (*currentFireDirection)
         {
@@ -3101,6 +3464,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3140,6 +3507,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3179,6 +3550,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
                     print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("onIce ko \n");
+                    }
                     return true;
                 }
             }
@@ -3190,6 +3565,9 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
             printf("X%d ", *currentFireDirection);
             return false;
         }
+        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        printf("findmovable cfd %d\n", *currentFireDirection);
+        return false;
     default:
         // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
         return false;
@@ -3681,74 +4059,57 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
     // }
 }
 
-// // wip
-// //  recursive ok ~missing ice and Bm/Mirror -> new fn//wip
-// bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
-// {
-//     bool isOnHighWay = true;
-//     // you r on n+1
-//     printf("onfirsICE %d\n", moveID);
-//     // here on way
-//     printf("start ice %d\n", gridWorked[movableX][movableY]);
-//     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
-//     // follow n+1 tile where u are
-//     switch (gridGround[movableX][movableY])
-//     {
-//     case ICE:
-//     //movableAction()
-//         if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
-//         {
-//             moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
-//             printf("legalICEmove\n");
-//             if (isHighWay(gridGround[movableX][movableY]))
-//             {
-//                 if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
-//                 {
-//                     printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
-//                     printf("return false\n");
-//                     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
-//                     return false;
-//                 }
-//             }
-//             else if (isFloor(gridGround[movableX][movableY]))
-//             {
-//                 return true;
-//             }
-//         }
-
-//         break;
-//     case THINICE:
-//         // move tank if its legal same but replace by water
-//         if (isLegalMove(tankPosition, 1, moveID, gridWorked, numRows, numColumns))
-//         {
-//             moveTank(tankPosition, 1, moveID, gridWorked, gridGround);
-//             printf("legalICEmove\n");
-//             if (isHighWay(gridGround[movableX][movableY]))
-//             {
-//                 if (!onFirstHighWay(tankPosition, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
-//                 {
-//                     printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
-//                     printf("return false\n");
-//                     print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
-//                     return false;
-//                 }
-//             }
-//             else if (isFloor(gridGround[movableX][movableY]))
-//             {
-//                 return true;
-//             }
-//         }
-//         break;
-//     default:
-//         printf("stop highway %d\n", gridWorked[movableX][movableY]);
-//         isOnHighWay = false;
-//         break;
-//     }
-//     // }
-//     printf("end of highway\n");
-//     return true;
-//     // }
-// }
+// recursive ok ~missing ice and Bm/Mirror -> new fn//wip // false : no need roll back but copy
+bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
+{
+    // here on way
+    printf("start ice %d\n", gridWorked[movableX][movableY]);
+    // follow n+1 tile where u are
+    switch (gridGround[movableX][movableY])
+    {
+    case ICE:
+    case THINICE:
+        // you r on n+1
+        printf("onfirsICE %d\n", moveID);
+        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+        if (isLegalMVMove(movableX, movableY, moveID, gridWorked, numRows, numColumns))
+        { // n+2 cheked
+            printf("legalICEmove\n");
+            // moveMovable handle ICE/THINCE/WATER cases
+            if (moveMovable(movableX, movableY, moveID, gridWorked, gridMovables, gridGround))
+            {
+                // check n+2
+                if (isIce(gridGround[movableX][movableY]))
+                {
+                    if (!movableOnIce(movableX, movableY, moveID, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
+                        printf("return ice false\n");
+                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+                        return false;
+                    }
+                }
+                else if (isFloor(gridGround[movableX][movableY]))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                // if error or water
+                printf("illegalICEmove\n");
+                printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
+                return false;
+            }
+        }
+        return false;
+    default:
+        printf("stop ice m %d\n", gridWorked[movableX][movableY]);
+        return false;
+    }
+    printf("end of ice m\n");
+    return false;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3790,6 +4151,22 @@ bool isHighWay(int elementID)
         return true;
     default:
         printf("not highway id:%d\n", elementID);
+        return false;
+    }
+    return false;
+}
+
+// True if Ice
+bool isIce(int elementID)
+{
+    switch (elementID)
+    {
+    case ICE:
+        return true;
+    case THINICE:
+        return true;
+    default:
+        printf("not ice id:%d\n", elementID);
         return false;
     }
     return false;
