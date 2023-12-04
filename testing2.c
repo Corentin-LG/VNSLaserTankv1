@@ -61,7 +61,7 @@ bool isMovableFloor(int elementID);
 bool isLegalMVMove(int movableX, int movableY, int moveID, int **arrayGrid, int *nbRows, int *nbColumns);
 bool nextMoovableFloor(int movableX, int movableY, int moveID, int **arrayGrid);
 bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, int **gridMovables, int **gridGround);
-
+void advanceMovableCoo(int *movableX, int *movableY, int moveID);
 bool isIce(int elementID);
 // Reflectables
 
@@ -721,7 +721,6 @@ int main()
                         {
                             printArrayBraket(gridWorked, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                             printf("bf tp? gd%d tp10 %d tp11 %d\n", gridGround[tankPosition[0][0]][tankPosition[0][1]], tankPosition[0][0], tankPosition[0][1]);
-                            // wip
                             if (isTunnel(gridGround[tankPosition[0][0]][tankPosition[0][1]]))
                             {
                                 printf("it's tuinnel\n");
@@ -3802,7 +3801,7 @@ void mirrorPosition(int **tankPosition, int fromCoo, int toCoo)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// recursive ok ~missing ice and Bm/Mirror -> new fn//wip
+// tank exclusif + recursive
 bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     bool isOnHighWay = true;
@@ -4059,7 +4058,7 @@ bool onFirstHighWay(int **tankPosition, int moveID, int **gridWorked, int **grid
     // }
 }
 
-// recursive ok ~missing ice and Bm/Mirror -> new fn//wip // false : no need roll back but copy
+// only mv + recursive : false = no need roll back but copy
 bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
     // here on way
@@ -4071,13 +4070,20 @@ bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int 
     case THINICE:
         // you r on n+1
         printf("onfirsICE %d\n", moveID);
-        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
         if (isLegalMVMove(movableX, movableY, moveID, gridWorked, numRows, numColumns))
         { // n+2 cheked
+            printf("mvx %d, mvy %d, mID %d\n", movableX, movableY, moveID);
             printf("legalICEmove\n");
             // moveMovable handle ICE/THINCE/WATER cases
             if (moveMovable(movableX, movableY, moveID, gridWorked, gridMovables, gridGround))
             {
+                int *ptx = &movableX;
+                int *pty = &movableY;
+                printf("mvx %d, mvy %d, mID %d, ptx %d, pty %d", movableX, movableY, moveID, *ptx, *pty);
+                // update xy wip
+                advanceMovableCoo(ptx, pty, moveID);
+                printf("mvx %d, mvy %d, mID %d, ptx %d, pty %d", movableX, movableY, moveID, *ptx, *pty);
                 // check n+2
                 if (isIce(gridGround[movableX][movableY]))
                 {
@@ -4653,6 +4659,29 @@ bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMo
     printf("no tp...m\n");
     return true;
 }
+
+void advanceMovableCoo(int *movableX, int *movableY, int moveID)
+{
+    switch (moveID)
+    {
+    case UP:
+        *movableX = *movableX - 1;
+        break;
+    case RIGHT:
+        *movableY = *movableY + 1;
+        break;
+    case DOWN:
+        *movableX = *movableX + 1;
+        break;
+    case LEFT:
+        *movableY = *movableY - 1;
+        break;
+    default:
+        printf("errorMove mvx %d mvy %d\n", movableX, movableY);
+        break;
+    }
+}
+
 // movables :
 // tp . + ice only
 // other +1
