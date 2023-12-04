@@ -190,7 +190,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing12.lt4";
+    const char *filename = ".\\TestingGrids\\testing11.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
