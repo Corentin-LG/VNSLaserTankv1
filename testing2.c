@@ -190,7 +190,7 @@ int main()
     // const char *filename = ".\\Grids\\Gary-II.lt4";
     // const char *filename = ".\\Grids\\Challenge-IV.lt4";
     // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing11.lt4";
+    const char *filename = ".\\TestingGrids\\testing13.lt4";
     const int CYCLES = 5;
 
     printf("%s\n", filename);
@@ -2122,12 +2122,13 @@ bool moveTank(int **tankPosition, int tankCoo, int testMoveID, int **gridWorked,
 
 // n : Ground -> Work ; n+1 : URDL ~if tank/mobale ?
 bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, int **gridMovables, int **gridGround)
-{
+{ // gridmov !!!!!!
     int movableID = 0;
     switch (testMoveID)
     {
     case UP:
         movableID = gridWorked[movableX][movableY];
+        gridMovables[movableX][movableY] = NOTHING;
         if (gridGround[movableX][movableY] == THINICE)
         {
             gridWorked[movableX][movableY] = WATER;
@@ -2141,12 +2142,15 @@ bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, i
         else
         {
             gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            gridMovables[movableX][movableY] = NOTHING;
         }
         movableX = movableX - 1;
         gridWorked[movableX][movableY] = movableID;
+        gridMovables[movableX][movableY] = movableID;
         return true;
     case RIGHT:
         movableID = gridWorked[movableX][movableY];
+        gridMovables[movableX][movableY] = NOTHING;
         if (gridGround[movableX][movableY] == THINICE)
         {
             gridWorked[movableX][movableY] = WATER;
@@ -2160,12 +2164,15 @@ bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, i
         else
         {
             gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            gridMovables[movableX][movableY] = NOTHING;
         }
         movableY = movableY + 1;
         gridWorked[movableX][movableY] = movableID;
+        gridMovables[movableX][movableY] = movableID;
         return true;
     case DOWN:
         movableID = gridWorked[movableX][movableY];
+        gridMovables[movableX][movableY] = NOTHING;
         if (gridGround[movableX][movableY] == THINICE)
         {
             gridWorked[movableX][movableY] = WATER;
@@ -2179,12 +2186,15 @@ bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, i
         else
         {
             gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            gridMovables[movableX][movableY] = NOTHING;
         }
         movableX = movableX + 1;
         gridWorked[movableX][movableY] = movableID;
+        gridMovables[movableX][movableY] = movableID;
         return true;
     case LEFT:
         movableID = gridWorked[movableX][movableY];
+        gridMovables[movableX][movableY] = NOTHING;
         if (gridGround[movableX][movableY] == THINICE)
         {
             gridWorked[movableX][movableY] = WATER;
@@ -2198,9 +2208,11 @@ bool moveMovable(int movableX, int movableY, int testMoveID, int **gridWorked, i
         else
         {
             gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+            gridMovables[movableX][movableY] = NOTHING;
         }
         movableY = movableY - 1;
         gridWorked[movableX][movableY] = movableID;
+        gridMovables[movableX][movableY] = movableID;
         return true;
     }
     return false;
@@ -4091,9 +4103,24 @@ bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int 
                     {
                         printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
                         printf("return ice false\n");
-                        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+                        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
                         return false;
                     }
+                }
+                else if (isTunnel(gridGround[movableX][movableY]))
+                {
+                    print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+                    if (!tunnelTPMovables(movableX, movableY, gridWorked, gridMovables, gridGround, numRows, numColumns))
+                    {
+                        printf("ice mv tp not ok\n");
+                    }
+                    else
+                    {
+                        printf("ice mv tp ok\n");
+                    }
+                    print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, movableX, movableY);
+                    return false;
+                    // bug log
                 }
                 else if (isFloor(gridGround[movableX][movableY]))
                 {
@@ -4598,6 +4625,7 @@ bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMo
     if (tunnelNumber == 1)
     {
         gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+        gridMovables[movableX][movableY] = NOTHING;
         printf("tp eraze m!!\n");
         return true;
     }
@@ -4645,10 +4673,12 @@ bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMo
                 printf("tp0 %d tp1 %d m!\n", movableX, movableY);
                 printf("at0 %d at1 %d m!\n", arrayTunnel[k][0], arrayTunnel[k][1]);
                 gridWorked[arrayTunnel[k][0]][arrayTunnel[k][1]] = gridWorked[movableX][movableY];
+                gridMovables[arrayTunnel[k][0]][arrayTunnel[k][1]] = gridWorked[movableX][movableY];
                 printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
 
                 printf("gw tp %d ; gd tp %d m!\n", gridWorked[movableX][movableY], gridGround[movableX][movableY]);
                 gridWorked[movableX][movableY] = gridGround[movableX][movableY];
+                gridMovables[movableX][movableY] = 0;
                 printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
                 printf("end tp m!\n");
                 return true;
