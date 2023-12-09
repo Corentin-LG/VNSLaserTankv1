@@ -1,13 +1,11 @@
-Rows: 6
-Cols: 6
+Rows: 4
+Cols: 4
 Name: PUTT,PUTT, IT AINT
 Author: KEITH HALL
 Hint: one way so why did you look at this.?
 Difficulty: 0
 
-b D D D D Bs
-Bs D Bs D D D
-Ar D Bs D D D
-D D D D D D
-D D Bs D D Al
-D D D D D Tu
+b D D D
+Ar D Bs D
+Ar D Bs D
+D Tu D D

@@ -36,12 +36,14 @@
 - [ ]
 - [ ]
 
-enhance cursor length -> long so the same for hyps
-curserH -192712320 ; curserR -192713072
-gridOrigin = lignes : 4 et colonnes : -3
-
+ssfn allistique ko
 - replay no show godd deplacement
 - fire : if do nothing erase fire
+	- if touch a thing and don't move x
+	- if touch thing and don't dead x
+	- if out boarder x
+	- zuto kill x -> a tester
+- move : if can't move
 
 ### tuiles faites :
  - [x]	TankUp
