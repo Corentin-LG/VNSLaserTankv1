@@ -430,9 +430,6 @@ int main()
     // First "Solution" //
     printf("FirstSolution\n");
 
-    int curseur = 0;
-    int turnNumber = 0;
-
     // here, if blanc it's cool
     for (int w = 0; w < curseur; w++)
     {
@@ -451,6 +448,9 @@ int main()
     printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
     ///////////////////////////
     // MHeuristique
+    
+    int curseur = 0;
+    int turnNumber = 0;
     bool fireDead = false;
     int intermEphemere = 0;
     int firedTileID = 0;
