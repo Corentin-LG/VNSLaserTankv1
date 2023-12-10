@@ -44,6 +44,7 @@ ssfn allistique ko
 	- if out boarder x
 	- zuto kill x -> a tester
 - move : if can't move
+modif de sorte à ce que les caluls curseur et mh soient bons
 
 ### tuiles faites :
  - [x]	TankUp

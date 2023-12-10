@@ -34,168 +34,83 @@ int main()
     return 0;
 }
 
-void supprimerEntreFours(int tableau[], int *curseur)
+bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
+                int **gridGround, int **gridWorkedCopy, int **gridGroundCopy, int **gridMovablesCopy,
+                int *numRows, int *numColumns,
+                int **tankPosition, int **basesPosition, int **firePosition,
+                int *currentTankDirection, int *currentFireDirection,
+                int *curseurDeplacementsHypothese, int *curseurDeplacementsRetenu, int *curseurDeplacementsMH,
+                int *objectiveFunctionMH,
+                int *testMove, int *curseur)
 {
-    int startCell = 0;
-    int lastFireCell = 0;  // rank
-    int lastDirection = 1; // up
-    int readingHead = 0;
-
-    for (int i = startCell; i < *curseur; i++)
+    bool fireDead = false;
+    int firedTileID = 0;
+    if (testMove == 0)
     {
-        printf("|i=%d; startCell =%d; *curseur = %d\n", i, startCell, *curseur);
-        if (startCell == *curseur)
-        {
-            printf("|breek\n");
-            break;
-        }
-        else if (tableau[i] == 0 && lastFireCell == 0)
-        {
-            lastFireCell = i + 1; // rank
-            printf("|lastFireCell=%d __", lastFireCell);
-        }
-        else if (tableau[i] == 0 && lastFireCell != 0)
-        {
-            for (int j = 0; j <= *curseur - (i - 1); j++)
-            {
-                if (i - lastFireCell == 0)
-                {
-                    lastFireCell = lastFireCell + 1;
-                    goto skip;
-                }
-                if (i - lastFireCell == 1)
-                {
-                    lastFireCell = 0;
-                    goto skip;
-                }
-                tableau[lastFireCell + j] = tableau[i - 1 + j];
-                printf("|j =%d; tableau[%d] =%d __", j, lastFireCell + j, tableau[lastFireCell + j]);
-            }
-            printf("|curseur%d _ ", *curseur);
-            *curseur = lastFireCell + (*curseur - (i - 1));
-            printf("|lastFireCell + (*curseur - (i - 1)=%d __", *curseur);
-            i = lastFireCell;
-            printf("|lastFireCell %d __", lastFireCell);
-            lastFireCell = 0;
-            startCell = i;
-        }
-    skip:
-    }
-}
+        firePosition[0][0] = tankPosition[0][0];
+        firePosition[0][1] = tankPosition[0][1];
+        firePosition[1][0] = tankPosition[0][0];
+        firePosition[1][1] = tankPosition[0][1];
 
-void supprimer2(int tableau[], int *curseur)
-{
-    int startCell = 0;
-    int lastFireCell = 0;  // rank
-    int lastDirection = 1; // up
-    int readingHead = 0;
-    // int tableau[] = {0, 2, 3, 0, 2, 3, 2, 2, 4, 0, 0, 1, 1, 2, 2, 3, 3, 0, 3, 1, 0};
-    // res = {0, 3, 0, 2, 2, 4, 0, 0, 1, 1, 2, 2, 3, 3, 0, 3, 1, 0}
-    for (int i = 0; i < *curseur; i++)
-    {
-        printf("\n|i=%d; *curseur = %d\n", i, *curseur);
-        if (i == *curseur)
+        *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+        *currentFireDirection = *currentTankDirection;
+        getFirstShootNextCoo(tankPosition, firePosition, currentTankDirection);
+        
+        fireDead = true;
+        if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
         {
-            printf("|breek\n");
-            break;
+            firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+            fireDead = false;
         }
-        else if (tableau[i] == 0 && lastFireCell == 0)
+        else
         {
-            lastFireCell = i + 1; // rank
-            printf("|lF1=%d __", lastFireCell);
+            return false;
         }
-        else if (tableau[i] == 0 && lastFireCell != 0)
+
+        while (!(isOutOfBorder(firePosition, 0, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
         {
-            if (i - lastFireCell == 0)
+            fireDead = false;
+
+            if (firePosition[0][0] == tankPosition[0][0] && firePosition[0][1] == tankPosition[0][1])
             {
-                lastFireCell = lastFireCell + 1;
-                printf("|lF2=%d __", lastFireCell);
-                goto skip;
+                return false;
             }
-            if (i - lastFireCell == 1)
+            else if (isFireTrought(firedTileID))
             {
-                lastFireCell = 0;
-                printf("|lF3=%d __", lastFireCell);
-                goto skip;
+                getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
+                fireDead = false;
+                goto nextFirePosition;
             }
-        }
-        else if (tableau[i] != 0)
-        {
-            if (tableau[i] == lastDirection)
+            else if (isShootable(firedTileID, currentFireDirection))
             {
-                // reset
-                lastFireCell = 0;
-                printf("|lF4=%d __", lastFireCell);
-                // for i -> i+1 next
-            }
-            else if (tableau[i + 1] != 0 && tableau[i + 1] != lastDirection && tableau[i + 1] != tableau[i])
-            {
-                // implicite: tableau[i] != lastDirection
-                if (lastFireCell != 0)
+                shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
+                if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                 {
-                    for (int j = 0; j < *curseur - 1; j++)
-                    {
-                        // erase
-                        tableau[lastFireCell + j] = tableau[lastFireCell + 1 + j];
-                    }
+                    mirror3Grids(gridWorkedCopy, gridWorked, gridMovablesCopy, gridMovables, gridGroundCopy, gridGround, numRows, numColumns);
+                    fireDead = false;
+                    return false;
                 }
-                else
-                {
-                    for (int j = 0; j < *curseur - 1; j++)
-                    {
-                        // erase
-                        tableau[i + j] = tableau[i + 1 + j];
-                    }
-                }
-                *curseur = *curseur - 1;
-                printf("|c1=%d __", *curseur);
-                i = i - 1;
-                printf("|i1=%d __", i);
-                for (int k = 0; k < *curseur; k++)
-                {
-                    printf("%d ", tableau[k]);
-                }
+                fireDead = true;
+                return true;
             }
-            else if (tableau[i + 1] == 0)
+            else
             {
-                // turn
-                lastDirection = tableau[i];
-                printf("|ld1=%d __", lastDirection);
-                // reset
-                lastFireCell = 0;
-                printf("|lF5=%d __", lastFireCell);
+                resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
+                resetGridWorked(gridOrigin, gridWorkedCopy, numRows, numColumns);
+                fireDead = true;
+                return false;
             }
-            else if (tableau[i + 1] == lastDirection)
+        nextFirePosition:
+            if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
             {
-                if (tableau[i + 2] == lastDirection)
-                {
-                    /* code */
-                    printf("|bruh __");
-                }
-                else if (tableau[i + 2] != lastDirection)
-                {
-                    // delete 2
-                    for (int j = 0; j < *curseur - 2; j++)
-                    {
-                        // erase
-                        tableau[i + j] = tableau[i + 2 + j];
-                    }
-                    *curseur = *curseur - 2;
-                    printf("|c2=%d __", *curseur);
-                    i = i - 1; //
-                    printf("|i2=%d __", i);
-                }
+                firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
+                fireDead = false;
             }
-            else if (tableau[i + 1] == tableau[i])
+            else
             {
-                // turn
-                lastDirection = tableau[i];
-                printf("|ld2=%d __", lastDirection);
-                // reset
-                lastFireCell = 0;
-                printf("|lF6=%d __", lastFireCell);
+                return false;
             }
         }
-    skip:
+    return true;
     }
 }
