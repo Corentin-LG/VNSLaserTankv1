@@ -493,22 +493,25 @@ int main()
                    curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
                    &objectiveFunctionMH, &testMove, &curseur))
     {
-        printf("ok\n");
+        printf("ok|||||||\n");
         mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGroundCopy, gridGround, numRows, numColumns);
-        mirrorPosition(tankPosition, 2, 0);
-        mirrorPosition(tankPosition, 2, 1);
+        mirrorPosition(tankPosition, 0, 1);
+        mirrorPosition(tankPosition, 0, 2);
     }
     else
     {
         printf("ko\n");
+        mirror3Grids(gridWorkedCopy, gridWorked, gridMovablesCopy, gridMovables, gridGroundCopy, gridGround, numRows, numColumns);
+        mirrorPosition(tankPosition, 2, 0);
+        mirrorPosition(tankPosition, 2, 1);
     }
     printf("curse cursor = %d\n", curseur);
     tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
-               gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
-               &numRows, &numColumns, tankPosition, basesPosition,
-               firePosition, &currentTankDirection, &currentFireDirection,
-               curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-               &objectiveFunctionMH, &testMove, &curseur);
+                   gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
+                   numRows, numColumns, tankPosition, basesPosition,
+                   firePosition, &currentTankDirection, &currentFireDirection,
+                   curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
+                   &objectiveFunctionMH, &testMove, &curseur);
     printf("curse cursor = %d\n", curseur);
 
     mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGroundCopy, gridGround, numRows, numColumns);
