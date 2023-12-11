@@ -1521,6 +1521,7 @@ bool isTunnel(int elementID)
 // only mirror and antitank ~treat Bm different ?
 bool isMovable(int elementID, int *positionID)
 {
+    printf("isMovable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     // case MOVABLEBLOC:
@@ -1623,6 +1624,7 @@ bool isMovableAtBeginning(int elementID)
 // only bric and antitank
 bool isShootable(int elementID, int *positionID)
 {
+    printf("isShootable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case BRICKS:
@@ -1655,7 +1657,7 @@ bool isShootable(int elementID, int *positionID)
         }
         return false;
     default:
-        // printf("other shootable %d\n", shootableID);
+        printf("other shootable %d\n", elementID);
         return false;
     }
     return false;
@@ -1663,6 +1665,7 @@ bool isShootable(int elementID, int *positionID)
 
 bool isFireTrought(int elementID)
 {
+    printf("isFireTrought eleID%d\n", elementID);
     switch (elementID)
     {
     case DIRT:
@@ -1710,6 +1713,7 @@ bool isFireTrought(int elementID)
 
 bool isFireDeflect(int elementID, int *positionID)
 {
+    printf("isFireDeflect eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case MIRRORUPRIGHT:
@@ -1775,6 +1779,7 @@ bool isFireDeflect(int elementID, int *positionID)
 
 bool isTurnable(int elementID, int *positionID)
 {
+    printf("isTurnable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case ROTATIVEMIRRORUPRIGHT:
@@ -4636,7 +4641,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             // or turn
             else if (isTurnable(firedTileID, currentFireDirection))
             {
-                // printf("turned, cursor = %d\n", *curseur);
+                printf("turned, cursor = %d\n", *curseur);
                 if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
                     // printf("turned ok \n");
