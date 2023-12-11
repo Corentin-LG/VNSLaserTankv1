@@ -488,7 +488,7 @@ int main()
     // {
     if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
                    gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
-                   &numRows, &numColumns, tankPosition, basesPosition,
+                   numRows, numColumns, tankPosition, basesPosition,
                    firePosition, &currentTankDirection, &currentFireDirection,
                    curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
                    &objectiveFunctionMH, &testMove, &curseur))
@@ -1589,6 +1589,9 @@ bool isMovableAtBeginning(int elementID)
 {
     switch (elementID)
     {
+        // more simple
+    case BRICKS:
+        return true;
     case MOVABLEBLOC:
         return true;
     case ANTITANKUP:
@@ -2078,6 +2081,7 @@ bool isFireStop(int elementID)
 // true for >=-1 and <=numX; easier for fire calc
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns)
 {
+    printf("o00 %d, o01 %d, nr %d, nc %d\n ", objectPosition[objectCoo][0], objectPosition[objectCoo][1], *numRows, *numColumns);
     if (objectPosition[objectCoo][0] < 0 || objectPosition[objectCoo][0] >= *numRows || objectPosition[objectCoo][1] < 0 || objectPosition[objectCoo][1] >= *numColumns)
     {
         return true;
@@ -4522,10 +4526,11 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                firePosition[1][0], tankPosition[0][0],
                firePosition[1][1], tankPosition[0][1]);
         fireDead = true;
+        printf("inspect border nr%d nc%d\n", *numRows, *numColumns);
         if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
         {
             firedTileID = gridWorked[firePosition[0][0]][firePosition[0][1]];
-            // printf("ft %d\n", firedTileID);
+            printf("ft %d\n", firedTileID);
             fireDead = false;
         }
         else
@@ -4544,7 +4549,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             }
             else if (isFireTrought(firedTileID))
             {
-                // printf("throught \n");
+                printf("throught \n");
                 getFirstShootNextCoo(firePosition, firePosition, currentFireDirection);
                 // print2ArrayBraket(gridWorked, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 fireDead = false;
@@ -4553,7 +4558,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             // or explode
             else if (isShootable(firedTileID, currentFireDirection))
             {
-                // printf("bang , cursor = %d\n", *curseur);
+                printf("bang , cursor = %d\n", *curseur);
                 shotableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns);
                 // when brick explode
                 if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
@@ -4582,27 +4587,27 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 case ANTITANKRIGHT:
                 case ANTITANKDOWN:
                 case ANTITANKLEFT:
-                    // printf("move cursor = %d\n", *curseur);
+                    printf("move cursor = %d\n", *curseur);
                     // printf("f00 = %d, f01 %d, forientation = %d\n", firePosition[0][0], firePosition[0][1], *currentFireDirection);
                     if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        // printf("moved ok \n");
+                        printf("moved ok \n");
                         return true;
                     }
                     else
                     {
-                        // printf("moved NO \n");
+                        printf("moved NO \n");
                         return false;
                     }
                     break;
                 default:
-                    // printf("!!! ismov firID %d\n", firedTileID);
+                    printf("!!! ismov firID %d\n", firedTileID);
                     return false;
                     break;
                 }
                 if (antiTankAction(tankPosition, 0, gridWorked, numRows, numColumns))
                 {
-                    // printf("ata DEADt\n");
+                    printf("ata DEADt\n");
                     mirror3Grids(gridWorkedCopy, gridWorked, gridMovablesCopy, gridMovables, gridGroundCopy, gridGround, numRows, numColumns);
                     fireDead = false;
                     return false;
@@ -4613,15 +4618,15 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             // or deflect
             else if (isFireDeflect(firedTileID, currentFireDirection))
             {
-                // printf("deflected, cursor = %d\n", *curseur);
+                printf("deflected, cursor = %d\n", *curseur);
                 if (deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
-                    // printf("deflected ok \n");
+                    printf("deflected ok \n");
                     return true;
                 }
                 else
                 {
-                    // printf("deflected NO \n");
+                    printf("deflected NO \n");
                     return false;
                 }
             }
