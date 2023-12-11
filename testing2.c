@@ -4145,13 +4145,13 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
         switch (i)
         {
         case UP:
-            // printf("ATA up %d tp %d\n", i, tankPosition[tankCoo][0]);
+            printf("ATA up %d tp %d\n", i, tankPosition[tankCoo][0]);
             if (tankPosition[tankCoo][0] > 0)
             {
                 for (int j = 1; j <= tankPosition[tankCoo][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[tankCoo][0] - j;
-                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    printf("uat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKDOWN)
                     {
@@ -4208,14 +4208,14 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
             goto nextCross;
 
         case DOWN:
-            // printf("ATA d %d tp %d\n", i, tankPosition[tankCoo][0]);
+            printf("ATA d %d tp %d\n", i, tankPosition[tankCoo][0]);
 
             if (tankPosition[tankCoo][0] > *numRows - 1)
             {
                 for (int j = 1; j <= *numRows - 1 - tankPosition[tankCoo][0]; j++)
                 {
                     rangeAT[0][0] = tankPosition[tankCoo][0] + j;
-                    // printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    printf("dat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKUP)
                     {
                         printf("at d killer ok\n");
@@ -4244,7 +4244,7 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
                 for (int j = 1; j <= tankPosition[tankCoo][1]; j++)
                 {
                     rangeAT[0][1] = tankPosition[tankCoo][1] - j;
-                    printf("rat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
+                    printf("lat %d %d\n", rangeAT[0][0], rangeAT[0][1]);
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKRIGHT)
                     {
                         printf("at l killer ok\n");
