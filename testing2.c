@@ -452,7 +452,8 @@ int main()
 
     int *curseur = 0;
     int *testMove = getRandomMove();
-    testMove = 0;
+    // need'nt *
+    testMove = 1;
 
     // reset grid
     resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
@@ -506,6 +507,7 @@ int main()
         mirrorPosition(tankPosition, 2, 1);
     }
     printf("curse cursor = %d\n", curseur);
+    testMove = 2;
     tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
                    gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                    numRows, numColumns, tankPosition, basesPosition,
