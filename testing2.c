@@ -4625,7 +4625,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 if (deflectableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
                     printf("deflected ok \n");
-                    return true;
+                    goto nextFirePosition;
                 }
                 else
                 {
