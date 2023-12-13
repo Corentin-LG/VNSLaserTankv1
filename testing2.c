@@ -470,6 +470,10 @@ int main()
     resetGridMovables(gridOrigin, gridMovablesCopy, gridGround, numRows, numColumns);
 
     // wip
+    int saveLastTankDirection;
+    int moveI;
+    int moveII;
+    int moves[2];
 
     int numCombin = 0;
     while (!(tankPosition[0][0] == basesPosition[0][0] &&
@@ -477,8 +481,8 @@ int main()
     {
         numCombin = getRandomCombin();
     nextCombin:
-    printf("combin %d\n", numCombin);
-    print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+        printf("combin %d\n", numCombin);
+        print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
         switch (numCombin)
         {
         case 0:
