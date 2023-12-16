@@ -477,7 +477,8 @@ int main()
     // wip
     int *curseur = 0;
     *curseurDeplacementsMH = 0;
-    //print *curseurDeplacementsMH  ; calc *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
+    *objectiveFunctionMH = 0;
+    // print *curseurDeplacementsMH  ; calc *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
     int *rndMove;
     int *testMove;
     int *saveLastTankDirection = (int *)malloc(sizeof(int));
@@ -510,7 +511,7 @@ int main()
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
                        curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       &objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionMH, &testMove, &curseur))
         {
             printf("ternFire CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -565,7 +566,7 @@ int main()
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
                        curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       &objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionMH, &testMove, &curseur))
         {
             printf("ternMove CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -633,7 +634,7 @@ int main()
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
                        curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       &objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionMH, &testMove, &curseur))
         {
             printf("ternRotation CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -677,6 +678,7 @@ nextMain:
     printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
     erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
     printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
+    printf("objectiveFunctionMH : %d\n", *objectiveFunctionMH);
 
     // //////////////////////////////////////////////////////////////////
     // // Replay //
@@ -4998,6 +5000,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     fireDead = false;
                     return false;
                 }
+                // objective fn
+                // shoot ok
+                *objectiveFunctionMH = *objectiveFunctionMH - 5;
                 fireDead = true;
                 return true;
             }
@@ -5023,7 +5028,6 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     if (movableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         // printf("moved ok \n");
-                        return true;
                     }
                     else
                     {
@@ -5044,6 +5048,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     return false;
                 }
                 fireDead = true;
+                // objective fn
+                // movable moved ok
+                *objectiveFunctionMH = *objectiveFunctionMH - 10;
                 return true;
             }
             // or deflect
@@ -5068,6 +5075,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 if (turnableAction(firedTileID, firePosition, currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                 {
                     // printf("turned ok \n");
+                    // objective fn
+                    // turnable ok
+                    *objectiveFunctionMH = *objectiveFunctionMH - 2;
                     return true;
                 }
                 else
@@ -5108,6 +5118,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
         // printf("turn cursor = %d\n\n", *curseur);
         gridWorked[tankPosition[0][0]][tankPosition[0][1]] = *testMove;
         *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+        // objective fn
+        // rot ok
+        *objectiveFunctionMH = *objectiveFunctionMH - 2;
         return true;
     }
     else
@@ -5152,6 +5165,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         gridWorked[tankPosition[cooIndexWorking][0]][tankPosition[cooIndexWorking][1]] = *testMove;
                         *currentTankDirection = *testMove;
                         // printf("currentTankDirection %d\n", *currentTankDirection);
+                        // objective fn
+                        // highway/glass ok
+                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
                         return true;
                     }
                     else
@@ -5192,6 +5208,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     {
                         // printf("ok no at\n");
                         mirrorPosition(tankPosition, cooIndexWorking, cooIndexSave);
+                        // objective fn
+                        // move ok
+                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
                         return true;
                     }
                 }
@@ -5207,6 +5226,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
     // printf("2curserMH %d ; 2curserH %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese);
 
     ////////
+    // objective fn
+    // don't know
+    *objectiveFunctionMH = *objectiveFunctionMH - 666;
     return true;
 }
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray)
