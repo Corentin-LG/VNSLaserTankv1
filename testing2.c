@@ -476,6 +476,8 @@ int main()
 
     // wip
     int *curseur = 0;
+    *curseurDeplacementsMH = 0;
+    //print *curseurDeplacementsMH  ; calc *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
     int *rndMove;
     int *testMove;
     int *saveLastTankDirection = (int *)malloc(sizeof(int));
@@ -515,6 +517,10 @@ int main()
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
+            // save action
+            printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
+            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
@@ -566,6 +572,10 @@ int main()
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
+            // save action
+            printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
+            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
@@ -631,6 +641,10 @@ int main()
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
             saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+            // save action
+            printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
+            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
