@@ -45,6 +45,13 @@ ssfn allistique ko
 	- zuto kill x -> a tester
 - move : if can't move
 modif de sorte à ce que les caluls curseur et mh soient bons
+- revoir at kill
+- revoir poids solution
+- revoir free alloc
+free objectivs
+free current
+- revoir site prof
+- revoir dégrossisement
 
 ### tuiles faites :
  - [x]	TankUp

@@ -875,6 +875,47 @@ nextMain:
     printMovingLetters(deplacementsRetenu, curseurDeplacementsRetenu);
 
     //////////////////////////////////////////////////////////////////
+    // Create new file //
+
+    // Trouver la position du point dans le nom de fichier
+    const char *pointPos = strchr(filename, '.');
+    if (pointPos == NULL)
+    {
+        fprintf(stderr, "Erreur : le nom de fichier ne contient pas de point\n");
+        return 1;
+    }
+    printf("pointPos %d", *pointPos);
+
+    // Calculer la longueur du nom
+    // size_t length = pointPos - filename;
+    size_t length = *pointPos;
+    // Extraire le nom avant le point
+    char nom[256];
+    strncpy(nom, filename, length);
+    nom[length] = '\0'; // Assurer la null-termination
+
+    // Concaténez "Soluce" avec le nom du fichier initial chargé pour obtenir le nouveau nom du fichier .lt4
+    char soluceFilename[256];
+    sprintf(soluceFilename, "%sSoluce.lt4", nom);
+
+    // Ouvrez le nouveau fichier en mode écriture
+    FILE *soluceFile = fopen(soluceFilename, "w");
+    if (soluceFile == NULL)
+    {
+        fprintf(stderr, "Impossible de créer le fichier %s\n", soluceFilename);
+        return 1; // Gestion d'erreur
+    }
+
+    // Écrivez le contenu de deplacementsRetenu dans le fichier .lt4
+    for (int i = 0; i < *curseurDeplacementsMH; i++)
+    {
+        fprintf(soluceFile, "%d\n", deplacementsHypotheseMH[i]);
+    }
+
+    // Fermez le fichier lorsque vous avez terminé
+    fclose(soluceFile);
+
+    //////////////////////////////////////////////////////////////////
     // Free Memory //
     printf("free grids\n");
     if (gridOrigin != NULL)
@@ -977,17 +1018,18 @@ nextMain:
     free(curseurDeplacementsHypothese);
     free(curseurDeplacementsMH);
     free(curseurDeplacementsRetenu);
-    printf("free objectivs\n");
-    free(objectiveFunctionHypothese);
-    free(objectiveFunctionMH);
-    free(objectiveFunctionRetenu);
-    printf("free current\n");
-    free(currentTankDirection);
-    free(currentFireDirection);
     printf("free nums\n");
     free(numRows);
     free(numColumns);
     free(numBases);
+    printf("free objectivs\n");
+    free(objectiveFunctionHypothese);
+    free(objectiveFunctionMH);
+    free(objectiveFunctionRetenu);
+    printf("free current2\n");
+    free(currentFireDirection);
+    printf("free current1\n");
+    free(currentTankDirection);
 
     printf("finish\n");
 
