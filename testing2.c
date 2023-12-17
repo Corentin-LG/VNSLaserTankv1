@@ -14,6 +14,7 @@ int getRandomTurning();
 int getRandomBinary();
 int getRandomTernary();
 int getRandomCombin();
+char convertIntIntoChar(int integer);
 bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 int **gridGround, int **gridWorkedCopy, int **gridGroundCopy, int **gridMovablesCopy,
                 int *numRows, int *numColumns,
@@ -205,17 +206,26 @@ int main()
     // Global Var //
     srand(time(NULL));
     setlocale(LC_ALL, "");
-    // const char *filename = ".\\Grids\\Special-I.lt4";
-    // const char *filename = ".\\Grids\\Sokoban-II.lt4";
-    // const char *filename = ".\\Grids\\No_HS-LPB.lt4";
-    // const char *filename = ".\\Grids\\LaserTank.lt4";
-    // const char *filename = ".\\Grids\\Gary-II.lt4";
-    // const char *filename = ".\\Grids\\Challenge-IV.lt4";
-    // const char *filename = ".\\Grids\\Beginner-II.lt4";
-    const char *filename = ".\\TestingGrids\\testing.lt4";
+    // const char *pathTesting = ".\\Grids\\";
+    const char *pathTesting = ".\\TestingGrids\\";
+    // const char *filename = "Special-I.lt4";
+    // const char *filename = "Sokoban-II.lt4";
+    // const char *filename = "No_HS-LPB.lt4";
+    // const char *filename = "LaserTank.lt4";
+    // const char *filename = "Gary-II.lt4";
+    // const char *filename = "Challenge-IV.lt4";
+    // const char *filename = "Beginner-II.lt4";
+    const char *filename = "testing.lt4";
     const int CYCLES = 5;
-
     printf("%s\n", filename);
+
+    size_t longueurTotale = snprintf(NULL, 0, "%s%s", pathTesting, filename) + 1;
+    // Allouer de la mémoire pour globalFilePath
+    char *globalFilePath = (char *)malloc(longueurTotale);
+    // Concaténer les deux variables dans globalFilePath
+    snprintf(globalFilePath, longueurTotale, "%s%s", pathTesting, filename);
+    // Afficher le résultat
+    printf("Chemin complet du fichier : %s\n", globalFilePath);
 
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
     for (int i = 0; i < 3; i++)
@@ -262,10 +272,10 @@ int main()
     //////////////////////////////////////////////////////////////////
     // Open File //
     FILE *file;
-    file = fopen(filename, "r");
+    file = fopen(globalFilePath, "r");
     if (file == NULL)
     {
-        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
+        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", globalFilePath);
         return 1;
     }
 
@@ -876,44 +886,35 @@ nextMain:
 
     //////////////////////////////////////////////////////////////////
     // Create new file //
+    // const char *filename = ".\\TestingGrids\\testing.lt4";
+    // Nouveau nom de fichier
+    const char *nouveauNom = "Soluce";
 
-    // Trouver la position du point dans le nom de fichier
-    const char *pointPos = strchr(filename, '.');
-    if (pointPos == NULL)
+    // Créer le nom du fichier Soluce
+    size_t longueurSoluce = snprintf(NULL, 0, "Soluce%s", filename) + 1;
+    char *nomFichierSoluce = (char *)malloc(longueurSoluce);
+    snprintf(nomFichierSoluce, longueurSoluce, "Soluce%s", filename);
+
+    // Créer et ouvrir le fichier Solucetesting.lt4
+    FILE *fichierSoluce = fopen(nomFichierSoluce, "w");
+    if (fichierSoluce == NULL)
     {
-        fprintf(stderr, "Erreur : le nom de fichier ne contient pas de point\n");
+        fprintf(stderr, "Erreur : Impossible de créer le fichier Soluce.\n");
         return 1;
     }
-    printf("pointPos %d", *pointPos);
-
-    // Calculer la longueur du nom
-    // size_t length = pointPos - filename;
-    size_t length = *pointPos;
-    // Extraire le nom avant le point
-    char nom[256];
-    strncpy(nom, filename, length);
-    nom[length] = '\0'; // Assurer la null-termination
-
-    // Concaténez "Soluce" avec le nom du fichier initial chargé pour obtenir le nouveau nom du fichier .lt4
-    char soluceFilename[256];
-    sprintf(soluceFilename, "%sSoluce.lt4", nom);
-
-    // Ouvrez le nouveau fichier en mode écriture
-    FILE *soluceFile = fopen(soluceFilename, "w");
-    if (soluceFile == NULL)
-    {
-        fprintf(stderr, "Impossible de créer le fichier %s\n", soluceFilename);
-        return 1; // Gestion d'erreur
+    fprintf(fichierSoluce, "# %d\n", *objectiveFunctionMH);
+    fprintf(fichierSoluce, "\n");
+    // Écrire les valeurs de deplacementsHypotheseMH dans le fichier .lt4
+    for (int i = 0; i < *curseurDeplacementsMH; i++) {
+        fprintf(fichierSoluce, "%c", convertIntIntoChar(deplacementsHypotheseMH[i]));
     }
 
-    // Écrivez le contenu de deplacementsRetenu dans le fichier .lt4
-    for (int i = 0; i < *curseurDeplacementsMH; i++)
-    {
-        fprintf(soluceFile, "%d\n", deplacementsHypotheseMH[i]);
-    }
+    // Fermer le fichier
+    fclose(fichierSoluce);
 
-    // Fermez le fichier lorsque vous avez terminé
-    fclose(soluceFile);
+    // Libérer la mémoire allouée
+    free(globalFilePath);
+    free(nomFichierSoluce);
 
     //////////////////////////////////////////////////////////////////
     // Free Memory //
@@ -1330,6 +1331,24 @@ int getRandomCombin()
 {
     int randomNumber = rand() % COMBINS;
     return randomNumber;
+}
+
+char convertIntIntoChar(int integer) {
+    switch (integer) {
+        case 0:
+            return 'F';
+        case 1:
+            return 'U';
+        case 2:
+            return 'R';
+        case 3:
+            return 'D';
+        case 4:
+            return 'L';
+        default:
+            printf("Erreur : entier en dehors de la plage attendue (0-4)\n");
+            return '\0'; // Caractère nul pour indiquer une erreur
+    }
 }
 
 //////////////////////////////////////////////////////////////////
