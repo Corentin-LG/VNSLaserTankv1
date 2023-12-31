@@ -200,22 +200,50 @@ enum gameConstant
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Main //
-int main()
+// int main()
+// {
+int main(int argc, char *argv[])
 {
+    // Affiche le nom du programme
+    printf("Nom du programme : %s\n", argv[0]);
+
+    // Affiche les arguments passés au programme
+    printf("Nombre total d'arguments : %d\n", argc - 1); // Exclut le nom du programme lui-même
+
+    // Affiche chaque argument
+    for (int i = 1; i < argc; i++)
+    {
+        printf("Argument %d : %s\n", i, argv[i]);
+    }
     //////////////////////////////////////////////////////////////////
     // Global Var //
     srand(time(NULL));
     setlocale(LC_ALL, "");
+    // Enregistrez le temps de début
+    clock_t debut = clock();
+
     // const char *pathTesting = ".\\Grids\\";
     const char *pathTesting = ".\\TestingGrids\\";
-    // const char *filename = "Special-I.lt4";
-    // const char *filename = "Sokoban-II.lt4";
-    // const char *filename = "No_HS-LPB.lt4";
-    // const char *filename = "LaserTank.lt4";
-    // const char *filename = "Gary-II.lt4";
-    // const char *filename = "Challenge-IV.lt4";
-    // const char *filename = "Beginner-II.lt4";
-    const char *filename = "testing.lt4";
+    char filenameInterm[] = "";
+    if (argc == 1)
+    {
+        // strcpy(filenameInterm, "Special-I.lt4");
+        // strcpy(filenameInterm, "Sokoban-II.lt4");
+        // strcpy(filenameInterm, "No_HS-LPB.lt4");
+        // strcpy(filenameInterm, "LaserTank.lt4");
+        // strcpy(filenameInterm, "Gary-II.lt4");
+        // strcpy(filenameInterm, "Challenge-IV.lt4");
+        // strcpy(filenameInterm, "Beginner-II.lt4");
+        strcpy(filenameInterm, "testing.lt4");
+    }
+    else
+    {
+        strncpy(filenameInterm, argv[1], strlen(argv[1]));
+        filenameInterm[strlen(argv[1])] = '\0';
+    }
+    const char *filename = malloc(strlen(filenameInterm) + 1);
+    strcpy(filename, filenameInterm);
+
     const int CYCLES = 5;
     printf("%s\n", filename);
 
@@ -885,6 +913,14 @@ nextMain:
     printMovingLetters(deplacementsRetenu, curseurDeplacementsRetenu);
 
     //////////////////////////////////////////////////////////////////
+    // Enregistrez le temps de fin
+    clock_t fin = clock();
+
+    // Calculez le temps écoulé en secondes
+    double temps_ecoule = ((double)(fin - debut)) / CLOCKS_PER_SEC;
+
+    printf("Le programme a mis %.6f secondes pour s'exécuter.\n", temps_ecoule);
+
     // Create new file //
     // const char *filename = ".\\TestingGrids\\testing.lt4";
     // Nouveau nom de fichier
@@ -905,7 +941,8 @@ nextMain:
     fprintf(fichierSoluce, "# %d\n", *objectiveFunctionMH);
     fprintf(fichierSoluce, "\n");
     // Écrire les valeurs de deplacementsHypotheseMH dans le fichier .lt4
-    for (int i = 0; i < *curseurDeplacementsMH; i++) {
+    for (int i = 0; i < *curseurDeplacementsMH; i++)
+    {
         fprintf(fichierSoluce, "%c", convertIntIntoChar(deplacementsHypotheseMH[i]));
     }
 
@@ -1333,21 +1370,23 @@ int getRandomCombin()
     return randomNumber;
 }
 
-char convertIntIntoChar(int integer) {
-    switch (integer) {
-        case 0:
-            return 'F';
-        case 1:
-            return 'U';
-        case 2:
-            return 'R';
-        case 3:
-            return 'D';
-        case 4:
-            return 'L';
-        default:
-            printf("Erreur : entier en dehors de la plage attendue (0-4)\n");
-            return '\0'; // Caractère nul pour indiquer une erreur
+char convertIntIntoChar(int integer)
+{
+    switch (integer)
+    {
+    case 0:
+        return 'F';
+    case 1:
+        return 'U';
+    case 2:
+        return 'R';
+    case 3:
+        return 'D';
+    case 4:
+        return 'L';
+    default:
+        printf("Erreur : entier en dehors de la plage attendue (0-4)\n");
+        return '\0'; // Caractère nul pour indiquer une erreur
     }
 }
 
