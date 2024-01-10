@@ -50,8 +50,16 @@ modif de sorte à ce que les caluls curseur et mh soient bons
 - revoir free alloc
 free objectivs
 free current
+
 - revoir site prof
 - revoir dégrossisement
+
+faire le re-run soluce inside
+tester le multiplaxage
+
+- faire un help si besoin
+- paramètre nom + temps + tour max
+
 
 ### tuiles faites :
  - [x]	TankUp

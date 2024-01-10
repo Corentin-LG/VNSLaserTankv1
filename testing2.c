@@ -225,6 +225,9 @@ int main(int argc, char *argv[])
     // const char *pathTesting = ".\\Grids\\";
     const char *pathTesting = ".\\TestingGrids\\";
     char filenameInterm[] = "";
+    int *nbHeuristicTurn = (int *)malloc(sizeof(int));
+    *nbHeuristicTurn = 1;
+    printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
     if (argc == 1)
     {
         // strcpy(filenameInterm, "Special-I.lt4");
@@ -234,13 +237,31 @@ int main(int argc, char *argv[])
         // strcpy(filenameInterm, "Gary-II.lt4");
         // strcpy(filenameInterm, "Challenge-IV.lt4");
         // strcpy(filenameInterm, "Beginner-II.lt4");
-        strcpy(filenameInterm, "testing.lt4");
+        strcpy(filenameInterm, "testing2.lt4");
     }
-    else
+    else if (argc == 2)
     {
+        if (strstr(argv[1], "help") != NULL)
+        {
+            printf(".\\exeNameWithoutEXT [[gridName.lt4] heuristiqueNumber]\n\n");
+            printf(".\\exeNameWithoutEXT: relative path plus only .exe's name\n");
+            printf("[gridName.lt4]: grid's name plus extension, default: testing2.lt4\n");
+            printf("[heuristiqueNumber]: number of loop to use metaheuristic, default: 1\n\n");
+            printf("example: .\\testing2 testing2.lt4\n");
+            printf("example: .\\testing2 testing14.lt4 3\n");
+            return 0;
+        }
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
     }
+    else if (argc == 3) {
+        strncpy(filenameInterm, argv[1], strlen(argv[1]));
+        filenameInterm[strlen(argv[1])] = '\0';
+        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        *nbHeuristicTurn = atoi(argv[2]);
+        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+    }
+    printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
     const char *filename = malloc(strlen(filenameInterm) + 1);
     strcpy(filename, filenameInterm);
 
@@ -528,6 +549,11 @@ int main(int argc, char *argv[])
     bool firstMoveTry = true;
     int rndBin = getRandomBinary();
     int rndTern = getRandomTernary();
+
+    // v1 avec deplacementsHypothese
+    // si v1 ko -> (circle, 16*16*16=4096) -> faire aléatoire 1-4096 et refaire de zéro
+    // sinon save retenu et refaire
+    
 
     // get one rnd combin
     printf(" ", TURNING, MOVES);
@@ -924,6 +950,7 @@ nextMain:
     // Create new file //
     // const char *filename = ".\\TestingGrids\\testing.lt4";
     // Nouveau nom de fichier
+    // ajouter l'heure ?
     const char *nouveauNom = "Soluce";
 
     // Créer le nom du fichier Soluce
