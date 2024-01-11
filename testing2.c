@@ -20,8 +20,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 int *numRows, int *numColumns,
                 int **tankPosition, int **basesPosition, int **firePosition,
                 int *currentTankDirection, int *currentFireDirection,
-                int *curseurDeplacementsHypothese, int *curseurDeplacementsRetenu, int *curseurDeplacementsMH,
-                int *objectiveFunctionMH,
+                int *objectiveFunction,
                 int *testMove, int *curseur);
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray);
 //////////////////////////////////////////////////////////////////
@@ -110,6 +109,7 @@ void printMovingLetters(int *array, int *curseur);
 void printMovingLettersWithoutPointor(int *array, int curseur);
 int replayDeplacements(char deplacementLetter);
 void erazeUselessTurn(int *vector, int *curseur);
+void mirrorDeplacementArray(int *arrayFrom, int *arrayTo, int *curseurFrom);
 //////////////////////////////////////////////////////////////////
 // Structs //
 struct ConversionTable
@@ -254,7 +254,8 @@ int main(int argc, char *argv[])
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
     }
-    else if (argc == 3) {
+    else if (argc == 3)
+    {
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
         printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
@@ -535,6 +536,8 @@ int main(int argc, char *argv[])
 
     // wip
     int *curseur = 0;
+    *curseurDeplacementsHypothese = 0;
+    *objectiveFunctionHypothese = 0;
     *curseurDeplacementsMH = 0;
     *objectiveFunctionMH = 0;
     // print *curseurDeplacementsMH  ; calc *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
@@ -553,7 +556,6 @@ int main(int argc, char *argv[])
     // v1 avec deplacementsHypothese
     // si v1 ko -> (circle, 16*16*16=4096) -> faire aléatoire 1-4096 et refaire de zéro
     // sinon save retenu et refaire
-    
 
     // get one rnd combin
     printf(" ", TURNING, MOVES);
@@ -574,8 +576,7 @@ int main(int argc, char *argv[])
                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
-                       curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionHypothese, &testMove, &curseur))
         {
             printf("ternFire CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -584,8 +585,8 @@ int main(int argc, char *argv[])
             mirrorPosition(tankPosition, 0, 2);
             // save action
             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
-            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
-            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
+            deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+            *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
@@ -629,8 +630,7 @@ int main(int argc, char *argv[])
                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
-                       curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionHypothese, &testMove, &curseur))
         {
             printf("ternMove CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -639,8 +639,8 @@ int main(int argc, char *argv[])
             mirrorPosition(tankPosition, 0, 2);
             // save action
             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
-            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
-            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
+            deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+            *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
@@ -697,8 +697,7 @@ int main(int argc, char *argv[])
                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
-                       curseurDeplacementsHypothese, curseurDeplacementsRetenu, curseurDeplacementsMH,
-                       objectiveFunctionMH, &testMove, &curseur))
+                       objectiveFunctionHypothese, &testMove, &curseur))
         {
             printf("ternRotation CASE %d\n", testMove);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
@@ -708,8 +707,8 @@ int main(int argc, char *argv[])
             saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
             // save action
             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
-            deplacementsHypotheseMH[*curseurDeplacementsMH] = testMove;
-            *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
+            deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+            *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
             firstMoveTry = true;
             rndBin = getRandomBinary();
@@ -739,14 +738,13 @@ nextMain:
 
     // Degrossissement
     printf("hyp\n");
-    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
-    erazeUselessTurn(deplacementsHypotheseMH, curseurDeplacementsMH);
-    printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
-    printf("objectiveFunctionMH : %d\n", *objectiveFunctionMH);
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    printf("objectiveFunctionHypothese : %d\n", *objectiveFunctionHypothese);
 
     //////////////////////////////////////////////////////////////////
     // MetaHeuristic //
-
 
     mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
     mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
@@ -761,7 +759,180 @@ nextMain:
     // copy or not
     // redo
 
+    *objectiveFunctionMH = *objectiveFunctionHypothese;
+    printf("mirror \n");
+    mirrorDeplacementArray(deplacementsHypothese, deplacementsHypotheseMH, curseurDeplacementsHypothese);
+    *curseurDeplacementsMH = *curseurDeplacementsHypothese;
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    printMovingLetters(deplacementsHypothese, curseurDeplacementsMH);
+    printf("curseurDeplacementsMH : %d curseurDeplacementsHypothese : %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese);
 
+    //     saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+    //     rndTern = getRandomTernary();
+    //     if (rndTern == 0)
+    //     {
+    //         testMove = 0;
+    //     ternFire:
+    //         if ((tankPosition[0][0] == basesPosition[0][0] &&
+    //              tankPosition[0][1] == basesPosition[0][1]))
+    //         {
+    //             printf("BIG FINISH\n");
+    //             goto nextMain;
+    //         }
+    //         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
+    //                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
+    //                        numRows, numColumns, tankPosition, basesPosition,
+    //                        firePosition, &currentTankDirection, &currentFireDirection,
+    //                        objectiveFunctionHypothese, &testMove, &curseur))
+    //         {
+    //             printf("ternFire CASE %d\n", testMove);
+    //             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+    //             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
+    //             mirrorPosition(tankPosition, 0, 1);
+    //             mirrorPosition(tankPosition, 0, 2);
+    //             // save action
+    //             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+    //             deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+    //             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
+    //             // next branch
+    //             firstMoveTry = true;
+    //             rndBin = getRandomBinary();
+    //             if (rndBin == 0)
+    //             {
+    //                 printf("ternFire goto ternFire\n");
+    //                 goto ternFire;
+    //             }
+    //             else
+    //             {
+    //                 printf("ternFire goto ternMove\n");
+    //                 goto ternMove;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // change
+    //             if (!firstMoveTry)
+    //             {
+    //                 printf("ternFire goto ternRotation\n");
+    //                 goto ternRotation;
+    //             }
+    //             firstMoveTry = false;
+    //             printf("ternFire goto ternMove\n");
+    //             goto ternMove;
+    //         }
+    //     }
+    //     else if (rndTern == 1)
+    //     {
+    //     // printf("interm1 %d\n", interm);
+    //     ternMove:
+    //         if ((tankPosition[0][0] == basesPosition[0][0] &&
+    //              tankPosition[0][1] == basesPosition[0][1]))
+    //         {
+    //             printf("BIG FINISH\n");
+    //             goto nextMain;
+    //         }
+    //         interm = saveLastTankDirection;
+    //         testMove = interm;
+    //         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
+    //                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
+    //                        numRows, numColumns, tankPosition, basesPosition,
+    //                        firePosition, &currentTankDirection, &currentFireDirection,
+    //                        objectiveFunctionHypothese, &testMove, &curseur))
+    //         {
+    //             printf("ternMove CASE %d\n", testMove);
+    //             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+    //             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
+    //             mirrorPosition(tankPosition, 0, 1);
+    //             mirrorPosition(tankPosition, 0, 2);
+    //             // save action
+    //             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+    //             deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+    //             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
+    //             // next branch
+    //             firstMoveTry = true;
+    //             rndBin = getRandomBinary();
+    //             if (rndBin == 0)
+    //             {
+    //                 printf("ternMove goto ternFire\n");
+    //                 goto ternFire;
+    //             }
+    //             else
+    //             {
+    //                 printf("ternMove goto ternMove\n");
+    //                 goto ternMove;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // change
+    //             if (!firstMoveTry)
+    //             {
+    //                 printf("ternMove goto ternRotation\n");
+    //                 goto ternRotation;
+    //             }
+    //             firstMoveTry = false;
+    //             printf("ternMove goto ternFire\n");
+    //             goto ternFire;
+    //         }
+    //     }
+    //     else
+    //     {
+    //     ternRotation:
+    //         if ((tankPosition[0][0] == basesPosition[0][0] &&
+    //              tankPosition[0][1] == basesPosition[0][1]))
+    //         {
+    //             printf("BIG FINISH\n");
+    //             goto nextMain;
+    //         }
+
+    //         printf("interm0 %d\n", interm);
+    //         interm = saveLastTankDirection;
+    //         printf("interm1 %d\n", interm);
+    //         rndBin = getRandomBinary();
+    //         if (rndBin == 1)
+    //         {
+    //             interm = interm + 2;
+    //             printf("interm1.2 %d\n", interm);
+    //         }
+    //         interm = interm % TURNING;
+    //         printf("interm2 %d\n", interm);
+    //         interm = interm + 1;
+    //         printf("interm3 %d\n", interm);
+
+    //         testMove = interm;
+    //         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
+    //                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
+    //                        numRows, numColumns, tankPosition, basesPosition,
+    //                        firePosition, &currentTankDirection, &currentFireDirection,
+    //                        objectiveFunctionHypothese, &testMove, &curseur))
+    //         {
+    //             printf("ternRotation CASE %d\n", testMove);
+    //             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+    //             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
+    //             mirrorPosition(tankPosition, 0, 1);
+    //             mirrorPosition(tankPosition, 0, 2);
+    //             saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
+    //             // save action
+    //             printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+    //             deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+    //             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
+    //             // next branch
+    //             firstMoveTry = true;
+    //             rndBin = getRandomBinary();
+    //             if (rndBin == 0)
+    //             {
+    //                 printf("ternRotation goto ternFire\n");
+    //                 goto ternFire;
+    //             }
+    //             else
+    //             {
+    //                 printf("ternRotation goto ternMove\n");
+    //                 goto ternMove;
+    //             }
+    //         }
+    //     }
+
+    // nextMain:
 
     // //////////////////////////////////////////////////////////////////
     // // Replay //
@@ -1339,8 +1510,13 @@ void printMovingLettersWithoutPointor(int *array, int curseur)
     printf("\n");
 }
 
-void firstHeuristique(int **tank, int **bases, int baseNumber)
+// copy from -> paste to
+void mirrorDeplacementArray(int *arrayFrom, int *arrayTo, int *curseurFrom)
 {
+    for (int i = 0; i < *curseurFrom; i++)
+    {
+        arrayTo[i] = arrayFrom[i];
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5063,8 +5239,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 int *numRows, int *numColumns,
                 int **tankPosition, int **basesPosition, int **firePosition,
                 int *currentTankDirection, int *currentFireDirection,
-                int *curseurDeplacementsHypothese, int *curseurDeplacementsRetenu, int *curseurDeplacementsMH,
-                int *objectiveFunctionMH,
+                int *objectiveFunction,
                 int *testMove, int *curseur)
 {
     bool fireDead = false;
@@ -5148,7 +5323,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 }
                 // objective fn
                 // shoot ok
-                *objectiveFunctionMH = *objectiveFunctionMH - 5;
+                *objectiveFunction = *objectiveFunction - 5;
                 fireDead = true;
                 return true;
             }
@@ -5196,7 +5371,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 fireDead = true;
                 // objective fn
                 // movable moved ok
-                *objectiveFunctionMH = *objectiveFunctionMH - 10;
+                *objectiveFunction = *objectiveFunction - 10;
                 return true;
             }
             // or deflect
@@ -5223,7 +5398,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     // printf("turned ok \n");
                     // objective fn
                     // turnable ok
-                    *objectiveFunctionMH = *objectiveFunctionMH - 2;
+                    *objectiveFunction = *objectiveFunction - 2;
                     return true;
                 }
                 else
@@ -5266,7 +5441,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
         *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
         // objective fn
         // rot ok
-        *objectiveFunctionMH = *objectiveFunctionMH - 2;
+        *objectiveFunction = *objectiveFunction - 2;
         return true;
     }
     else
@@ -5313,7 +5488,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         // printf("currentTankDirection %d\n", *currentTankDirection);
                         // objective fn
                         // highway/glass ok
-                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                        *objectiveFunction = *objectiveFunction - 1;
                         return true;
                     }
                     else
@@ -5356,7 +5531,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         mirrorPosition(tankPosition, cooIndexWorking, cooIndexSave);
                         // objective fn
                         // move ok
-                        *objectiveFunctionMH = *objectiveFunctionMH - 1;
+                        *objectiveFunction = *objectiveFunction - 1;
                         return true;
                     }
                 }
@@ -5374,7 +5549,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
     ////////
     // objective fn
     // don't know
-    *objectiveFunctionMH = *objectiveFunctionMH - 666;
+    *objectiveFunction = *objectiveFunction - 666;
     return true;
 }
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray)
