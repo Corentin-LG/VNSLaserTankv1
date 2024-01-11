@@ -744,6 +744,25 @@ nextMain:
     printMovingLetters(deplacementsHypotheseMH, curseurDeplacementsMH);
     printf("objectiveFunctionMH : %d\n", *objectiveFunctionMH);
 
+    //////////////////////////////////////////////////////////////////
+    // MetaHeuristic //
+
+
+    mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
+    mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
+    mirrorGrid(gridGround, gridGroundCopy, numRows, numColumns);
+    mirrorPosition(tankPosition, 2, 0);
+    mirrorPosition(tankPosition, 2, 1);
+
+    // code
+    // co^pyu cursors and array
+    // do
+    // compare
+    // copy or not
+    // redo
+
+
+
     // //////////////////////////////////////////////////////////////////
     // // Replay //
     // resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
