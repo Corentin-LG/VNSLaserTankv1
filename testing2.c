@@ -24,6 +24,8 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 int *objectiveFunction,
                 int *testMove, int *curseur);
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray);
+char* genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn);
+const char* extraireNomFichier(const char *filename);
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
@@ -1043,12 +1045,20 @@ nextMain:
     // const char *filename = ".\\TestingGrids\\testing.lt4";
     // Nouveau nom de fichier
     // ajouter l'heure ?
-    const char *nouveauNom = "Soluce_";
+    // const char *nouveauNom = "Soluce_";
 
-    // Créer le nom du fichier Soluce
-    size_t longueurSoluce = snprintf(NULL, 0, "Soluce_%s", filename) + 1;
-    char *nomFichierSoluce = (char *)malloc(longueurSoluce);
-    snprintf(nomFichierSoluce, longueurSoluce, "Soluce_%s", filename);
+    // // Créer le nom du fichier Soluce
+    // size_t longueurSoluce = snprintf(NULL, 0, "Soluce_%s", filename) + 1;
+    // char *nomFichierSoluce = (char *)malloc(longueurSoluce);
+    // snprintf(nomFichierSoluce, longueurSoluce, "Soluce_%s", filename);
+    // // nbHeuristicTurn
+
+
+     // Appeler la fonction pour générer le nom du fichier
+    char *nomFichierSoluce = genererNomFichier(filename, objectiveFunctionRetenu, actualNBHeuristicTurn);
+
+    // Afficher le nom du fichier généré
+    printf("Nom du fichier généré : %s\n", nomFichierSoluce);
 
     // Créer et ouvrir le fichier Solucetesting.lt4
     FILE *fichierSoluce = fopen(nomFichierSoluce, "w");
@@ -5522,4 +5532,40 @@ void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray)
     // printf("cd end MI %d MII %d\n", *moveI, *moveII);
     moveArray[0] = *moveI;
     moveArray[1] = *moveII;
+}
+
+// Fonction pour extraire le nom du fichier sans l'extension
+const char* extraireNomFichier(const char *filename) {
+    // Trouver la position du dernier point dans le nom du fichier
+    const char *dernierPoint = strrchr(filename, '.');
+    
+    // Si un point est trouvé, extraire le nom du fichier sans l'extension
+    if (dernierPoint != NULL) {
+        size_t longueurNom = dernierPoint - filename;
+        char *nomFichier = (char *)malloc(longueurNom + 1);
+        strncpy(nomFichier, filename, longueurNom);
+        nomFichier[longueurNom] = '\0';
+        return nomFichier;
+    } else {
+        // Si aucun point n'est trouvé, retourner la chaîne d'origine
+        return filename;
+    }
+}
+
+// Fonction pour générer le nom du fichier
+char* genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn) {
+    const char *prefixe = "Soluce_";
+    const char *nomFichierSansExtension = extraireNomFichier(filename);
+    char *nomFichier = (char *)malloc(strlen(prefixe) + strlen(nomFichierSansExtension) + 10); // Taille du préfixe + taille maximale des entiers + longueur de l'extension .lt4
+
+    // Vérifier si objectiveFunctionRetenu est négatif ou positif
+    char signe = (*objectiveFunctionRetenu < 0) ? 'p' : 'm';
+    int valeurAbsolue = abs(*objectiveFunctionRetenu);
+
+    // Générer le nom du fichier
+    sprintf(nomFichier, "%s%s_%c%d_t%d.lt4", prefixe, nomFichierSansExtension, signe, valeurAbsolue, *actualNBHeuristicTurn);
+
+    free(nomFichierSansExtension); // Libérer la mémoire allouée dans extraireNomFichier
+
+    return nomFichier;
 }
