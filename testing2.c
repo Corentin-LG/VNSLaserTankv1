@@ -5563,7 +5563,7 @@ char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int 
     int valeurAbsolue = abs(*objectiveFunctionRetenu);
 
     // Générer le nom du fichier
-    sprintf(nomFichier, "%s%s_%c%d_t%d.lt4", prefixe, nomFichierSansExtension, signe, valeurAbsolue, *actualNBHeuristicTurn);
+    sprintf(nomFichier, "%s%s_%c%d_t%d.ltr", prefixe, nomFichierSansExtension, signe, valeurAbsolue, *actualNBHeuristicTurn);
 
     free(nomFichierSansExtension); // Libérer la mémoire allouée dans extraireNomFichier
 
