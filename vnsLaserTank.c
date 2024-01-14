@@ -26,7 +26,8 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray);
 char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn);
 const char *extraireNomFichier(const char *filename);
-void end2minutes(clock_t debut);
+bool end1minutes(clock_t debut);
+void endNMinutes(clock_t debut, float floatTime);
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
@@ -195,6 +196,13 @@ enum gameConstant
 };
 
 const float COEFF_HEURISTIC = 0.75;
+const int WEIGTH_MOVE = 1;
+const int WEIGTH_TURNABLE = 2;
+const int WEIGTH_SHOOTABLE = 3;
+const int WEIGTH_TURN = 5;
+const int WEIGTH_MOVABLE = 8;
+const int WEIGTH_BASE = 10000;
+const float QUIT_TIME = 140.00;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,17 +218,17 @@ const float COEFF_HEURISTIC = 0.75;
 // {
 int main(int argc, char *argv[])
 {
-    // Affiche le nom du programme
-    printf("Nom du programme : %s\n", argv[0]);
+    // // Affiche le nom du programme
+    // printf("Nom du programme : %s\n", argv[0]);
 
-    // Affiche les arguments passés au programme
-    printf("Nombre total d'arguments : %d\n", argc - 1); // Exclut le nom du programme lui-même
+    // // Affiche les arguments passés au programme
+    // printf("Nombre total d'arguments : %d\n", argc - 1); // Exclut le nom du programme lui-même
 
-    // Affiche chaque argument
-    for (int i = 1; i < argc; i++)
-    {
-        printf("Argument %d : %s\n", i, argv[i]);
-    }
+    // // Affiche chaque argument
+    // for (int i = 1; i < argc; i++)
+    // {
+    //     printf("Argument %d : %s\n", i, argv[i]);
+    // }
     //////////////////////////////////////////////////////////////////
     // Global Var //
     srand(time(NULL));
@@ -233,13 +241,29 @@ int main(int argc, char *argv[])
     char filenameInterm[] = "";
     int *nbHeuristicTurn = (int *)malloc(sizeof(int));
     *nbHeuristicTurn = 1;
-    printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
+    // printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
     int *actualNBHeuristicTurn = (int *)malloc(sizeof(int));
     *actualNBHeuristicTurn = 0;
-    printf("*actualNBHeuristicTurn : %d\n", *actualNBHeuristicTurn);
+    // printf("*actualNBHeuristicTurn : %d\n", *actualNBHeuristicTurn);
+    int *paralellisationNumber = (int *)malloc(sizeof(int));
+    *paralellisationNumber = 0;
+    // printf("*paralellisationNumber : %d\n", *paralellisationNumber);
 
-    if (argc == 1)
+    char *nomExe = argv[0];
+    char *suffixe = ".exe";
+    size_t longueurNomExe = strlen(nomExe);
+    size_t longueurSuffixe = strlen(suffixe);
+
+    // Vérifier si le nom de l'exécutable se termine par ".exe"
+    if (longueurNomExe >= longueurSuffixe && strcmp(nomExe + longueurNomExe - longueurSuffixe, suffixe) == 0)
     {
+        // Retirer le suffixe ".exe"
+        nomExe[longueurNomExe - longueurSuffixe] = '\0';
+    }
+
+    switch (argc)
+    {
+    case 1:
         // strcpy(filenameInterm, "Special-I.lt4");
         // strcpy(filenameInterm, "Sokoban-II.lt4");
         // strcpy(filenameInterm, "No_HS-LPB.lt4");
@@ -248,51 +272,74 @@ int main(int argc, char *argv[])
         // strcpy(filenameInterm, "Challenge-IV.lt4");
         // strcpy(filenameInterm, "Beginner-II.lt4");
         strcpy(filenameInterm, "testing2.lt4");
-    }
-    else if (argc == 2)
-    {
+        break;
+    case 2:
         if (strstr(argv[1], "help") != NULL)
         {
             printf("    Thank you for choosing to work with vnsLaserTank\n");
             printf("For cmd :\n");
             printf("exeName.exe [[gridName.lt4] heuristiqueNumber]\n\n");
-            printf("example: testing2.exe testing2.lt4\n");
-            printf("example: testing2.exe testing14.lt4 3\n");
+            printf("example: %s.exe testing2.lt4\n", nomExe);
+            printf("example: %s.exe testing14.lt4 3\n", nomExe);
             printf("    For configured VSCode :\n");
             printf(".\\exeNameWithoutEXT [[gridName.lt4] heuristiqueNumber]\n\n");
             printf("exeName.exe: name plus extension\n");
             printf(".\\exeNameWithoutEXT: relative path plus only .exe's name\n");
             printf("[gridName.lt4]: grid's name plus extension, default: testing2.lt4\n");
             printf("[heuristiqueNumber]: number of loop to use metaheuristic, default: 1\n\n");
-            printf("example: .\\testing2 testing2.lt4\n");
-            printf("example: .\\testing2 testing14.lt4 3\n");
+            printf("example: .\\%s testing2.lt4\n", nomExe);
+            printf("example: .\\%s testing14.lt4 3\n", nomExe);
             return 0;
         }
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
-    }
-    else if (argc == 3)
-    {
+        break;
+    case 3:
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
-        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        // printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
         *nbHeuristicTurn = atoi(argv[2]);
         printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        break;
+    case 4:
+        strncpy(filenameInterm, argv[1], strlen(argv[1]));
+        filenameInterm[strlen(argv[1])] = '\0';
+        // printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        *nbHeuristicTurn = atoi(argv[2]);
+        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+
+        // printf("argv[3] : %s *paralellisationNumber : %d\n", argv[3], *paralellisationNumber);
+        *paralellisationNumber = atoi(argv[3]);
+        printf("argv[3] : %s *paralellisationNumber : %d\n", argv[3], *paralellisationNumber);
+        break;
+    default:
+        printf("Error : to many parameters or wrong parameter(s)\n");
+        return 1;
     }
-    printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
+
+    // printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
     const char *filename = malloc(strlen(filenameInterm) + 1);
     strcpy(filename, filenameInterm);
 
-    const int CYCLES = 5;
     printf("%s\n", filename);
 
-    size_t longueurTotale = snprintf(NULL, 0, "%s%s", pathTesting, filename) + 1;
+    // // in testing folder
+    // size_t longueurTotale = snprintf(NULL, 0, "%s%s", pathTesting, filename) + 1;
+    // // Allouer de la mémoire pour globalFilePath
+    // char *globalFilePath = (char *)malloc(longueurTotale);
+    // // Concaténer les deux variables dans globalFilePath
+    // snprintf(globalFilePath, longueurTotale, "%s%s", pathTesting, filename);
+    // // Afficher le résultat
+    // printf("Chemin complet du fichier : %s\n", globalFilePath);
+
+    // without testing folder
+    size_t longueurTotale = snprintf(NULL, 0, "%s", filename) + 1;
     // Allouer de la mémoire pour globalFilePath
     char *globalFilePath = (char *)malloc(longueurTotale);
     // Concaténer les deux variables dans globalFilePath
-    snprintf(globalFilePath, longueurTotale, "%s%s", pathTesting, filename);
+    snprintf(globalFilePath, longueurTotale, "%s", filename);
     // Afficher le résultat
-    printf("Chemin complet du fichier : %s\n", globalFilePath);
+    // printf("Chemin complet du fichier : %s\n", globalFilePath);
 
     int **tankPosition = (int **)malloc((2) * sizeof(int *));
     for (int i = 0; i < 3; i++)
@@ -543,7 +590,7 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // First "Solution" //
-    printf("FirstSolution\n");
+    // printf("FirstSolution\n");
     memset(deplacementsHypothese, -1, deplacementsSize);
     memset(deplacementsMH, -1, deplacementsSize);
 
@@ -553,12 +600,9 @@ int main(int argc, char *argv[])
     *objectiveFunctionMH = 0;
     *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
 
-    printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
+    // printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
     ///////////////////////////
     // MHeuristique
-
-    // // need'nt *
-    // testMove = 1;
 
     // reset grid
     resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
@@ -568,7 +612,6 @@ int main(int argc, char *argv[])
     resetGridGround(gridOrigin, gridGroundCopy, numRows, numColumns);
     resetGridMovables(gridOrigin, gridMovablesCopy, gridGround, numRows, numColumns);
 
-    // wip
     int *curseur = 0;
     *curseurDeplacementsHypothese = 0;
     *objectiveFunctionHypothese = 0;
@@ -588,10 +631,6 @@ int main(int argc, char *argv[])
     int rndBin = getRandomBinary();
     int rndTern = getRandomTernary();
 
-    // v1 avec deplacementsHypothese
-    // si v1 ko -> (circle, 16*16*16=4096) -> faire aléatoire 1-4096 et refaire de zéro
-    // sinon save retenu et refaire
-
     // get one rnd combin
     printf(" ", TURNING, MOVES);
 
@@ -601,11 +640,20 @@ int main(int argc, char *argv[])
     {
         testMove = 0;
     ternFire:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -614,13 +662,13 @@ int main(int argc, char *argv[])
                        firePosition, &currentTankDirection, &currentFireDirection,
                        objectiveFunctionHypothese, &testFire, &curseur))
         {
-            printf("ternFire CASE %d\n", testFire);
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+            // printf("ternFire CASE %d\n", testFire);
+            // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
             // save action
-            printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
+            // printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
             deplacementsHypothese[*curseurDeplacementsHypothese] = testFire;
             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
@@ -628,12 +676,12 @@ int main(int argc, char *argv[])
             rndBin = getRandomBinary();
             if (rndBin == 0)
             {
-                printf("ternFire goto ternFire\n");
+                // printf("ternFire goto ternFire\n");
                 goto ternFire;
             }
             else
             {
-                printf("ternFire goto ternMove\n");
+                // printf("ternFire goto ternMove\n");
                 goto ternMove;
             }
         }
@@ -642,11 +690,11 @@ int main(int argc, char *argv[])
             // change
             if (!firstMoveTry)
             {
-                printf("ternFire goto ternRotation\n");
+                // printf("ternFire goto ternRotation\n");
                 goto ternRotation;
             }
             firstMoveTry = false;
-            printf("ternFire goto ternMove\n");
+            // printf("ternFire goto ternMove\n");
             goto ternMove;
         }
     }
@@ -654,11 +702,20 @@ int main(int argc, char *argv[])
     {
     // printf("interm1 %d\n", interm);
     ternMove:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
         interm = saveLastTankDirection;
@@ -669,13 +726,13 @@ int main(int argc, char *argv[])
                        firePosition, &currentTankDirection, &currentFireDirection,
                        objectiveFunctionHypothese, &testMove, &curseur))
         {
-            printf("ternMove CASE %d\n", testMove);
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+            // printf("ternMove CASE %d\n", testMove);
+            // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
             // save action
-            printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
+            // printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
             deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
@@ -683,12 +740,12 @@ int main(int argc, char *argv[])
             rndBin = getRandomBinary();
             if (rndBin == 0)
             {
-                printf("ternMove goto ternFire\n");
+                // printf("ternMove goto ternFire\n");
                 goto ternFire;
             }
             else
             {
-                printf("ternMove goto ternMove\n");
+                // printf("ternMove goto ternMove\n");
                 goto ternMove;
             }
         }
@@ -697,38 +754,47 @@ int main(int argc, char *argv[])
             // change
             if (!firstMoveTry)
             {
-                printf("ternMove goto ternRotation\n");
+                // printf("ternMove goto ternRotation\n");
                 goto ternRotation;
             }
             firstMoveTry = false;
-            printf("ternMove goto ternFire\n");
+            // printf("ternMove goto ternFire\n");
             goto ternFire;
         }
     }
     else
     {
     ternRotation:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
 
-        printf("interm0 %d\n", interm);
+        // printf("interm0 %d\n", interm);
         interm = saveLastTankDirection;
-        printf("interm1 %d\n", interm);
+        // printf("interm1 %d\n", interm);
         rndBin = getRandomBinary();
         if (rndBin == 1)
         {
             interm = interm + 2;
-            printf("interm1.2 %d\n", interm);
+            // printf("interm1.2 %d\n", interm);
         }
         interm = interm % TURNING;
-        printf("interm2 %d\n", interm);
+        // printf("interm2 %d\n", interm);
         interm = interm + 1;
-        printf("interm3 %d\n", interm);
+        // printf("interm3 %d\n", interm);
 
         testMove = interm;
         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -737,14 +803,14 @@ int main(int argc, char *argv[])
                        firePosition, &currentTankDirection, &currentFireDirection,
                        objectiveFunctionHypothese, &testMove, &curseur))
         {
-            printf("ternRotation CASE %d\n", testMove);
-            print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+            // printf("ternRotation CASE %d\n", testMove);
+            // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
             saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
             // save action
-            printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
+            // printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
             deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
@@ -752,12 +818,12 @@ int main(int argc, char *argv[])
             rndBin = getRandomBinary();
             if (rndBin == 0)
             {
-                printf("ternRotation goto ternFire\n");
+                // printf("ternRotation goto ternFire\n");
                 goto ternFire;
             }
             else
             {
-                printf("ternRotation goto ternMove\n");
+                // printf("ternRotation goto ternMove\n");
                 goto ternMove;
             }
         }
@@ -774,12 +840,12 @@ nextMain:
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Degrossissement
-    printf("hyp\n");
-    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-    erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
-    printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-    printf("objectiveFunctionHypothese : %d\n", *objectiveFunctionHypothese);
+    // // Degrossissement
+    // printf("hyp\n");
+    // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    // erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
+    // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+    // printf("objectiveFunctionHypothese : %d\n", *objectiveFunctionHypothese);
 
     // Initial Soluce
     *objectiveFunctionRetenu = *objectiveFunctionHypothese;
@@ -790,7 +856,7 @@ nextMain:
     // MetaHeuristic //
     while (*actualNBHeuristicTurn < *nbHeuristicTurn)
     {
-        printf("begin *actualNBHeuristicTurn %d\n", *actualNBHeuristicTurn);
+        // printf("begin *actualNBHeuristicTurn %d\n", *actualNBHeuristicTurn);
         resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
         resetGridGround(gridOrigin, gridGround, numRows, numColumns);
         resetGridMovables(gridOrigin, gridMovables, gridGround, numRows, numColumns);
@@ -805,21 +871,21 @@ nextMain:
         tankPosition[0][1] = *originTankPositionY;
         currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
 
-        printf("mirror \n");
+        // printf("mirror \n");
         mirrorDeplacementArray(deplacementsHypothese, deplacementsMH, curseurDeplacementsHypothese);
         *curseurDeplacementsMH = *curseurDeplacementsHypothese;
-        printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-        printMovingLetters(deplacementsMH, curseurDeplacementsMH);
-        printf("curseurDeplacementsMH : %d curseurDeplacementsHypothese : %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese);
+        // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
+        // printMovingLetters(deplacementsMH, curseurDeplacementsMH);
+        // printf("curseurDeplacementsMH : %d curseurDeplacementsHypothese : %d\n", *curseurDeplacementsMH, *curseurDeplacementsHypothese);
         *curseurDeplacementsMH = getRandomCursor(curseurDeplacementsMH);
-        printf("curseurDeplacementsMH : %d\n", *curseurDeplacementsMH);
+        // printf("curseurDeplacementsMH : %d\n", *curseurDeplacementsMH);
         *objectiveFunctionMH = 0;
 
         for (int i = 0; i < *curseurDeplacementsMH; i++)
         {
             // redo action
             testMove = deplacementsMH[i];
-            printf("i %d objectiveFunctionMH %d *curseurDeplacementsMH %d\n", i, *objectiveFunctionMH, *curseurDeplacementsMH);
+            // printf("i %d objectiveFunctionMH %d *curseurDeplacementsMH %d\n", i, *objectiveFunctionMH, *curseurDeplacementsMH);
 
             if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
                            gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
@@ -827,20 +893,20 @@ nextMain:
                            firePosition, &currentTankDirection, &currentFireDirection,
                            objectiveFunctionMH, &testMove, &curseur))
             {
-                printf("reboot CASE %d\n", testMove);
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+                // printf("reboot CASE %d\n", testMove);
+                // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
                 mirrorPosition(tankPosition, 0, 1);
                 mirrorPosition(tankPosition, 0, 2);
             }
             else
             {
-                printf("!!!! ERROR !!!!!\n");
-                printf("i %d objectiveFunctionMH %d testMove %d deplacementsMH[i] %d\n", i, *objectiveFunctionMH, testMove, deplacementsMH[i]);
+                // printf("!!!! ERROR !!!!!\n");
+                // printf("i %d objectiveFunctionMH %d testMove %d deplacementsMH[i] %d\n", i, *objectiveFunctionMH, testMove, deplacementsMH[i]);
                 return 0;
             }
         }
-        printf("end ofmh %d\n", *objectiveFunctionMH);
+        // printf("end ofmh %d\n", *objectiveFunctionMH);
 
         // Redo
         saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
@@ -849,11 +915,20 @@ nextMain:
         {
             testMove = 0;
         ternFire2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
             if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -862,13 +937,13 @@ nextMain:
                            firePosition, &currentTankDirection, &currentFireDirection,
                            objectiveFunctionMH, &testFire, &curseur))
             {
-                printf("ternFire2 CASE %d\n", testFire);
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+                // printf("ternFire2 CASE %d\n", testFire);
+                // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
                 mirrorPosition(tankPosition, 0, 1);
                 mirrorPosition(tankPosition, 0, 2);
                 // save action
-                printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+                // printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
                 deplacementsMH[*curseurDeplacementsMH] = testFire;
                 *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
                 // next branch
@@ -876,12 +951,12 @@ nextMain:
                 rndBin = getRandomBinary();
                 if (rndBin == 0)
                 {
-                    printf("ternFire goto ternFire\n");
+                    // printf("ternFire goto ternFire\n");
                     goto ternFire2;
                 }
                 else
                 {
-                    printf("ternFire goto ternMove\n");
+                    // printf("ternFire goto ternMove\n");
                     goto ternMove2;
                 }
             }
@@ -890,11 +965,11 @@ nextMain:
                 // change
                 if (!firstMoveTry)
                 {
-                    printf("ternFire goto ternRotation\n");
+                    // printf("ternFire goto ternRotation\n");
                     goto ternRotation2;
                 }
                 firstMoveTry = false;
-                printf("ternFire goto ternMove\n");
+                // printf("ternFire goto ternMove\n");
                 goto ternMove2;
             }
         }
@@ -902,11 +977,20 @@ nextMain:
         {
         // printf("interm1 %d\n", interm);
         ternMove2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
             interm = saveLastTankDirection;
@@ -917,13 +1001,13 @@ nextMain:
                            firePosition, &currentTankDirection, &currentFireDirection,
                            objectiveFunctionMH, &testMove, &curseur))
             {
-                printf("ternMove CASE %d\n", testMove);
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+                // printf("ternMove CASE %d\n", testMove);
+                // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
                 mirrorPosition(tankPosition, 0, 1);
                 mirrorPosition(tankPosition, 0, 2);
                 // save action
-                printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+                // printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
                 deplacementsMH[*curseurDeplacementsMH] = testMove;
                 *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
                 // next branch
@@ -931,12 +1015,12 @@ nextMain:
                 rndBin = getRandomBinary();
                 if (rndBin == 0)
                 {
-                    printf("ternMove goto ternFire\n");
+                    // printf("ternMove goto ternFire\n");
                     goto ternFire2;
                 }
                 else
                 {
-                    printf("ternMove goto ternMove\n");
+                    // printf("ternMove goto ternMove\n");
                     goto ternMove2;
                 }
             }
@@ -945,38 +1029,47 @@ nextMain:
                 // change
                 if (!firstMoveTry)
                 {
-                    printf("ternMove goto ternRotation\n");
+                    // printf("ternMove goto ternRotation\n");
                     goto ternRotation2;
                 }
                 firstMoveTry = false;
-                printf("ternMove goto ternFire\n");
+                // printf("ternMove goto ternFire\n");
                 goto ternFire2;
             }
         }
         else
         {
         ternRotation2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
 
-            printf("interm0 %d\n", interm);
+            // printf("interm0 %d\n", interm);
             interm = saveLastTankDirection;
-            printf("interm1 %d\n", interm);
+            // printf("interm1 %d\n", interm);
             rndBin = getRandomBinary();
             if (rndBin == 1)
             {
                 interm = interm + 2;
-                printf("interm1.2 %d\n", interm);
+                // printf("interm1.2 %d\n", interm);
             }
             interm = interm % TURNING;
-            printf("interm2 %d\n", interm);
+            // printf("interm2 %d\n", interm);
             interm = interm + 1;
-            printf("interm3 %d\n", interm);
+            // printf("interm3 %d\n", interm);
 
             testMove = interm;
             if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -985,14 +1078,14 @@ nextMain:
                            firePosition, &currentTankDirection, &currentFireDirection,
                            objectiveFunctionMH, &testMove, &curseur))
             {
-                printf("ternRotation CASE %d\n", testMove);
-                print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
+                // printf("ternRotation CASE %d\n", testMove);
+                // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
                 mirrorPosition(tankPosition, 0, 1);
                 mirrorPosition(tankPosition, 0, 2);
                 saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
                 // save action
-                printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
+                // printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
                 deplacementsMH[*curseurDeplacementsMH] = testMove;
                 *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
                 // next branch
@@ -1000,19 +1093,19 @@ nextMain:
                 rndBin = getRandomBinary();
                 if (rndBin == 0)
                 {
-                    printf("ternRotation goto ternFire\n");
+                    // printf("ternRotation goto ternFire\n");
                     goto ternFire2;
                 }
                 else
                 {
-                    printf("ternRotation goto ternMove\n");
+                    // printf("ternRotation goto ternMove\n");
                     goto ternMove2;
                 }
             }
         }
 
     nextMain2:
-        printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
+        // printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
 
         if (*objectiveFunctionMH > *objectiveFunctionHypothese)
         {
@@ -1026,10 +1119,12 @@ nextMain:
             *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
             mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
         }
-        printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
+        // printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
 
         *actualNBHeuristicTurn = *actualNBHeuristicTurn + 1;
     }
+
+makeFile:
 
     mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
     mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
@@ -1490,7 +1585,7 @@ void getFirstShootNextCoo(int **tankPosition, int **firePosition, int *currentTa
         firePosition[0][1] = tankPosition[0][1] - 1;
         break;
     default:
-        printf("errorMove %d\n", *currentTankDirection);
+        // printf("errorMove %d\n", *currentTankDirection);
         break;
     }
 }
@@ -1557,7 +1652,7 @@ char convertIntIntoChar(int integer)
     case 4:
         return 'L';
     default:
-        printf("Erreur : entier en dehors de la plage attendue (0-4)\n");
+        // printf("Erreur : entier en dehors de la plage attendue (0-4)\n");
         return '\0'; // Caractère nul pour indiquer une erreur
     }
 }
@@ -1644,7 +1739,7 @@ bool isLegalMove(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid, 
             }
         }
     default:
-        printf("illegalMove = %d\n", moveID);
+        // printf("illegalMove = %d\n", moveID);
         return false;
     }
     return false;
@@ -1729,7 +1824,7 @@ bool isLegalMVMove(int movableX, int movableY, int moveID, int **arrayGrid, int 
             }
         }
     default:
-        printf("illegalMove = %d\n", moveID);
+        // printf("illegalMove = %d\n", moveID);
         return false;
     }
     return false;
@@ -1783,7 +1878,7 @@ bool nextFloor(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
             return false;
         }
     default:
-        printf("X%d ", moveID);
+        // printf("X%d ", moveID);
         return false;
     }
     return false;
@@ -1831,7 +1926,7 @@ bool nextMoovableFloor(int movableX, int movableY, int moveID, int **arrayGrid)
             return false;
         }
     default:
-        printf("X%d ", moveID);
+        // printf("X%d ", moveID);
         return false;
     }
     return false;
@@ -1960,7 +2055,7 @@ bool isTunnel(int elementID)
 // only mirror and antitank ~treat Bm different ?
 bool isMovable(int elementID, int *positionID)
 {
-    printf("isMovable eleID%d posID%d\n", elementID, *positionID);
+    // printf("isMovable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     // case MOVABLEBLOC:
@@ -2063,7 +2158,7 @@ bool isMovableAtBeginning(int elementID)
 // only bric and antitank
 bool isShootable(int elementID, int *positionID)
 {
-    printf("isShootable eleID%d posID%d\n", elementID, *positionID);
+    // printf("isShootable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case BRICKS:
@@ -2096,7 +2191,7 @@ bool isShootable(int elementID, int *positionID)
         }
         return false;
     default:
-        printf("other shootable %d\n", elementID);
+        // printf("other shootable %d\n", elementID);
         return false;
     }
     return false;
@@ -2104,7 +2199,7 @@ bool isShootable(int elementID, int *positionID)
 
 bool isFireTrought(int elementID)
 {
-    printf("isFireTrought eleID%d\n", elementID);
+    // printf("isFireTrought eleID%d\n", elementID);
     switch (elementID)
     {
     case DIRT:
@@ -2152,7 +2247,7 @@ bool isFireTrought(int elementID)
 
 bool isFireDeflect(int elementID, int *positionID)
 {
-    printf("isFireDeflect eleID%d posID%d\n", elementID, *positionID);
+    // printf("isFireDeflect eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case MIRRORUPRIGHT:
@@ -2210,7 +2305,7 @@ bool isFireDeflect(int elementID, int *positionID)
         }
         return true;
     default:
-        printf("other deflect %d\n", *positionID);
+        // printf("other deflect %d\n", *positionID);
         return false;
     }
     return false;
@@ -2218,7 +2313,7 @@ bool isFireDeflect(int elementID, int *positionID)
 
 bool isTurnable(int elementID, int *positionID)
 {
-    printf("isTurnable eleID%d posID%d\n", elementID, *positionID);
+    // printf("isTurnable eleID%d posID%d\n", elementID, *positionID);
     switch (elementID)
     {
     case ROTATIVEMIRRORUPRIGHT:
@@ -2528,7 +2623,7 @@ bool isFireStop(int elementID)
 // true for >=-1 and <=numX; easier for fire calc
 bool isOutOfBorder(int **objectPosition, int objectCoo, int *numRows, int *numColumns)
 {
-    printf("o00 %d, o01 %d, nr %d, nc %d\n ", objectPosition[objectCoo][0], objectPosition[objectCoo][1], *numRows, *numColumns);
+    // printf("o00 %d, o01 %d, nr %d, nc %d\n ", objectPosition[objectCoo][0], objectPosition[objectCoo][1], *numRows, *numColumns);
     if (objectPosition[objectCoo][0] < 0 || objectPosition[objectCoo][0] >= *numRows || objectPosition[objectCoo][1] < 0 || objectPosition[objectCoo][1] >= *numColumns)
     {
         return true;
@@ -2562,12 +2657,12 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUPDEAD;
             gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKUPDEAD;
             gridGround[firePosition[0][0]][firePosition[0][1]] = ANTITANKUPDEAD; // to be sure
-            print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             break;
         }
         else
         {
-            printf("atu not kill ?\n");
+            // printf("atu not kill ?\n");
         }
         break;
     case ANTITANKRIGHT:
@@ -2576,12 +2671,12 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHTDEAD;
             gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHTDEAD;
             gridGround[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHTDEAD;
-            print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             break;
         }
         else
         {
-            printf("atr not kill ?\n");
+            // printf("atr not kill ?\n");
         }
         break;
     case ANTITANKDOWN:
@@ -2590,12 +2685,12 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWNDEAD;
             gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWNDEAD;
             gridGround[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWNDEAD;
-            print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             break;
         }
         else
         {
-            printf("atd not kill ?\n");
+            // printf("atd not kill ?\n");
         }
         break;
     case ANTITANKLEFT:
@@ -2604,16 +2699,16 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFTDEAD;
             gridMovables[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFTDEAD;
             gridGround[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFTDEAD;
-            print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             break;
         }
         else
         {
-            printf("atl not kill ?\n");
+            // printf("atl not kill ?\n");
         }
         break;
     default:
-        printf("!! bang ft= %d fp00 %d fp01 %d\n", firedTileID, firePosition[0][0], firePosition[0][1]);
+        // printf("!! bang ft= %d fp00 %d fp01 %d\n", firedTileID, firePosition[0][0], firePosition[0][1]);
         break;
     }
 }
@@ -2630,7 +2725,7 @@ void shotableAction(int firedTileID, int **firePosition, int *currentFireDirecti
 // Bm+mirror+AT : water case ok ~missing way and ice // can return false and continue
 bool movableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
-    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
     ////////// !!!!!!!!!! attention no WAYurdl and ice
     // brick and antitank
     switch (firedTileID)
@@ -2654,7 +2749,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     // copy ground at before location
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2663,7 +2758,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -2680,11 +2775,11 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     // return directly false if no ICE/THINICE
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -2700,7 +2795,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2709,7 +2804,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -2726,10 +2821,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -2745,7 +2840,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2770,10 +2865,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -2789,7 +2884,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = WATERFULL;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2814,21 +2909,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MOVABLEBLOC;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case MIRRORUPRIGHT:
         switch (*currentFireDirection)
@@ -2841,7 +2936,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2850,7 +2945,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -2867,10 +2962,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -2884,7 +2979,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2893,7 +2988,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -2910,21 +3005,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORUPRIGHT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case MIRRORRIGHTDOWN:
 
@@ -2938,7 +3033,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2947,7 +3042,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -2964,10 +3059,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -2981,7 +3076,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -2990,7 +3085,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3007,21 +3102,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORRIGHTDOWN;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case MIRRORDOWNLEFT:
 
@@ -3035,7 +3130,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3044,7 +3139,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3061,10 +3156,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3078,7 +3173,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3087,7 +3182,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3104,21 +3199,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORDOWNLEFT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case MIRRORLEFTUP:
 
@@ -3132,7 +3227,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3141,7 +3236,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3158,10 +3253,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3175,7 +3270,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3184,7 +3279,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3201,28 +3296,28 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = MIRRORLEFTUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case ANTITANKUP:
         // positionID point to distination
         switch (*currentFireDirection)
         {
         case UP:
-            printf("err mov atu case up\n");
+            // printf("err mov atu case up\n");
             return false;
         case RIGHT:
             firePosition[0][1] = firePosition[0][1] + 1;
@@ -3232,7 +3327,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3241,7 +3336,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3258,10 +3353,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3275,7 +3370,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3284,7 +3379,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3301,10 +3396,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3318,7 +3413,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3327,7 +3422,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3344,21 +3439,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKUP;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case ANTITANKRIGHT:
         switch (*currentFireDirection)
@@ -3371,7 +3466,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3380,7 +3475,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3397,17 +3492,17 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         case RIGHT:
-            printf("err mov atr case r\n");
+            // printf("err mov atr case r\n");
             return false;
         case DOWN:
             firePosition[0][0] = firePosition[0][0] + 1;
@@ -3417,7 +3512,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3426,7 +3521,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3443,10 +3538,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3460,7 +3555,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3469,7 +3564,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3486,21 +3581,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKRIGHT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case ANTITANKDOWN:
         switch (*currentFireDirection)
@@ -3513,7 +3608,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3522,7 +3617,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3539,10 +3634,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3556,7 +3651,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3565,7 +3660,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3582,17 +3677,17 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         case DOWN:
-            printf("err mov atd case d\n");
+            // printf("err mov atd case d\n");
             return false;
         case LEFT:
             firePosition[0][1] = firePosition[0][1] - 1;
@@ -3602,7 +3697,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3611,7 +3706,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3628,21 +3723,21 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKDOWN;
                     gridMovables[firePosition[0][0]][firePosition[0][1] + 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] + 1] = gridGround[firePosition[0][0]][firePosition[0][1] + 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     case ANTITANKLEFT:
         switch (*currentFireDirection)
@@ -3655,7 +3750,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3664,7 +3759,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3681,10 +3776,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0] + 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] + 1][firePosition[0][1]] = gridGround[firePosition[0][0] + 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3698,7 +3793,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3707,7 +3802,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3724,10 +3819,10 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0]][firePosition[0][1] - 1] = NOTHING;
                     gridWorked[firePosition[0][0]][firePosition[0][1] - 1] = gridGround[firePosition[0][0]][firePosition[0][1] - 1];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
@@ -3741,7 +3836,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                 {
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     return true;
                 }
                 if (isTunnel(gridGround[firePosition[0][0]][firePosition[0][1]]))
@@ -3750,7 +3845,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!tunnelTPMovables(firePosition[0][0], firePosition[0][1], gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
                         return false;
@@ -3767,24 +3862,24 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
                     gridWorked[firePosition[0][0]][firePosition[0][1]] = ANTITANKLEFT;
                     gridMovables[firePosition[0][0] - 1][firePosition[0][1]] = NOTHING;
                     gridWorked[firePosition[0][0] - 1][firePosition[0][1]] = gridGround[firePosition[0][0] - 1][firePosition[0][1]];
-                    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                     if (!movableOnIce(firePosition[0][0], firePosition[0][1], *currentFireDirection, gridWorked, gridMovables, gridGround, numRows, numColumns))
                     {
-                        printf("onIce ko \n");
+                        // printf("onIce ko \n");
                     }
                     return true;
                 }
             }
             return false;
         case LEFT:
-            printf("err mov atl case l\n");
+            // printf("err mov atl case l\n");
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("findmovable cfd %d\n", *currentFireDirection);
+        // print3ArrayTarget(gridWorked, gridMovables, gridGround, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("findmovable cfd %d\n", *currentFireDirection);
         return false;
     default:
         // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
@@ -3804,7 +3899,7 @@ bool movableAction(int firedTileID, int **firePosition, int *currentFireDirectio
 // mirror and rmirror ok
 bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
-    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
     switch (firedTileID)
     {
     case MIRRORUPRIGHT:
@@ -3817,7 +3912,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][1] = firePosition[0][1] + 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
@@ -3826,16 +3921,16 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][0] = firePosition[0][0] - 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case MIRRORRIGHTDOWN:
     case ROTATIVEMIRRORRIGHTDOWN:
@@ -3846,7 +3941,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][0] = firePosition[0][0] + 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
@@ -3855,16 +3950,16 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][1] = firePosition[0][1] + 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case MIRRORDOWNLEFT:
     case ROTATIVEMIRRORDOWNLEFT:
@@ -3875,7 +3970,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][1] = firePosition[0][1] - 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
@@ -3884,16 +3979,16 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][0] = firePosition[0][0] + 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case MIRRORLEFTUP:
     case ROTATIVEMIRRORLEFTUP:
@@ -3904,7 +3999,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][0] = firePosition[0][0] - 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
@@ -3913,16 +4008,16 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
             firePosition[0][1] = firePosition[0][1] - 1;
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns))
             {
-                print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+                // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
                 return true;
             }
             return false;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     default:
         // printf("bangid = %d tn %d\n", firedTileID, turnNumber);
@@ -3932,7 +4027,7 @@ bool deflectableAction(int firedTileID, int **firePosition, int *currentFireDire
 
 bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirection, int **gridWorked, int **gridMovables, int **gridGround, int *numRows, int *numColumns)
 {
-    print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+    // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
     switch (firedTileID)
     {
     case ROTATIVEMIRRORDOWNLEFT:
@@ -3942,14 +4037,14 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
         case DOWN:
         case LEFT:
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORLEFTUP;
-            print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             return true;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case ROTATIVEMIRRORLEFTUP:
 
@@ -3958,14 +4053,14 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
         case LEFT:
         case UP:
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORUPRIGHT;
-            print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             return true;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case ROTATIVEMIRRORUPRIGHT:
         switch (*currentFireDirection)
@@ -3973,14 +4068,14 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
         case UP:
         case RIGHT:
             gridWorked[firePosition[0][0]][firePosition[0][1]] = ROTATIVEMIRRORRIGHTDOWN;
-            print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+            // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             return true;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
-        print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
-        printf("finddeflectable\n");
+        // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
+        // printf("finddeflectable\n");
         return false;
     case ROTATIVEMIRRORRIGHTDOWN:
 
@@ -3992,7 +4087,7 @@ bool turnableAction(int firedTileID, int **firePosition, int *currentFireDirecti
             // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
             return true;
         default:
-            printf("X%d ", *currentFireDirection);
+            // printf("X%d ", *currentFireDirection);
             return false;
         }
         // print2ArrayTarget(gridWorked, gridMovables, numRows, numColumns, firePosition[0][0], firePosition[0][1]);
@@ -4025,7 +4120,7 @@ bool onFirstHighWay(int **tankPosition, int tankCoo, int moveID, int **gridWorke
 {
     bool isOnHighWay = true;
     // you r on n+1
-    printf("onfirstHW %d\n", moveID);
+    // printf("onfirstHW %d\n", moveID);
     // // here on way
     // printf("start highway %d\n", gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]]);
     // print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
@@ -4524,12 +4619,12 @@ bool onSecondHighWay(int **tankPosition, int tankCoo, int moveID, int **gridWork
         }
         break;
     default:
-        printf("stop highway %d\n", gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]]);
+        // printf("stop highway %d\n", gridWorked[tankPosition[tankCoo][0]][tankPosition[tankCoo][1]]);
         isOnHighWay = false;
         break;
     }
     // }
-    printf("end of highway\n");
+    // printf("end of highway\n");
     return true;
     // }
 }
@@ -4594,17 +4689,17 @@ bool movableOnIce(int movableX, int movableY, int moveID, int **gridWorked, int 
             else
             {
                 // if error or water
-                printf("illegalICEmove\n");
+                // printf("illegalICEmove\n");
                 // printf("%d %d %d\n", gridGround[movableX][movableY], movableX, movableY);
                 return false;
             }
         }
         return false;
     default:
-        printf("stop ice m %d\n", gridWorked[movableX][movableY]);
+        // printf("stop ice m %d\n", gridWorked[movableX][movableY]);
         return false;
     }
-    printf("end of ice m\n");
+    // printf("end of ice m\n");
     return false;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4647,7 +4742,7 @@ bool isHighWay(int elementID)
     case THINICE:
         return true;
     default:
-        printf("not highway id:%d\n", elementID);
+        // printf("not highway id:%d\n", elementID);
         return false;
     }
     return false;
@@ -4663,7 +4758,7 @@ bool isIce(int elementID)
     case THINICE:
         return true;
     default:
-        printf("not ice id:%d\n", elementID);
+        // printf("not ice id:%d\n", elementID);
         return false;
     }
     return false;
@@ -4712,7 +4807,7 @@ bool nextHighWay(int **arrayTankCell, int tankCoo, int moveID, int **arrayGrid)
             return false;
         }
     default:
-        printf("X%d ", moveID);
+        // printf("X%d ", moveID);
         return false;
     }
     return false;
@@ -4729,7 +4824,7 @@ void erazeUselessTurn(int *vector, int *curseur)
         // printf("\n|i=%d; *curseur = %d\n", i, *curseur);
         if (i == *curseur)
         {
-            printf("|breek\n");
+            // printf("|breek\n");
             break;
         }
         else if (vector[i] == 0 && lastFireCell == 0)
@@ -4803,8 +4898,8 @@ void erazeUselessTurn(int *vector, int *curseur)
                 if (vector[i + 2] == lastDirection)
                 {
                     /* code */
-                    printf("vi-1=%d, vi=%d, vi+1=%d, vi+2=%d, ld=%d\n", vector[i - 1], vector[i], vector[i + 1], vector[i + 2], lastDirection);
-                    printf("|bruh __\n");
+                    // printf("vi-1=%d, vi=%d, vi+1=%d, vi+2=%d, ld=%d\n", vector[i - 1], vector[i], vector[i + 1], vector[i + 2], lastDirection);
+                    // printf("|bruh __\n");
                 }
                 else if (vector[i + 2] != lastDirection)
                 {
@@ -4860,7 +4955,7 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
                     if (gridWorked[rangeAT[0][0]][rangeAT[0][1]] == ANTITANKDOWN)
                     {
                         // printf("at up killer ok\n");
-                        printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                        // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                         return true;
                     }
                     if (!isFireTrought(gridWorked[rangeAT[0][0]][rangeAT[0][1]]))
@@ -4905,7 +5000,7 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
             }
             else
             {
-                printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
+                // printArrayTarget(gridWorked, numRows, numColumns, rangeAT[0][0], rangeAT[0][1]);
                 // printf("no righted at\n");
                 goto nextCross;
             }
@@ -4942,7 +5037,7 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
             }
             goto nextCross;
         case LEFT:
-            printf("ATA l %d tp %d\n", i, tankPosition[tankCoo][1]);
+            // printf("ATA l %d tp %d\n", i, tankPosition[tankCoo][1]);
             if (tankPosition[tankCoo][1] > 0)
             {
                 for (int j = 1; j <= tankPosition[tankCoo][1]; j++)
@@ -4971,12 +5066,12 @@ bool antiTankAction(int **tankPosition, int tankCoo, int **gridWorked, int *numR
             }
             goto nextCross;
         default:
-            printf("err move atAction %d\n", i);
+            // printf("err move atAction %d\n", i);
             return false;
         }
     nextCross:
     }
-    printf("no AT action\n");
+    // printf("no AT action\n");
     return false;
 }
 
@@ -4998,7 +5093,7 @@ bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridM
     }
     if (tunnelNumber == 1)
     {
-        printf("tp kill !!!!\n");
+        // printf("tp kill !!!!\n");
         return false;
     }
 
@@ -5059,8 +5154,8 @@ bool tunnelTPTank(int **tankPosition, int tankCoo, int **gridWorked, int **gridM
             }
         }
     }
-    printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
-    printf("no tp...\n");
+    // printArrayBraket(gridWorked, numRows, numColumns, tankPosition[tankCoo][0], tankPosition[tankCoo][1]);
+    // printf("no tp...\n");
     return true;
 }
 
@@ -5083,7 +5178,7 @@ bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMo
 
     if (tunnelNumber == 0)
     {
-        printf("tp m ERROR!!\n");
+        // printf("tp m ERROR!!\n");
         return false;
     }
 
@@ -5150,8 +5245,8 @@ bool tunnelTPMovables(int movableX, int movableY, int **gridWorked, int **gridMo
             }
         }
     }
-    printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
-    printf("no tp...m\n");
+    // printArrayBraket(gridWorked, numRows, numColumns, movableX, movableY);
+    // printf("no tp...m\n");
     return true;
 }
 
@@ -5172,7 +5267,7 @@ void advanceMovableCoo(int *movableX, int *movableY, int moveID)
         *movableY = *movableY - 1;
         break;
     default:
-        printf("errorMove mvx %d mvy %d\n", movableX, movableY);
+        // printf("errorMove mvx %d mvy %d\n", movableX, movableY);
         break;
     }
 }
@@ -5276,7 +5371,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 // objective fn
                 // shoot ok
                 // printf("bang ok\n");
-                *objectiveFunction = *objectiveFunction - 5;
+                *objectiveFunction = *objectiveFunction - WEIGTH_SHOOTABLE;
                 fireDead = true;
                 return true;
             }
@@ -5325,7 +5420,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 // objective fn
                 // movable moved ok
                 // printf("move ok\n");
-                *objectiveFunction = *objectiveFunction - 10;
+                *objectiveFunction = *objectiveFunction - WEIGTH_MOVABLE;
                 return true;
             }
             // or deflect
@@ -5353,7 +5448,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     // objective fn
                     // turnable ok
                     // printf("turn ok\n");
-                    *objectiveFunction = *objectiveFunction - 2;
+                    *objectiveFunction = *objectiveFunction - WEIGTH_TURNABLE;
                     return true;
                 }
                 else
@@ -5374,7 +5469,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 return false;
             }
         nextFirePosition:
-            printf("endFire \n");
+            // printf("endFire \n");
             if (!isOutOfBorder(firePosition, 0, numRows, numColumns) && !fireDead)
             {
                 // printf("NotOut fp00 = %d, fp01 = %d, cursor = %d\n", firePosition[0][0], firePosition[0][1], *curseur);
@@ -5396,7 +5491,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
         *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
         // objective fn
         // rot ok
-        *objectiveFunction = *objectiveFunction - 2;
+        *objectiveFunction = *objectiveFunction - WEIGTH_TURN;
         // printf("turn ok\n");
         return true;
     }
@@ -5412,7 +5507,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             // mirror to begin
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGroundCopy, gridGround, numRows, numColumns);
             mirrorPosition(tankPosition, cooIndexWorking, cooIndexSave);
-            printf("test legalmov\n");
+            // printf("test legalmov\n");
             // check n+1 = H
             if (nextHighWay(tankPosition, cooIndexWorking, *testMove, gridWorked))
             {
@@ -5444,7 +5539,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         // printf("currentTankDirection %d\n", *currentTankDirection);
                         // objective fn
                         // highway/glass ok
-                        *objectiveFunction = *objectiveFunction - 1;
+                        *objectiveFunction = *objectiveFunction - WEIGTH_MOVE;
                         // printf("hw ok\n");
                         return true;
                     }
@@ -5489,7 +5584,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         mirrorPosition(tankPosition, cooIndexWorking, cooIndexSave);
                         // objective fn
                         // move ok
-                        *objectiveFunction = *objectiveFunction - 1;
+                        *objectiveFunction = *objectiveFunction - WEIGTH_MOVE;
                         return true;
                     }
                 }
@@ -5504,7 +5599,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
 
     // don't really know
     // hear, error tup fire Bs and ternFire goto ternMove -> ternMove goto ternFire -> ternFire goto ternFire
-    printf("end don't really know\n");
+    // printf("end don't really know\n");
     return false;
 }
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray)
@@ -5586,7 +5681,7 @@ char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int 
     char *nomFichier = (char *)malloc(strlen(prefixe) + strlen(nomFichierSansExtension) + 10); // Taille du préfixe + taille maximale des entiers + longueur de l'extension .lt4
 
     // Vérifier si objectiveFunctionRetenu est négatif ou positif
-    char signe = (*objectiveFunctionRetenu < 0) ? 'p' : 'm';
+    char signe = (*objectiveFunctionRetenu < 0) ? 'm' : 'p';
     int valeurAbsolue = abs(*objectiveFunctionRetenu);
 
     // Générer le nom du fichier
@@ -5597,14 +5692,27 @@ char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int 
     return nomFichier;
 }
 
-void end2minutes(clock_t debut)
+// true if over 1 minute
+bool end1minutes(clock_t debut)
 {
     clock_t maintenant = clock();
     double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
 
-    // if (tempsEcoule > 120.0)
-    if (tempsEcoule > 320.0)
+    if (tempsEcoule > 60.0)
     { // 2 minutes en secondes
+        fprintf(stderr, "Le programme a dépassé 1 minutes d'exécution. Arrêt du programme.\n");
+        return true;
+    }
+    return false;
+}
+
+void endNMinutes(clock_t debut, float floatTime)
+{
+    clock_t maintenant = clock();
+    double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
+
+    if (tempsEcoule > floatTime)
+    {
         fprintf(stderr, "Le programme a dépassé 2 minutes d'exécution. Arrêt du programme.\n");
         exit(EXIT_FAILURE);
     }
