@@ -46,7 +46,6 @@ ssfn allistique ko
 - move : if can't move
 modif de sorte à ce que les caluls curseur et mh soient bons
 - revoir at kill
-- revoir poids solution
 - revoir free alloc
 free objectivs
 free current
@@ -54,8 +53,6 @@ free current
 - revoir dégrossisement
 - paramètre nom + temps + tour max
 
-- fn max 1min just cut and diplay 1rst sol
-- fn max 2min out
 
 ### tuiles faites :
  - [x]	TankUp

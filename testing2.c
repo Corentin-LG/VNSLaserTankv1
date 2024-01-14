@@ -26,7 +26,8 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray);
 char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn);
 const char *extraireNomFichier(const char *filename);
-void end2minutes(clock_t debut);
+bool end1minutes(clock_t debut);
+void endNMinutes(clock_t debut, float floatTime);
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
@@ -201,6 +202,7 @@ const int WEIGTH_SHOOTABLE = 3;
 const int WEIGTH_TURN = 5;
 const int WEIGTH_MOVABLE = 8;
 const int WEIGTH_BASE = 10000;
+const float QUIT_TIME = 140.00;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -647,7 +649,15 @@ int main(int argc, char *argv[])
     {
         testMove = 0;
     ternFire:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -701,7 +711,15 @@ int main(int argc, char *argv[])
     {
     // printf("interm1 %d\n", interm);
     ternMove:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -756,7 +774,15 @@ int main(int argc, char *argv[])
     else
     {
     ternRotation:
-        end2minutes(debut);
+        if (end1minutes(debut))
+        {
+            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            goto makeFile;
+            endNMinutes(debut, QUIT_TIME);
+            // goto makeFile;
+        }
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -898,7 +924,15 @@ nextMain:
         {
             testMove = 0;
         ternFire2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -952,7 +986,15 @@ nextMain:
         {
         // printf("interm1 %d\n", interm);
         ternMove2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -1007,7 +1049,15 @@ nextMain:
         else
         {
         ternRotation2:
-            end2minutes(debut);
+            if (end1minutes(debut))
+            {
+                *objectiveFunctionRetenu = *objectiveFunctionMH;
+                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                goto makeFile;
+                endNMinutes(debut, QUIT_TIME);
+                // goto makeFile;
+            }
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -1082,6 +1132,8 @@ nextMain:
 
         *actualNBHeuristicTurn = *actualNBHeuristicTurn + 1;
     }
+
+makeFile:
 
     mirrorGrid(gridWorked, gridWorkedCopy, numRows, numColumns);
     mirrorGrid(gridMovables, gridMovablesCopy, numRows, numColumns);
@@ -5649,14 +5701,27 @@ char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int 
     return nomFichier;
 }
 
-void end2minutes(clock_t debut)
+// true if over 1 minute
+bool end1minutes(clock_t debut)
 {
     clock_t maintenant = clock();
     double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
 
-    // if (tempsEcoule > 120.0)
-    if (tempsEcoule > 320.0)
+    if (tempsEcoule > 60.0)
     { // 2 minutes en secondes
+        fprintf(stderr, "Le programme a dépassé 1 minutes d'exécution. Arrêt du programme.\n");
+        return true;
+    }
+    return false;
+}
+
+void endNMinutes(clock_t debut, float floatTime)
+{
+    clock_t maintenant = clock();
+    double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
+
+    if (tempsEcoule > floatTime)
+    {
         fprintf(stderr, "Le programme a dépassé 2 minutes d'exécution. Arrêt du programme.\n");
         exit(EXIT_FAILURE);
     }
