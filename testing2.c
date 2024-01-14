@@ -5586,7 +5586,8 @@ void end2minutes(clock_t debut)
     clock_t maintenant = clock();
     double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
 
-    if (tempsEcoule > 120.0)
+    // if (tempsEcoule > 120.0)
+    if (tempsEcoule > 320.0)
     { // 2 minutes en secondes
         fprintf(stderr, "Le programme a dépassé 2 minutes d'exécution. Arrêt du programme.\n");
         exit(EXIT_FAILURE);

@@ -24,6 +24,9 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 int *objectiveFunction,
                 int *testMove, int *curseur);
 void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray);
+char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn);
+const char *extraireNomFichier(const char *filename);
+void end2minutes(clock_t debut);
 //////////////////////////////////////////////////////////////////
 // Array Functions //
 
@@ -250,7 +253,14 @@ int main(int argc, char *argv[])
     {
         if (strstr(argv[1], "help") != NULL)
         {
+            printf("    Thank you for choosing to work with vnsLaserTank\n");
+            printf("For cmd :\n");
+            printf("exeName.exe [[gridName.lt4] heuristiqueNumber]\n\n");
+            printf("example: testing2.exe testing2.lt4\n");
+            printf("example: testing2.exe testing14.lt4 3\n");
+            printf("    For configured VSCode :\n");
             printf(".\\exeNameWithoutEXT [[gridName.lt4] heuristiqueNumber]\n\n");
+            printf("exeName.exe: name plus extension\n");
             printf(".\\exeNameWithoutEXT: relative path plus only .exe's name\n");
             printf("[gridName.lt4]: grid's name plus extension, default: testing2.lt4\n");
             printf("[heuristiqueNumber]: number of loop to use metaheuristic, default: 1\n\n");
@@ -555,6 +565,7 @@ int main(int argc, char *argv[])
     // print *curseurDeplacementsMH  ; calc *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
     int *rndMove;
     int *testMove;
+    int *testFire = 0;
     int *saveLastTankDirection = (int *)malloc(sizeof(int));
     int *moveI = (int *)malloc(sizeof(int));
     int *moveII = (int *)malloc(sizeof(int));
@@ -578,6 +589,7 @@ int main(int argc, char *argv[])
     {
         testMove = 0;
     ternFire:
+        end2minutes(debut);
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -588,16 +600,16 @@ int main(int argc, char *argv[])
                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                        numRows, numColumns, tankPosition, basesPosition,
                        firePosition, &currentTankDirection, &currentFireDirection,
-                       objectiveFunctionHypothese, &testMove, &curseur))
+                       objectiveFunctionHypothese, &testFire, &curseur))
         {
-            printf("ternFire CASE %d\n", testMove);
+            printf("ternFire CASE %d\n", testFire);
             print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
             mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
             mirrorPosition(tankPosition, 0, 1);
             mirrorPosition(tankPosition, 0, 2);
             // save action
             printf("cDH %d ; *%d ; &%d\n", curseurDeplacementsHypothese, *curseurDeplacementsHypothese, &curseurDeplacementsHypothese);
-            deplacementsHypothese[*curseurDeplacementsHypothese] = testMove;
+            deplacementsHypothese[*curseurDeplacementsHypothese] = testFire;
             *curseurDeplacementsHypothese = *curseurDeplacementsHypothese + 1;
             // next branch
             firstMoveTry = true;
@@ -630,6 +642,7 @@ int main(int argc, char *argv[])
     {
     // printf("interm1 %d\n", interm);
     ternMove:
+        end2minutes(debut);
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -683,6 +696,7 @@ int main(int argc, char *argv[])
     else
     {
     ternRotation:
+        end2minutes(debut);
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
@@ -823,6 +837,7 @@ nextMain:
         {
             testMove = 0;
         ternFire2:
+            end2minutes(debut);
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -833,16 +848,16 @@ nextMain:
                            gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                            numRows, numColumns, tankPosition, basesPosition,
                            firePosition, &currentTankDirection, &currentFireDirection,
-                           objectiveFunctionMH, &testMove, &curseur))
+                           objectiveFunctionMH, &testFire, &curseur))
             {
-                printf("ternFire CASE %d\n", testMove);
+                printf("ternFire2 CASE %d\n", testFire);
                 print3ArrayBraket(gridWorked, gridMovables, gridGround, numRows, numColumns, tankPosition[0][0], tankPosition[0][1]);
                 mirror3Grids(gridWorked, gridWorkedCopy, gridMovables, gridMovablesCopy, gridGround, gridGroundCopy, numRows, numColumns);
                 mirrorPosition(tankPosition, 0, 1);
                 mirrorPosition(tankPosition, 0, 2);
                 // save action
                 printf("cDMH %d ; *%d ; &%d\n", curseurDeplacementsMH, *curseurDeplacementsMH, &curseurDeplacementsMH);
-                deplacementsMH[*curseurDeplacementsMH] = testMove;
+                deplacementsMH[*curseurDeplacementsMH] = testFire;
                 *curseurDeplacementsMH = *curseurDeplacementsMH + 1;
                 // next branch
                 firstMoveTry = true;
@@ -875,6 +890,7 @@ nextMain:
         {
         // printf("interm1 %d\n", interm);
         ternMove2:
+            end2minutes(debut);
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -928,6 +944,7 @@ nextMain:
         else
         {
         ternRotation2:
+            end2minutes(debut);
             if ((tankPosition[0][0] == basesPosition[0][0] &&
                  tankPosition[0][1] == basesPosition[0][1]))
             {
@@ -1039,17 +1056,11 @@ nextMain:
 
     printf("Le programme a mis %.6f secondes pour s'exécuter.\n", temps_ecoule);
 
-    // Create new file //
-    // const char *filename = ".\\TestingGrids\\testing.lt4";
-    // Nouveau nom de fichier
-    // ajouter l'heure ?
-    const char *nouveauNom = "Soluce_";
+    // Appeler la fonction pour générer le nom du fichier
+    char *nomFichierSoluce = genererNomFichier(filename, objectiveFunctionRetenu, actualNBHeuristicTurn);
 
-    // Créer le nom du fichier Soluce
-    size_t longueurSoluce = snprintf(NULL, 0, "Soluce_%s", filename) + 1;
-    char *nomFichierSoluce = (char *)malloc(longueurSoluce);
-    snprintf(nomFichierSoluce, longueurSoluce, "Soluce_%s", filename);
-    // nbHeuristicTurn
+    // Afficher le nom du fichier généré
+    printf("Nom du fichier généré : %s\n", nomFichierSoluce);
 
     // Créer et ouvrir le fichier Solucetesting.lt4
     FILE *fichierSoluce = fopen(nomFichierSoluce, "w");
@@ -1058,10 +1069,14 @@ nextMain:
         fprintf(stderr, "Erreur : Impossible de créer le fichier Soluce.\n");
         return 1;
     }
-    fprintf(fichierSoluce, "# %d\n", *objectiveFunctionRetenu);
+    fprintf(fichierSoluce, "Level: 1\n");
+    char *fileNameWithoutExtension = extraireNomFichier(filename);
+    fprintf(fichierSoluce, "Name: %s\n", fileNameWithoutExtension);
+    fprintf(fichierSoluce, "Solver: VNS\n");
+    fprintf(fichierSoluce, "Score: %d\n", *objectiveFunctionRetenu);
     fprintf(fichierSoluce, "\n");
     // Écrire les valeurs de deplacementsRetenu dans le fichier .lt4
-    for (int i = 0; i < *curseurDeplacementsMH; i++)
+    for (int i = 0; i < *curseurDeplacementsRetenu; i++)
     {
         fprintf(fichierSoluce, "%c", convertIntIntoChar(deplacementsRetenu[i]));
     }
@@ -5523,4 +5538,58 @@ void combinDispatcher(int combinNumber, int *moveI, int *moveII, int *moveArray)
     // printf("cd end MI %d MII %d\n", *moveI, *moveII);
     moveArray[0] = *moveI;
     moveArray[1] = *moveII;
+}
+
+// Fonction pour extraire le nom du fichier sans l'extension
+const char *extraireNomFichier(const char *filename)
+{
+    // Trouver la position du dernier point dans le nom du fichier
+    const char *dernierPoint = strrchr(filename, '.');
+
+    // Si un point est trouvé, extraire le nom du fichier sans l'extension
+    if (dernierPoint != NULL)
+    {
+        size_t longueurNom = dernierPoint - filename;
+        char *nomFichier = (char *)malloc(longueurNom + 1);
+        strncpy(nomFichier, filename, longueurNom);
+        nomFichier[longueurNom] = '\0';
+        return nomFichier;
+    }
+    else
+    {
+        // Si aucun point n'est trouvé, retourner la chaîne d'origine
+        return filename;
+    }
+}
+
+// Fonction pour générer le nom du fichier
+char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int *actualNBHeuristicTurn)
+{
+    const char *prefixe = "Soluce_";
+    const char *nomFichierSansExtension = extraireNomFichier(filename);
+    char *nomFichier = (char *)malloc(strlen(prefixe) + strlen(nomFichierSansExtension) + 10); // Taille du préfixe + taille maximale des entiers + longueur de l'extension .lt4
+
+    // Vérifier si objectiveFunctionRetenu est négatif ou positif
+    char signe = (*objectiveFunctionRetenu < 0) ? 'p' : 'm';
+    int valeurAbsolue = abs(*objectiveFunctionRetenu);
+
+    // Générer le nom du fichier
+    sprintf(nomFichier, "%s%s_%c%d_t%d.ltr", prefixe, nomFichierSansExtension, signe, valeurAbsolue, *actualNBHeuristicTurn);
+
+    free(nomFichierSansExtension); // Libérer la mémoire allouée dans extraireNomFichier
+
+    return nomFichier;
+}
+
+void end2minutes(clock_t debut)
+{
+    clock_t maintenant = clock();
+    double tempsEcoule = (double)(maintenant - debut) / CLOCKS_PER_SEC;
+
+    // if (tempsEcoule > 120.0)
+    if (tempsEcoule > 320.0)
+    { // 2 minutes en secondes
+        fprintf(stderr, "Le programme a dépassé 2 minutes d'exécution. Arrêt du programme.\n");
+        exit(EXIT_FAILURE);
+    }
 }
