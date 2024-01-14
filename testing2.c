@@ -253,7 +253,14 @@ int main(int argc, char *argv[])
     {
         if (strstr(argv[1], "help") != NULL)
         {
+            printf("    Thank you for choosing to work with vnsLaserTank\n");
+            printf("For cmd :\n");
+            printf("exeName.exe [[gridName.lt4] heuristiqueNumber]\n\n");
+            printf("example: testing2.exe testing2.lt4\n");
+            printf("example: testing2.exe testing14.lt4 3\n");
+            printf("    For configured VSCode :\n");
             printf(".\\exeNameWithoutEXT [[gridName.lt4] heuristiqueNumber]\n\n");
+            printf("exeName.exe: name plus extension\n");
             printf(".\\exeNameWithoutEXT: relative path plus only .exe's name\n");
             printf("[gridName.lt4]: grid's name plus extension, default: testing2.lt4\n");
             printf("[heuristiqueNumber]: number of loop to use metaheuristic, default: 1\n\n");
@@ -1062,7 +1069,11 @@ nextMain:
         fprintf(stderr, "Erreur : Impossible de créer le fichier Soluce.\n");
         return 1;
     }
-    fprintf(fichierSoluce, "# %d\n", *objectiveFunctionRetenu);
+    fprintf(fichierSoluce, "Level: 1\n");
+    char *fileNameWithoutExtension = extraireNomFichier(filename);
+    fprintf(fichierSoluce, "Name: %s\n", fileNameWithoutExtension);
+    fprintf(fichierSoluce, "Solver: VNS\n");
+    fprintf(fichierSoluce, "Score: %d\n", *objectiveFunctionRetenu);
     fprintf(fichierSoluce, "\n");
     // Écrire les valeurs de deplacementsRetenu dans le fichier .lt4
     for (int i = 0; i < *curseurDeplacementsRetenu; i++)
