@@ -436,7 +436,19 @@ int main(int argc, char *argv[])
         memset(gridMovablesCopy[i], NOTHING, (*numColumns) * sizeof(int));
     }
 
-    for (int i = 0; i < 5; i++)
+    wchar_t *levelName;
+    levelName = (wchar_t *)malloc(100 * sizeof(wchar_t));
+
+    // Search Name//
+    fgetws(header, sizeof(header) / sizeof(header[0]), file);
+    if (swscanf(header, L"Name: %99[^\n]", levelName) != 1)
+    {
+        fprintf(stderr, "Erreur lors de la lecture du niveau\n");
+        fclose(file);
+        return 1;
+    }
+
+    for (int i = 0; i < 4; i++)
     {
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
     }
@@ -1062,6 +1074,9 @@ nextMain:
     // Afficher le nom du fichier généré
     printf("Nom du fichier généré : %s\n", nomFichierSoluce);
 
+    // Afficher le nom du niveau (à des fins de vérification)
+    wprintf(L"Nom du niveau : %s\n", levelName);
+
     // Créer et ouvrir le fichier Solucetesting.lt4
     FILE *fichierSoluce = fopen(nomFichierSoluce, "w");
     if (fichierSoluce == NULL)
@@ -1070,8 +1085,7 @@ nextMain:
         return 1;
     }
     fprintf(fichierSoluce, "Level: 1\n");
-    char *fileNameWithoutExtension = extraireNomFichier(filename);
-    fprintf(fichierSoluce, "Name: %s\n", fileNameWithoutExtension);
+    fprintf(fichierSoluce, "Name: %s\n", levelName);
     fprintf(fichierSoluce, "Solver: VNS\n");
     fprintf(fichierSoluce, "Score: %d\n", *objectiveFunctionRetenu);
     fprintf(fichierSoluce, "\n");
@@ -1211,6 +1225,8 @@ nextMain:
     free(nbHeuristicTurn);
     printf("free actualNBHeuristicTurn\n");
     free(actualNBHeuristicTurn);
+    printf("free levelName\n");
+    free(levelName);
     printf("finish\n");
 
     return 0;
