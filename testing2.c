@@ -195,6 +195,12 @@ enum gameConstant
 };
 
 const float COEFF_HEURISTIC = 0.75;
+const int WEIGTH_MOVE = 1;
+const int WEIGTH_TURNABLE = 2;
+const int WEIGTH_SHOOTABLE = 3;
+const int WEIGTH_TURN = 5;
+const int WEIGTH_MOVABLE = 8;
+const int WEIGTH_BASE = 10000;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -646,6 +652,7 @@ int main(int argc, char *argv[])
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -699,6 +706,7 @@ int main(int argc, char *argv[])
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
         interm = saveLastTankDirection;
@@ -753,6 +761,7 @@ int main(int argc, char *argv[])
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
 
@@ -894,6 +903,7 @@ nextMain:
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
             if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
@@ -947,6 +957,7 @@ nextMain:
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
             interm = saveLastTankDirection;
@@ -1001,6 +1012,7 @@ nextMain:
                  tankPosition[0][1] == basesPosition[0][1]))
             {
                 printf("BIG FINISH2\n");
+                *objectiveFunctionMH = *objectiveFunctionMH + WEIGTH_BASE;
                 goto nextMain2;
             }
 
@@ -5316,7 +5328,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 // objective fn
                 // shoot ok
                 // printf("bang ok\n");
-                *objectiveFunction = *objectiveFunction - 5;
+                *objectiveFunction = *objectiveFunction - WEIGTH_SHOOTABLE;
                 fireDead = true;
                 return true;
             }
@@ -5365,7 +5377,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                 // objective fn
                 // movable moved ok
                 // printf("move ok\n");
-                *objectiveFunction = *objectiveFunction - 10;
+                *objectiveFunction = *objectiveFunction - WEIGTH_MOVABLE;
                 return true;
             }
             // or deflect
@@ -5393,7 +5405,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                     // objective fn
                     // turnable ok
                     // printf("turn ok\n");
-                    *objectiveFunction = *objectiveFunction - 2;
+                    *objectiveFunction = *objectiveFunction - WEIGTH_TURNABLE;
                     return true;
                 }
                 else
@@ -5436,7 +5448,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
         *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
         // objective fn
         // rot ok
-        *objectiveFunction = *objectiveFunction - 2;
+        *objectiveFunction = *objectiveFunction - WEIGTH_TURN;
         // printf("turn ok\n");
         return true;
     }
@@ -5484,7 +5496,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         // printf("currentTankDirection %d\n", *currentTankDirection);
                         // objective fn
                         // highway/glass ok
-                        *objectiveFunction = *objectiveFunction - 1;
+                        *objectiveFunction = *objectiveFunction - WEIGTH_MOVE;
                         // printf("hw ok\n");
                         return true;
                     }
@@ -5529,7 +5541,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
                         mirrorPosition(tankPosition, cooIndexWorking, cooIndexSave);
                         // objective fn
                         // move ok
-                        *objectiveFunction = *objectiveFunction - 1;
+                        *objectiveFunction = *objectiveFunction - WEIGTH_MOVE;
                         return true;
                     }
                 }
@@ -5626,7 +5638,7 @@ char *genererNomFichier(const char *filename, int *objectiveFunctionRetenu, int 
     char *nomFichier = (char *)malloc(strlen(prefixe) + strlen(nomFichierSansExtension) + 10); // Taille du préfixe + taille maximale des entiers + longueur de l'extension .lt4
 
     // Vérifier si objectiveFunctionRetenu est négatif ou positif
-    char signe = (*objectiveFunctionRetenu < 0) ? 'p' : 'm';
+    char signe = (*objectiveFunctionRetenu < 0) ? 'm' : 'p';
     int valeurAbsolue = abs(*objectiveFunctionRetenu);
 
     // Générer le nom du fichier
