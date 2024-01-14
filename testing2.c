@@ -316,11 +316,21 @@ int main(int argc, char *argv[])
     const int CYCLES = 5;
     printf("%s\n", filename);
 
-    size_t longueurTotale = snprintf(NULL, 0, "%s%s", pathTesting, filename) + 1;
+    // // in testing folder
+    // size_t longueurTotale = snprintf(NULL, 0, "%s%s", pathTesting, filename) + 1;
+    // // Allouer de la mémoire pour globalFilePath
+    // char *globalFilePath = (char *)malloc(longueurTotale);
+    // // Concaténer les deux variables dans globalFilePath
+    // snprintf(globalFilePath, longueurTotale, "%s%s", pathTesting, filename);
+    // // Afficher le résultat
+    // printf("Chemin complet du fichier : %s\n", globalFilePath);
+
+    // without testing folder
+    size_t longueurTotale = snprintf(NULL, 0, "%s", filename) + 1;
     // Allouer de la mémoire pour globalFilePath
     char *globalFilePath = (char *)malloc(longueurTotale);
     // Concaténer les deux variables dans globalFilePath
-    snprintf(globalFilePath, longueurTotale, "%s%s", pathTesting, filename);
+    snprintf(globalFilePath, longueurTotale, "%s", filename);
     // Afficher le résultat
     printf("Chemin complet du fichier : %s\n", globalFilePath);
 

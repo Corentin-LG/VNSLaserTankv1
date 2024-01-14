@@ -51,15 +51,11 @@ modif de sorte à ce que les caluls curseur et mh soient bons
 free objectivs
 free current
 
-- revoir site prof
 - revoir dégrossisement
-
-faire le re-run soluce inside
-tester le multiplaxage
-
-- faire un help si besoin
 - paramètre nom + temps + tour max
 
+- fn max 1min just cut and diplay 1rst sol
+- fn max 2min out
 
 ### tuiles faites :
  - [x]	TankUp
