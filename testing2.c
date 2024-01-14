@@ -237,9 +237,25 @@ int main(int argc, char *argv[])
     int *actualNBHeuristicTurn = (int *)malloc(sizeof(int));
     *actualNBHeuristicTurn = 0;
     printf("*actualNBHeuristicTurn : %d\n", *actualNBHeuristicTurn);
+    int *paralellisationNumber = (int *)malloc(sizeof(int));
+    *paralellisationNumber = 0;
+    printf("*paralellisationNumber : %d\n", *paralellisationNumber);
 
-    if (argc == 1)
+    char *nomExe = argv[0];
+    char *suffixe = ".exe";
+    size_t longueurNomExe = strlen(nomExe);
+    size_t longueurSuffixe = strlen(suffixe);
+
+    // Vérifier si le nom de l'exécutable se termine par ".exe"
+    if (longueurNomExe >= longueurSuffixe && strcmp(nomExe + longueurNomExe - longueurSuffixe, suffixe) == 0)
     {
+        // Retirer le suffixe ".exe"
+        nomExe[longueurNomExe - longueurSuffixe] = '\0';
+    }
+
+    switch (argc)
+    {
+    case 1:
         // strcpy(filenameInterm, "Special-I.lt4");
         // strcpy(filenameInterm, "Sokoban-II.lt4");
         // strcpy(filenameInterm, "No_HS-LPB.lt4");
@@ -248,37 +264,51 @@ int main(int argc, char *argv[])
         // strcpy(filenameInterm, "Challenge-IV.lt4");
         // strcpy(filenameInterm, "Beginner-II.lt4");
         strcpy(filenameInterm, "testing2.lt4");
-    }
-    else if (argc == 2)
-    {
+        break;
+    case 2:
         if (strstr(argv[1], "help") != NULL)
         {
             printf("    Thank you for choosing to work with vnsLaserTank\n");
             printf("For cmd :\n");
             printf("exeName.exe [[gridName.lt4] heuristiqueNumber]\n\n");
-            printf("example: testing2.exe testing2.lt4\n");
-            printf("example: testing2.exe testing14.lt4 3\n");
+            printf("example: %s.exe testing2.lt4\n", nomExe);
+            printf("example: %s.exe testing14.lt4 3\n", nomExe);
             printf("    For configured VSCode :\n");
             printf(".\\exeNameWithoutEXT [[gridName.lt4] heuristiqueNumber]\n\n");
             printf("exeName.exe: name plus extension\n");
             printf(".\\exeNameWithoutEXT: relative path plus only .exe's name\n");
             printf("[gridName.lt4]: grid's name plus extension, default: testing2.lt4\n");
             printf("[heuristiqueNumber]: number of loop to use metaheuristic, default: 1\n\n");
-            printf("example: .\\testing2 testing2.lt4\n");
-            printf("example: .\\testing2 testing14.lt4 3\n");
+            printf("example: .\\%s testing2.lt4\n", nomExe);
+            printf("example: .\\%s testing14.lt4 3\n", nomExe);
             return 0;
         }
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
-    }
-    else if (argc == 3)
-    {
+        break;
+    case 3:
         strncpy(filenameInterm, argv[1], strlen(argv[1]));
         filenameInterm[strlen(argv[1])] = '\0';
         printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
         *nbHeuristicTurn = atoi(argv[2]);
         printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        break;
+    case 4:
+        strncpy(filenameInterm, argv[1], strlen(argv[1]));
+        filenameInterm[strlen(argv[1])] = '\0';
+        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+        *nbHeuristicTurn = atoi(argv[2]);
+        printf("argv[2] : %s *nbHeuristicTurn : %d\n", argv[2], *nbHeuristicTurn);
+
+        printf("argv[3] : %s *paralellisationNumber : %d\n", argv[3], *paralellisationNumber);
+        *paralellisationNumber = atoi(argv[3]);
+        printf("argv[3] : %s *paralellisationNumber : %d\n", argv[3], *paralellisationNumber);
+        break;
+    default:
+        printf("Error : to many parameters or wrong parameter(s)\n");
+        return 1;
     }
+
     printf("*nbHeuristicTurn : %d\n", *nbHeuristicTurn);
     const char *filename = malloc(strlen(filenameInterm) + 1);
     strcpy(filename, filenameInterm);
