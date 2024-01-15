@@ -655,10 +655,12 @@ rebootFSolution:
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
+            // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
             printf("BIG FINISH\n");
             *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
+        // printf("!!ternFire CASE %d\n", testFire);
         if (tankAction(gridOrigin, gridWorked, gridMovables, gridGround,
                        gridWorkedCopy, gridGroundCopy, gridMovablesCopy,
                        numRows, numColumns, tankPosition, basesPosition,
@@ -728,6 +730,7 @@ rebootFSolution:
         if ((tankPosition[0][0] == basesPosition[0][0] &&
              tankPosition[0][1] == basesPosition[0][1]))
         {
+            // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
             printf("BIG FINISH\n");
             *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
@@ -792,6 +795,7 @@ rebootFSolution:
              tankPosition[0][1] == basesPosition[0][1]))
         {
             printf("BIG FINISH\n");
+            // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
             *objectiveFunctionHypothese = *objectiveFunctionHypothese + WEIGTH_BASE;
             goto nextMain;
         }
@@ -5358,6 +5362,7 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
         }
         
         // printf("shoot %d cdt %d\n", isShootable(firedTileID, currentFireDirection), *currentFireDirection);
+        // printf("isoob %d isfs %d fd %d\n", isOutOfBorder(firePosition, 0, numRows, numColumns), isFireStop(firedTileID), fireDead);
 
         while (!(isOutOfBorder(firePosition, 0, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
         {
