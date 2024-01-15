@@ -203,6 +203,7 @@ const int WEIGTH_TURN = 5;
 const int WEIGTH_MOVABLE = 8;
 const int WEIGTH_BASE = 10000;
 const float QUIT_TIME = 140.00;
+const int PRINT_PADDING = 100;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -601,9 +602,8 @@ int main(int argc, char *argv[])
     *currentTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
 
     // printf("curserH %d ; curserR %d\n", *curseurDeplacementsHypothese, *curseurDeplacementsRetenu);
-    ///////////////////////////
-    // MHeuristique
 
+rebootFSolution:
     // reset grid
     resetGridWorked(gridOrigin, gridWorked, numRows, numColumns);
     resetGridGround(gridOrigin, gridGround, numRows, numColumns);
@@ -631,8 +631,10 @@ int main(int argc, char *argv[])
     int rndBin = getRandomBinary();
     int rndTern = getRandomTernary();
 
-    // get one rnd combin
-    printf(" ", TURNING, MOVES);
+    // // get one rnd combin
+    // printf(" ", TURNING, MOVES);
+
+    printf("Searching First Solution\n");
 
     saveLastTankDirection = gridWorked[tankPosition[0][0]][tankPosition[0][1]];
     rndTern = getRandomTernary();
@@ -702,6 +704,17 @@ int main(int argc, char *argv[])
     {
     // printf("interm1 %d\n", interm);
     ternMove:
+        if (*curseurDeplacementsHypothese % PRINT_PADDING == 0)
+        {
+            printf("actions: %d\n", *curseurDeplacementsHypothese);
+        }
+        if (*curseurDeplacementsHypothese > (*numRows) * (*numColumns) * 40)
+        {
+            clock_t fin = clock();
+            double temps_ecoule = ((double)(fin - debut)) / CLOCKS_PER_SEC;
+            printf("Reboot FH at %.6f", temps_ecoule);
+            goto rebootFSolution;
+        }
         if (end1minutes(debut))
         {
             *objectiveFunctionRetenu = *objectiveFunctionHypothese;
@@ -843,7 +856,7 @@ nextMain:
     // // Degrossissement
     // printf("hyp\n");
     // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-    // erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
+    erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
     // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
     // printf("objectiveFunctionHypothese : %d\n", *objectiveFunctionHypothese);
 
@@ -854,6 +867,8 @@ nextMain:
 
     //////////////////////////////////////////////////////////////////
     // MetaHeuristic //
+    printf("Searching Local Neighbour(s)\n");
+rebootMSolution:
     while (*actualNBHeuristicTurn < *nbHeuristicTurn)
     {
         // printf("begin *actualNBHeuristicTurn %d\n", *actualNBHeuristicTurn);
@@ -977,6 +992,17 @@ nextMain:
         {
         // printf("interm1 %d\n", interm);
         ternMove2:
+            if (*curseurDeplacementsMH % PRINT_PADDING == 0)
+            {
+                printf("actions: %d\n", *curseurDeplacementsMH);
+            }
+            if (*curseurDeplacementsMH > (*numRows) * (*numColumns) * 40)
+            {
+                clock_t fin = clock();
+                double temps_ecoule = ((double)(fin - debut)) / CLOCKS_PER_SEC;
+                printf("Reboot MH at %.6f", temps_ecoule);
+                goto rebootMSolution;
+            }
             if (end1minutes(debut))
             {
                 *objectiveFunctionRetenu = *objectiveFunctionMH;
@@ -1112,12 +1138,14 @@ nextMain:
             *objectiveFunctionRetenu = *objectiveFunctionMH;
             *curseurDeplacementsRetenu = *curseurDeplacementsMH;
             mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+            erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
         }
         else
         {
             *objectiveFunctionRetenu = *objectiveFunctionHypothese;
             *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
             mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
+            erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
         }
         // printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
 
@@ -1167,7 +1195,7 @@ makeFile:
     char *nomFichierSoluce = genererNomFichier(filename, objectiveFunctionRetenu, actualNBHeuristicTurn);
 
     // Afficher le nom du fichier généré
-    printf("Nom du fichier généré : %s\n", nomFichierSoluce);
+    printf("Nom du fichier genere : %s\n", nomFichierSoluce);
 
     // Afficher le nom du niveau (à des fins de vérification)
     wprintf(L"Nom du niveau : %s\n", levelName);
