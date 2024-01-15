@@ -373,7 +373,7 @@ int main(int argc, char *argv[])
     int *objectiveFunctionRetenu = (int *)malloc(sizeof(int));
 
     size_t deplacementsSize = sizeof(int) * 1000000;
-    wchar_t header[1000];
+    wchar_t header[10000];
     //////////////////////////////////////////////////////////////////
     // Annexe Var //
 
@@ -388,6 +388,7 @@ int main(int argc, char *argv[])
 
     //////////////////////////////////////////////////////////////////
     // Open File //
+    printf("Open File\n");
     FILE *file;
     file = fopen(globalFilePath, "r");
     if (file == NULL)
@@ -486,7 +487,7 @@ int main(int argc, char *argv[])
 
     wchar_t *levelName;
     levelName = (wchar_t *)malloc(100 * sizeof(wchar_t));
-
+    printf("Get Name\n");
     // Search Name//
     fgetws(header, sizeof(header) / sizeof(header[0]), file);
     if (swscanf(header, L"Name: %99[^\n]", levelName) != 1)
@@ -507,7 +508,7 @@ int main(int argc, char *argv[])
     wchar_t *tokenInterm;
     wchar_t *tabConvInterm;
     wchar_t *tabNConvInterm;
-
+    printf("Complete Origin Grid\n");
     for (int i = 0; i < *numRows; i++)
     {
         fgetws(header, sizeof(header) / sizeof(header[0]), file);
@@ -856,7 +857,7 @@ nextMain:
     // // Degrossissement
     // printf("hyp\n");
     // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
-    erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
+    // erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
     // printMovingLetters(deplacementsHypothese, curseurDeplacementsHypothese);
     // printf("objectiveFunctionHypothese : %d\n", *objectiveFunctionHypothese);
 
@@ -932,9 +933,9 @@ rebootMSolution:
         ternFire2:
             if (end1minutes(debut))
             {
-                *objectiveFunctionRetenu = *objectiveFunctionMH;
-                *curseurDeplacementsRetenu = *curseurDeplacementsMH;
-                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
+                *objectiveFunctionRetenu = *objectiveFunctionHypothese;
+                *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
+                mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsHypothese);
                 goto makeFile;
                 endNMinutes(debut, QUIT_TIME);
                 // goto makeFile;
@@ -1133,22 +1134,13 @@ rebootMSolution:
     nextMain2:
         // printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
 
-        if (*objectiveFunctionMH > *objectiveFunctionHypothese)
+        if (*objectiveFunctionMH > *objectiveFunctionRetenu)
         {
             *objectiveFunctionRetenu = *objectiveFunctionMH;
             *curseurDeplacementsRetenu = *curseurDeplacementsMH;
             mirrorDeplacementArray(deplacementsMH, deplacementsRetenu, curseurDeplacementsMH);
-            erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
+            // erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
         }
-        else
-        {
-            *objectiveFunctionRetenu = *objectiveFunctionHypothese;
-            *curseurDeplacementsRetenu = *curseurDeplacementsHypothese;
-            mirrorDeplacementArray(deplacementsHypothese, deplacementsRetenu, curseurDeplacementsHypothese);
-            erazeUselessTurn(deplacementsHypothese, curseurDeplacementsHypothese);
-        }
-        // printf("*objectiveFunctionRetenu %d; *curseurDeplacementsRetenu %d; *actualNBHeuristicTurn %d\n", *objectiveFunctionRetenu, *curseurDeplacementsRetenu, *actualNBHeuristicTurn);
-
         *actualNBHeuristicTurn = *actualNBHeuristicTurn + 1;
     }
 
@@ -1189,7 +1181,7 @@ makeFile:
     // Calculez le temps écoulé en secondes
     double temps_ecoule = ((double)(fin - debut)) / CLOCKS_PER_SEC;
 
-    printf("Le programme a mis %.6f secondes pour s'exécuter.\n", temps_ecoule);
+    printf("Le programme a mis %.6f secondes pour s'executer.\n", temps_ecoule);
 
     // Appeler la fonction pour générer le nom du fichier
     char *nomFichierSoluce = genererNomFichier(filename, objectiveFunctionRetenu, actualNBHeuristicTurn);
@@ -1290,6 +1282,20 @@ makeFile:
         }
         free(gridMovablesCopy);
     }
+    printf("free nums\n");
+    free(numRows);
+    free(numColumns);
+    free(numBases);
+    printf("free objectivs\n");
+    free(objectiveFunctionHypothese);
+    free(objectiveFunctionMH);
+    free(objectiveFunctionRetenu);
+    printf("free nbHeuristicTurn\n");
+    free(nbHeuristicTurn);
+    printf("free actualNBHeuristicTurn\n");
+    free(actualNBHeuristicTurn);
+    printf("free levelName\n");
+    free(levelName);
     printf("free pos\n");
 
     if (tankPosition != NULL)
@@ -1300,6 +1306,8 @@ makeFile:
         }
         free(tankPosition);
     }
+    printf("free originTankPositionX\n");
+    free(originTankPositionX);
 
     printf("free posf\n");
 
@@ -1320,6 +1328,9 @@ makeFile:
         }
         free(basesPosition);
     }
+    
+    printf("free originTankPositionY\n");
+    free(originTankPositionY);
     printf("free deplac\n");
     free(deplacementsMH);
     free(deplacementsHypothese);
@@ -1328,30 +1339,11 @@ makeFile:
     free(curseurDeplacementsHypothese);
     free(curseurDeplacementsMH);
     free(curseurDeplacementsRetenu);
-    printf("free nums\n");
-    free(numRows);
-    free(numColumns);
-    free(numBases);
-    printf("free objectivs\n");
-    free(objectiveFunctionHypothese);
-    free(objectiveFunctionMH);
-    free(objectiveFunctionRetenu);
-    printf("free current2\n");
-    free(currentFireDirection);
     printf("free current1\n");
     free(currentTankDirection);
-    printf("free originTankPositionX\n");
-    free(originTankPositionX);
-    printf("free originTankPositionY\n");
-    free(originTankPositionY);
-    printf("free nbHeuristicTurn\n");
-    free(nbHeuristicTurn);
-    printf("free actualNBHeuristicTurn\n");
-    free(actualNBHeuristicTurn);
-    printf("free levelName\n");
-    free(levelName);
+    printf("free current2\n");
+    free(currentFireDirection);
     printf("finish\n");
-
     return 0;
 }
 
@@ -5364,6 +5356,8 @@ bool tankAction(int **gridOrigin, int **gridWorked, int **gridMovables,
             // printf("outBORDER\n");
             return false;
         }
+        
+        // printf("shoot %d cdt %d\n", isShootable(firedTileID, currentFireDirection), *currentFireDirection);
 
         while (!(isOutOfBorder(firePosition, 0, numRows, numColumns) || isFireStop(firedTileID) || fireDead))
         {
@@ -5728,7 +5722,7 @@ bool end1minutes(clock_t debut)
 
     if (tempsEcoule > 60.0)
     { // 2 minutes en secondes
-        fprintf(stderr, "Le programme a dépassé 1 minutes d'exécution. Arrêt du programme.\n");
+        fprintf(stderr, "Le programme a depasse 1 minutes d'execution. Arrêt du programme.\n");
         return true;
     }
     return false;
@@ -5741,7 +5735,7 @@ void endNMinutes(clock_t debut, float floatTime)
 
     if (tempsEcoule > floatTime)
     {
-        fprintf(stderr, "Le programme a dépassé 2 minutes d'exécution. Arrêt du programme.\n");
+        fprintf(stderr, "Le programme a depasse %f minutes d'execution. Arrêt du programme.\n", floatTime);
         exit(EXIT_FAILURE);
     }
 }
